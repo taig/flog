@@ -1,4 +1,4 @@
-package io.taig.logging.sheets
+package io.taig.flog.sheets
 
 import java.io.{FileNotFoundException, InputStream}
 import java.util.Collections

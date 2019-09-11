@@ -1,4 +1,4 @@
-package io.taig.logging
+package io.taig.flog
 
 import cats.Show
 

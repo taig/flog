@@ -1,15 +1,14 @@
-package io.taig.logging
+package io.taig.flog
 
 import java.time.Instant
 
 import cats.Eval
-import io.circe.Json
 
 final case class Event(
     level: Level,
     scope: Scope,
     timestamp: Instant,
     message: Eval[String],
-    payload: Eval[Json],
+    payload: Eval[Map[String, String]],
     throwable: Option[Throwable]
 )

@@ -1,4 +1,4 @@
-package io.taig.logging
+package io.taig.flog
 
 final class ScopedLogger[F[_]](scope: Scope, logger: Logger[F])
     extends Logger[F] {

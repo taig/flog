@@ -1,10 +1,10 @@
-package io.taig.logging
+package io.taig.flog
 
 import java.io._
 
 import cats.effect.Sync
 import cats.implicits._
-import io.taig.logging.internal.Helpers
+import io.taig.flog.internal.Helpers
 
 final class StdOutLogger[F[_]](writer: BufferedWriter)(implicit F: Sync[F])
     extends Logger[F] {
@@ -33,7 +33,14 @@ final class StdOutLogger[F[_]](writer: BufferedWriter)(implicit F: Sync[F])
 
       val payload = event.payload.value
 
-      if (!payload.isNull) builder.append('\n').append(payload.spaces2)
+      if (payload.nonEmpty) {
+        val data = payload
+          .map {
+            case (key, value) => s"  $key: $value"
+          }
+          .mkString("\n")
+        builder.append('\n').append(data)
+      }
 
       event.throwable.map(Helpers.print).foreach { value =>
         builder.append('\n').append(value)

@@ -1,14 +1,13 @@
 lazy val root = project
   .in(file("."))
   .settings(noPublishSettings)
-  .aggregate(core, sheets)
+  .aggregate(core, sheets, stackdriver)
 
 lazy val core = project
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
       "org.typelevel" %% "cats-effect" % "2.0.0" ::
-        "io.circe" %% "circe-core" % "0.12.1" ::
         Nil,
     name := "flog-core"
   )
@@ -23,5 +22,15 @@ lazy val sheets = project
         "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.2" ::
         Nil,
     name := "flog-sheets"
+  )
+  .dependsOn(core)
+
+lazy val stackdriver = project
+  .settings(sonatypePublishSettings)
+  .settings(
+    libraryDependencies ++=
+      "com.google.cloud" % "google-cloud-logging" % "1.90.0" ::
+        Nil,
+    name := "flog-stackdriver"
   )
   .dependsOn(core)

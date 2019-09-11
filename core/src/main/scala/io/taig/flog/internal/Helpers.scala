@@ -1,4 +1,4 @@
-package io.taig.logging.internal
+package io.taig.flog.internal
 
 import java.io.{PrintWriter, StringWriter}
 import java.time.format.DateTimeFormatter
