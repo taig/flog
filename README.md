@@ -1,0 +1,3 @@
+# Flog
+
+> Purely functional logging
