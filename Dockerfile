@@ -1,7 +1,7 @@
 FROM        openjdk:8u191-jdk-alpine3.8
 
 RUN         apk update
-RUN         apk add --no-cache bash
+RUN         apk add --no-cache bash git
 
 # Install sbt
 RUN         apk add --no-cache --virtual=build-dependencies
