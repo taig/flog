@@ -2,6 +2,9 @@
 
 > Functional logging with metadata
 
+[![GitLab CI](https://gitlab.com/taig-github/flog/badges/master/build.svg?style=flat-square)](https://gitlab.com/taig-github/flog/pipelines)
+[![Maven Central](https://img.shields.io/maven-central/v/io.taig/flog_2.13.svg?style=flat-square)](https://index.scala-lang.org/taig/flog)
+
 ```
 "io.taig" %% "flog-core" % "x.x.x"
 "io.taig" %% "flog-sheets" % "x.x.x"
