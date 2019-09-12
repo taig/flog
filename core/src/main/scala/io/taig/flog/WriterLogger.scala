@@ -6,7 +6,7 @@ import cats.effect.Sync
 import cats.implicits._
 import io.taig.flog.internal.Helpers
 
-final class StdOutLogger[F[_]](writer: BufferedWriter)(implicit F: Sync[F])
+final class WriterLogger[F[_]](writer: Writer)(implicit F: Sync[F])
     extends Logger[F] {
   override def apply(events: List[Event]): F[Unit] =
     F.unlessA(events.isEmpty) {
@@ -53,12 +53,12 @@ final class StdOutLogger[F[_]](writer: BufferedWriter)(implicit F: Sync[F])
   }
 }
 
-object StdOutLogger {
+object WriterLogger {
   def apply[F[_]](
       target: OutputStream
   )(implicit F: Sync[F]): F[Logger[F]] =
     F.delay(new BufferedWriter(new OutputStreamWriter(target), 1024))
-      .map(new StdOutLogger[F](_))
+      .map(new WriterLogger[F](_))
 
-  def apply[F[_]: Sync]: F[Logger[F]] = StdOutLogger(System.out)
+  def stdOut[F[_]: Sync]: F[Logger[F]] = WriterLogger(System.out)
 }

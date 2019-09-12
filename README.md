@@ -13,8 +13,8 @@
 
 ## Available loggers
 
-- `StdOutLogger`  
-  Print events to stdout
+- `WriterLogger`  
+  Print events to a `Writer` (e.g. std out)
 - `ScopedLoogger`  
   Prefix events with an additional `Scope`
 - `BatchLogger`  
