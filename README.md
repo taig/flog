@@ -27,10 +27,11 @@
 ## Usage
 
 ```scala
-def run[F[_]](logger: Logger[F]): F[Unit] =
-  logger.debug(
-    Scope / "my" / "scope",
-    message = "Running my function",
-    payload = Map("meta" -> "data")
-  )
+val logger: Logger[IO] = StdOutLogger[IO].unsafeRunSync()
+
+logger.debug(
+  Scope.Root / "my" / "scope",
+  message = "Running my function",
+  payload = Map("meta" -> "data")
+).unsafeRunSync()
 ```
