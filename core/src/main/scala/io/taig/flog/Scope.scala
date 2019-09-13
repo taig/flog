@@ -4,7 +4,7 @@ import cats._
 import cats.implicits._
 
 final case class Scope(segments: List[String]) extends AnyVal {
-  def /(segment: String): Scope =
+  def \(segment: String): Scope =
     if (segment.isEmpty) this else Scope(segments :+ segment)
 
   def ++(scope: Scope): Scope = Scope(segments ++ scope.segments)
