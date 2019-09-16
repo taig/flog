@@ -4,12 +4,9 @@ import cats.effect.{Resource, Sync}
 import cats.implicits._
 import com.google.cloud.MonitoredResource
 import com.google.cloud.logging.Logging.WriteOption
-import com.google.cloud.logging.Payload.JsonPayload
+import com.google.cloud.logging.Payload.StringPayload
 import com.google.cloud.logging.{Option => _, _}
-import io.circe.JsonObject
-import io.circe.syntax._
 import io.taig.flog.internal.Helpers
-import io.taig.flog.stackdriver.interal.Circe
 import io.taig.flog.{Event, Level, Logger}
 
 import scala.jdk.CollectionConverters._
@@ -25,31 +22,31 @@ final class StackdriverLogger[F[_]](
   override def apply(events: List[Event]): F[Unit] = {
     val entries = events.map { event =>
       val scope = event.scope.show
-
       val stacktrace = event.throwable.map(Helpers.print)
-
-      val json = JsonObject(
-        "scope" -> scope.asJson,
-        "message" -> Option(event.message.value).filter(_.nonEmpty).asJson,
-        "payload" -> event.payload.value.asJson,
-        "stacktrace" -> stacktrace.asJson
-      )
-
-      val payload = JsonPayload.of(Circe.toJavaMap(json))
+      val payload = StringPayload.of(message(event, scope, stacktrace))
 
       val builder = LogEntry
         .newBuilder(payload)
         .setSeverity(severity(event))
         .setResource(resource)
         .setLogName(name)
-        .addLabel("scope", scope)
         .setTimestamp(event.timestamp.toEpochMilli)
+        .setLabels(event.payload.value.asJava)
 
       build(builder).build()
     }
 
     F.delay(logging.write(entries.asJava, write: _*))
   }
+
+  def message(event: Event, scope: String, stacktrace: Option[String]): String =
+    (Option(event.message.value).filter(_.nonEmpty), stacktrace) match {
+      case (Some(message), Some(stacktrace)) =>
+        s"$scope: $message" + "\n" + stacktrace
+      case (None, Some(stacktrace)) => scope + "\n" + stacktrace
+      case (Some(message), None)    => s"$scope: $message"
+      case (None, None)             => scope
+    }
 
   def severity(event: Event): Severity = event.level match {
     case Level.Debug   => Severity.DEBUG

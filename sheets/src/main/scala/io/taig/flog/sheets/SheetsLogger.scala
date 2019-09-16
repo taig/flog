@@ -5,9 +5,8 @@ import java.io.InputStream
 import cats.effect.Sync
 import cats.implicits._
 import com.google.api.services.sheets.v4.Sheets
-import io.circe.Json
 import io.taig.flog.internal.Helpers
-import io.taig.flog.sheets.internal.{Circe, Google}
+import io.taig.flog.sheets.internal.Google
 import io.taig.flog.{Event, Logger}
 
 final class SheetsLogger[F[_]: Sync](
@@ -20,7 +19,7 @@ final class SheetsLogger[F[_]: Sync](
     Google.append(sheets, id, range)(events.map(row)).void
 
   def row(event: Event): List[AnyRef] = {
-    val payload = Circe.flatten(Json.fromJsonObject(event.payload.value))
+    val payload = event.payload.value
     val known: List[String] = schema.map(payload.getOrElse(_, ""))
     val unknown: List[String] = schema.foldLeft(payload)(_ - _).values.toList
 
