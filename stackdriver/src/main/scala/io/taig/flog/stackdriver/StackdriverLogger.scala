@@ -4,7 +4,7 @@ import cats.effect.{Resource, Sync}
 import cats.implicits._
 import com.google.cloud.MonitoredResource
 import com.google.cloud.logging.Logging.WriteOption
-import com.google.cloud.logging.Payload.StringPayload
+import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.{Option => _, _}
 import io.taig.flog.internal.Helpers
 import io.taig.flog.{Event, Level, Logger}
@@ -21,31 +21,28 @@ final class StackdriverLogger[F[_]](
     extends Logger[F] {
   override def apply(events: List[Event]): F[Unit] = {
     val entries = events.map { event =>
+      val message = Option(event.message.value).filter(_.nonEmpty)
       val stacktrace = event.throwable.map(Helpers.print)
-      val payload = StringPayload.of(message(event, stacktrace))
+
+      val payload = Map(
+        "scope" -> event.scope.show,
+        "message" -> message.orNull,
+        "stacktrace" -> stacktrace.orNull,
+        "payload" -> event.payload.value.asJava
+      ).asJava
 
       val builder = LogEntry
-        .newBuilder(payload)
+        .newBuilder(JsonPayload.of(payload))
         .setSeverity(severity(event))
         .setResource(resource)
         .setLogName(name)
         .setTimestamp(event.timestamp.toEpochMilli)
-        .setLabels(event.payload.value.asJava)
-        .addLabel("scope", event.scope.show)
 
       build(builder).build()
     }
 
     F.delay(logging.write(entries.asJava, write: _*))
   }
-
-  def message(event: Event, stacktrace: Option[String]): String =
-    (Option(event.message.value).filter(_.nonEmpty), stacktrace) match {
-      case (Some(message), Some(stacktrace)) => message + "\n" + stacktrace
-      case (None, Some(stacktrace)) => stacktrace
-      case (Some(message), None)    => message
-      case (None, None)             => ""
-    }
 
   def severity(event: Event): Severity = event.level match {
     case Level.Debug   => Severity.DEBUG
