@@ -32,6 +32,7 @@ final class StackdriverLogger[F[_]](
         .setLogName(name)
         .setTimestamp(event.timestamp.toEpochMilli)
         .setLabels(event.payload.value.asJava)
+        .addLabel("scope", scope)
 
       build(builder).build()
     }
