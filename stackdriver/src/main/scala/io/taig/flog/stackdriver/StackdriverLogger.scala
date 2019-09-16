@@ -4,9 +4,11 @@ import cats.effect.{Resource, Sync}
 import cats.implicits._
 import com.google.cloud.MonitoredResource
 import com.google.cloud.logging.Logging.WriteOption
-import com.google.cloud.logging.Payload.StringPayload
+import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.{Option => _, _}
-import io.taig.flog.internal.Helpers
+import io.circe.JsonObject
+import io.circe.syntax._
+import io.taig.flog.stackdriver.interal.Circe
 import io.taig.flog.{Event, Level, Logger}
 
 import scala.jdk.CollectionConverters._
@@ -21,31 +23,28 @@ final class StackdriverLogger[F[_]](
     extends Logger[F] {
   override def apply(events: List[Event]): F[Unit] = {
     val entries = events.map { event =>
+      val scope = event.scope.show
+
+      val json = JsonObject(
+        "scope" -> scope.asJson,
+        "message" -> Option(event.message.value).filter(_.nonEmpty).asJson,
+        "payload" -> event.payload.value.asJson
+      )
+
+      val payload = JsonPayload.of(Circe.toMap(json).asJava)
+
       val builder = LogEntry
-        .newBuilder(StringPayload.of(payload(event)))
+        .newBuilder(payload)
         .setSeverity(severity(event))
         .setResource(resource)
         .setLogName(name)
-        .setLabels(event.payload.value.asJava)
-        .addLabel("scope", event.scope.show)
+        .addLabel("scope", scope)
         .setTimestamp(event.timestamp.toEpochMilli)
 
       build(builder).build()
     }
 
     F.delay(logging.write(entries.asJava, write: _*))
-  }
-
-  def payload(event: Event): String = {
-    val scope = event.scope.show
-
-    (Some(event.message.value).filter(_.nonEmpty), event.throwable) match {
-      case (Some(message), Some(throwable)) =>
-        scope + ": " + message + "\n" + Helpers.print(throwable)
-      case (Some(message), None)   => scope + ": " + message
-      case (None, Some(throwable)) => scope + "\n" + Helpers.print(throwable)
-      case (None, None)            => scope
-    }
   }
 
   def severity(event: Event): Severity = event.level match {

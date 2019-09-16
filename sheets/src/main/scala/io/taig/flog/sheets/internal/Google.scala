@@ -1,4 +1,4 @@
-package io.taig.flog.sheets
+package io.taig.flog.sheets.internal
 
 import java.io.{FileNotFoundException, InputStream}
 import java.util.Collections
@@ -14,7 +14,7 @@ import com.google.api.services.sheets.v4.model._
 
 import scala.jdk.CollectionConverters._
 
-object SheetsHelpers {
+object Google {
   def jackson[F[_]](implicit F: Sync[F]): F[JacksonFactory] =
     F.delay(JacksonFactory.getDefaultInstance)
 

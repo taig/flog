@@ -4,6 +4,7 @@ import java.io._
 
 import cats.effect.Sync
 import cats.implicits._
+import io.circe.Json
 import io.taig.flog.internal.Helpers
 
 final class WriterLogger[F[_]](writer: Writer)(implicit F: Sync[F])
@@ -33,14 +34,8 @@ final class WriterLogger[F[_]](writer: Writer)(implicit F: Sync[F])
 
       val payload = event.payload.value
 
-      if (payload.nonEmpty) {
-        val data = payload
-          .map {
-            case (key, value) => s"  $key: $value"
-          }
-          .mkString("\n")
-        builder.append('\n').append(data)
-      }
+      if (payload.nonEmpty)
+        builder.append('\n').append(Json.fromJsonObject(payload).spaces2)
 
       event.throwable.map(Helpers.print).foreach { value =>
         builder.append('\n').append(value)
