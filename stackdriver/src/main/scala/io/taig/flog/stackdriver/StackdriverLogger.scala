@@ -8,6 +8,7 @@ import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.{Option => _, _}
 import io.circe.JsonObject
 import io.circe.syntax._
+import io.taig.flog.internal.Helpers
 import io.taig.flog.stackdriver.interal.Circe
 import io.taig.flog.{Event, Level, Logger}
 
@@ -25,10 +26,13 @@ final class StackdriverLogger[F[_]](
     val entries = events.map { event =>
       val scope = event.scope.show
 
+      val stacktrace = event.throwable.map(Helpers.print)
+
       val json = JsonObject(
         "scope" -> scope.asJson,
         "message" -> Option(event.message.value).filter(_.nonEmpty).asJson,
-        "payload" -> event.payload.value.asJson
+        "payload" -> event.payload.value.asJson,
+        "stacktrace" -> stacktrace.asJson
       )
 
       val payload = JsonPayload.of(Circe.toMap(json).asJava)
