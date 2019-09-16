@@ -24,7 +24,7 @@ final class StackdriverLogger[F[_]](
         .newBuilder(payload(event).map(StringPayload.of).orNull)
         .setSeverity(severity(event))
         .setResource(resource)
-        .setLogName(name(event))
+        .setLogName(name(event).orNull)
         .setLabels(event.payload.value.asJava)
         .setTimestamp(event.timestamp.toEpochMilli)
 
@@ -43,7 +43,11 @@ final class StackdriverLogger[F[_]](
       case (None, None)              => None
     }
 
-  def name(event: Event): String = event.scope.show.replace("/", "%2F")
+  def name(event: Event): Option[String] =
+    event.scope.segments match {
+      case Nil      => None
+      case segments => Some(segments.mkString("%2F"))
+    }
 
   def severity(event: Event): Severity = event.level match {
     case Level.Debug   => Severity.DEBUG
