@@ -21,9 +21,8 @@ final class StackdriverLogger[F[_]](
     extends Logger[F] {
   override def apply(events: List[Event]): F[Unit] = {
     val entries = events.map { event =>
-      val scope = event.scope.show
       val stacktrace = event.throwable.map(Helpers.print)
-      val payload = StringPayload.of(message(event, scope, stacktrace))
+      val payload = StringPayload.of(message(event, stacktrace))
 
       val builder = LogEntry
         .newBuilder(payload)
@@ -32,7 +31,7 @@ final class StackdriverLogger[F[_]](
         .setLogName(name)
         .setTimestamp(event.timestamp.toEpochMilli)
         .setLabels(event.payload.value.asJava)
-        .addLabel("scope", scope)
+        .addLabel("scope", event.scope.show)
 
       build(builder).build()
     }
@@ -40,13 +39,12 @@ final class StackdriverLogger[F[_]](
     F.delay(logging.write(entries.asJava, write: _*))
   }
 
-  def message(event: Event, scope: String, stacktrace: Option[String]): String =
+  def message(event: Event, stacktrace: Option[String]): String =
     (Option(event.message.value).filter(_.nonEmpty), stacktrace) match {
-      case (Some(message), Some(stacktrace)) =>
-        s"$scope: $message" + "\n" + stacktrace
-      case (None, Some(stacktrace)) => scope + "\n" + stacktrace
-      case (Some(message), None)    => s"$scope: $message"
-      case (None, None)             => scope
+      case (Some(message), Some(stacktrace)) => message + "\n" + stacktrace
+      case (None, Some(stacktrace)) => stacktrace
+      case (Some(message), None)    => message
+      case (None, None)             => ""
     }
 
   def severity(event: Event): Severity = event.level match {
