@@ -1,6 +1,6 @@
 package io.taig.flog.stackdriver
 
-import cats.effect.Sync
+import cats.effect.{Resource, Sync}
 import cats.implicits._
 import com.google.cloud.logging.Logging.WriteOption
 import com.google.cloud.logging.Payload.StringPayload
@@ -59,7 +59,10 @@ object StackdriverLogger {
   ): Logger[F] =
     new StackdriverLogger[F](logging, build, write)
 
-  def default[F[_]](implicit F: Sync[F]): F[Logger[F]] =
-    F.delay(LoggingOptions.getDefaultInstance.getService)
+  def default[F[_]](implicit F: Sync[F]): Resource[F, Logger[F]] =
+    Resource
+      .make(F.delay(LoggingOptions.getDefaultInstance.getService))(
+        logging => F.delay(logging.close())
+      )
       .map(StackdriverLogger[F](_, build = identity, write = List.empty))
 }
