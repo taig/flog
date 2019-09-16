@@ -2,6 +2,7 @@ package io.taig.flog.stackdriver
 
 import cats.effect.{Resource, Sync}
 import cats.implicits._
+import com.google.cloud.MonitoredResource
 import com.google.cloud.logging.Logging.WriteOption
 import com.google.cloud.logging.Payload.StringPayload
 import com.google.cloud.logging.{Option => _, _}
@@ -12,6 +13,7 @@ import scala.jdk.CollectionConverters._
 
 final class StackdriverLogger[F[_]](
     logging: Logging,
+    resource: MonitoredResource,
     build: LogEntry.Builder => LogEntry.Builder,
     write: List[WriteOption]
 )(implicit F: Sync[F])
@@ -21,6 +23,7 @@ final class StackdriverLogger[F[_]](
       val builder = LogEntry
         .newBuilder(payload(event).map(StringPayload.of).orNull)
         .setSeverity(severity(event))
+        .setResource(resource)
         .setLogName(name(event))
         .setLabels(event.payload.value.asJava)
         .setTimestamp(event.timestamp.toEpochMilli)
@@ -54,15 +57,22 @@ final class StackdriverLogger[F[_]](
 object StackdriverLogger {
   def apply[F[_]: Sync](
       logging: Logging,
+      resource: MonitoredResource,
       build: LogEntry.Builder => LogEntry.Builder,
       write: List[WriteOption]
   ): Logger[F] =
-    new StackdriverLogger[F](logging, build, write)
+    new StackdriverLogger[F](logging, resource, build, write)
 
-  def default[F[_]](implicit F: Sync[F]): Resource[F, Logger[F]] =
+  def default[F[_]](implicit F: Sync[F]): Resource[F, Logger[F]] = {
+    // https://cloud.google.com/logging/docs/api/v2/resource-list
+    val resource = MonitoredResource.newBuilder("global").build()
+
     Resource
       .make(F.delay(LoggingOptions.getDefaultInstance.getService))(
         logging => F.delay(logging.close())
       )
-      .map(StackdriverLogger[F](_, build = identity, write = List.empty))
+      .map(
+        StackdriverLogger[F](_, resource, build = identity, write = List.empty)
+      )
+  }
 }
