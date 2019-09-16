@@ -35,7 +35,7 @@ final class StackdriverLogger[F[_]](
         "stacktrace" -> stacktrace.asJson
       )
 
-      val payload = JsonPayload.of(Circe.toMap(json).asJava)
+      val payload = JsonPayload.of(Circe.toJavaMap(json))
 
       val builder = LogEntry
         .newBuilder(payload)

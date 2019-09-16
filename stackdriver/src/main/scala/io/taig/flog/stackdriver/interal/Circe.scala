@@ -1,17 +1,22 @@
 package io.taig.flog.stackdriver.interal
 
+import java.util
+
 import cats.implicits._
 import io.circe.{Json, JsonObject}
 
-object Circe {
-  final def toMap(json: JsonObject): Map[String, Any] = json.toMap.fmap(toAny)
+import scala.jdk.CollectionConverters._
 
-  final def toAny(json: Json): Any = json.fold(
+object Circe {
+  final def toJavaMap(json: JsonObject): util.Map[String, Object] =
+    json.toMap.fmap(toAny).asJava
+
+  final def toAny(json: Json): Object = json.fold(
     jsonNull = null,
-    jsonBoolean = identity,
-    jsonNumber = _.toDouble,
+    jsonBoolean = Boolean.box,
+    jsonNumber = number => Double.box(number.toDouble),
     jsonString = identity,
     jsonArray = _.toArray.map(toAny),
-    jsonObject = toMap
+    jsonObject = toJavaMap
   )
 }
