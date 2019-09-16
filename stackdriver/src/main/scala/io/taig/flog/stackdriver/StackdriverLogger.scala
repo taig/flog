@@ -13,6 +13,7 @@ import scala.jdk.CollectionConverters._
 
 final class StackdriverLogger[F[_]](
     logging: Logging,
+    name: String,
     resource: MonitoredResource,
     build: LogEntry.Builder => LogEntry.Builder,
     write: List[WriteOption]
@@ -21,11 +22,12 @@ final class StackdriverLogger[F[_]](
   override def apply(events: List[Event]): F[Unit] = {
     val entries = events.map { event =>
       val builder = LogEntry
-        .newBuilder(payload(event).map(StringPayload.of).orNull)
+        .newBuilder(StringPayload.of(payload(event)))
         .setSeverity(severity(event))
         .setResource(resource)
-        .setLogName(name(event).orNull)
+        .setLogName(name)
         .setLabels(event.payload.value.asJava)
+        .addLabel("scope", event.scope.show)
         .setTimestamp(event.timestamp.toEpochMilli)
 
       build(builder).build()
@@ -34,20 +36,17 @@ final class StackdriverLogger[F[_]](
     F.delay(logging.write(entries.asJava, write: _*))
   }
 
-  def payload(event: Event): Option[String] =
+  def payload(event: Event): String = {
+    val scope = event.scope.show
+
     (Some(event.message.value).filter(_.nonEmpty), event.throwable) match {
       case (Some(message), Some(throwable)) =>
-        Some(message + "\n" + Helpers.print(throwable))
-      case (message @ Some(_), None) => message
-      case (None, Some(throwable))   => Some(Helpers.print(throwable))
-      case (None, None)              => None
+        scope + ": " + message + "\n" + Helpers.print(throwable)
+      case (Some(message), None)   => scope + ": " + message
+      case (None, Some(throwable)) => scope + "\n" + Helpers.print(throwable)
+      case (None, None)            => scope
     }
-
-  def name(event: Event): Option[String] =
-    event.scope.segments match {
-      case Nil      => None
-      case segments => Some(segments.mkString("%2F"))
-    }
+  }
 
   def severity(event: Event): Severity = event.level match {
     case Level.Debug   => Severity.DEBUG
@@ -61,22 +60,21 @@ final class StackdriverLogger[F[_]](
 object StackdriverLogger {
   def apply[F[_]: Sync](
       logging: Logging,
+      name: String,
       resource: MonitoredResource,
       build: LogEntry.Builder => LogEntry.Builder,
       write: List[WriteOption]
   ): Logger[F] =
-    new StackdriverLogger[F](logging, resource, build, write)
+    new StackdriverLogger[F](logging, name, resource, build, write)
 
-  def default[F[_]](implicit F: Sync[F]): Resource[F, Logger[F]] = {
-    // https://cloud.google.com/logging/docs/api/v2/resource-list
-    val resource = MonitoredResource.newBuilder("global").build()
-
-    Resource
-      .make(F.delay(LoggingOptions.getDefaultInstance.getService))(
-        logging => F.delay(logging.close())
-      )
-      .map(
-        StackdriverLogger[F](_, resource, build = identity, write = List.empty)
-      )
+  // https://cloud.google.com/logging/docs/api/v2/resource-list
+  def default[F[_]](name: String, resource: MonitoredResource)(
+      implicit F: Sync[F]
+  ): Resource[F, Logger[F]] = {
+    val acquire = F.delay(LoggingOptions.getDefaultInstance.getService)
+    val release = (logging: Logging) => F.delay(logging.close())
+    Resource.make(acquire)(release).map { logging =>
+      StackdriverLogger[F](logging, name, resource, identity, List.empty)
+    }
   }
 }
