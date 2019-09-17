@@ -15,8 +15,8 @@
 
 - `WriterLogger`  
   Print events to a `Writer` (e.g. std out)
-- `ScopedLoogger`  
-  Prefix events with an additional `Scope`
+- `PreparedLoogger`  
+  Prefill arbitrary values of an event (e.g. prefix scope or add a tracing id)
 - `BatchLogger`  
   Collect events for a given interval before forwarding to another `Logger`
 - `BroadcastLogger`  
