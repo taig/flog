@@ -6,7 +6,10 @@ import com.google.cloud.MonitoredResource
 import com.google.cloud.logging.Logging.WriteOption
 import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.{Option => _, _}
+import io.circe.JsonObject
+import io.circe.syntax._
 import io.taig.flog.internal.Helpers
+import io.taig.flog.stackdriver.interal.Circe
 import io.taig.flog.{Event, Level, Logger}
 
 import scala.jdk.CollectionConverters._
@@ -19,29 +22,29 @@ final class StackdriverLogger[F[_]](
     write: List[WriteOption]
 )(implicit F: Sync[F])
     extends Logger[F] {
-  override def apply(events: List[Event]): F[Unit] = {
-    val entries = events.map { event =>
-      val message = Option(event.message.value).filter(_.nonEmpty)
-      val stacktrace = event.throwable.map(Helpers.print)
+  override def apply(events: List[Event]): F[Unit] =
+    F.delay(logging.write(events.map(entry).asJava, write: _*))
 
-      val payload = Map(
-        "scope" -> event.scope.show,
-        "message" -> message.orNull,
-        "stacktrace" -> stacktrace.orNull,
-        "payload" -> event.payload.value.asJava
-      ).asJava
+  def entry(event: Event): LogEntry = {
+    val builder = LogEntry
+      .newBuilder(payload(event))
+      .setSeverity(severity(event))
+      .setResource(resource)
+      .setLogName(name)
+      .setTimestamp(event.timestamp.toEpochMilli)
 
-      val builder = LogEntry
-        .newBuilder(JsonPayload.of(payload))
-        .setSeverity(severity(event))
-        .setResource(resource)
-        .setLogName(name)
-        .setTimestamp(event.timestamp.toEpochMilli)
+    build(builder).build()
+  }
 
-      build(builder).build()
-    }
+  def payload(event: Event): JsonPayload = {
+    val json = JsonObject(
+      "scope" -> event.scope.show.asJson,
+      "message" -> Option(event.message.value).filter(_.nonEmpty).asJson,
+      "payload" -> event.payload.value.asJson,
+      "stacktrace" -> event.throwable.map(Helpers.print).asJson
+    )
 
-    F.delay(logging.write(entries.asJava, write: _*))
+    JsonPayload.of(Circe.toJavaMap(json))
   }
 
   def severity(event: Event): Severity = event.level match {

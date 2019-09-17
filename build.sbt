@@ -7,7 +7,8 @@ lazy val core = project
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "org.typelevel" %% "cats-effect" % "2.0.0" ::
+      "io.circe" %% "circe-core" % "0.12.1" ::
+        "org.typelevel" %% "cats-effect" % "2.0.0" ::
         Nil,
     name := "flog-core"
   )

@@ -3,6 +3,7 @@ package io.taig.flog
 import cats._
 import cats.effect.Sync
 import cats.implicits._
+import io.circe.JsonObject
 import io.taig.flog.internal.Helpers
 
 trait Logger[F[_]] {
@@ -12,7 +13,7 @@ trait Logger[F[_]] {
       level: Level,
       scope: Scope,
       message: Eval[String] = Eval.now(""),
-      payload: Eval[Map[String, String]] = Eval.now(Map.empty),
+      payload: Eval[JsonObject] = Eval.now(JsonObject.empty),
       throwable: Option[Throwable] = None
   )(implicit F: Sync[F]): F[Unit] =
     Helpers.timestamp[F].map { timestamp =>
@@ -22,28 +23,28 @@ trait Logger[F[_]] {
   final def debug(
       scope: Scope,
       message: => String = "",
-      payload: => Map[String, String] = Map.empty
+      payload: => JsonObject = JsonObject.empty
   )(implicit F: Sync[F]): F[Unit] =
     apply(Level.Debug, scope, Eval.later(message), Eval.later(payload), None)
 
   final def error(
       scope: Scope,
       message: => String = "",
-      payload: => Map[String, String] = Map.empty
+      payload: => JsonObject = JsonObject.empty
   )(implicit F: Sync[F]): F[Unit] =
     apply(Level.Error, scope, Eval.later(message), Eval.later(payload), None)
 
   final def info(
       scope: Scope,
       message: => String = "",
-      payload: => Map[String, String] = Map.empty
+      payload: => JsonObject = JsonObject.empty
   )(implicit F: Sync[F]): F[Unit] =
     apply(Level.Info, scope, Eval.later(message), Eval.later(payload), None)
 
   final def failure(
       scope: Scope,
       message: => String = "",
-      payload: => Map[String, String] = Map.empty
+      payload: => JsonObject = JsonObject.empty
   )(throwable: Throwable)(implicit F: Sync[F]): F[Unit] =
     apply(
       Level.Failure,
@@ -56,7 +57,7 @@ trait Logger[F[_]] {
   final def warning(
       scope: Scope,
       message: => String = "",
-      payload: => Map[String, String] = Map.empty
+      payload: => JsonObject = JsonObject.empty
   )(implicit F: Sync[F]): F[Unit] =
     apply(Level.Warning, scope, Eval.later(message), Eval.later(payload), None)
 }
