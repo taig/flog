@@ -23,41 +23,70 @@ trait Logger[F[_]] {
   final def debug(
       scope: Scope,
       message: => String = "",
-      payload: => JsonObject = JsonObject.empty
+      payload: => JsonObject = JsonObject.empty,
+      throwable: Option[Throwable] = None
   )(implicit F: Sync[F]): F[Unit] =
-    apply(Level.Debug, scope, Eval.later(message), Eval.later(payload), None)
+    apply(
+      Level.Debug,
+      scope,
+      Eval.later(message),
+      Eval.later(payload),
+      throwable
+    )
 
   final def error(
       scope: Scope,
       message: => String = "",
-      payload: => JsonObject = JsonObject.empty
+      payload: => JsonObject = JsonObject.empty,
+      throwable: Option[Throwable] = None
   )(implicit F: Sync[F]): F[Unit] =
-    apply(Level.Error, scope, Eval.later(message), Eval.later(payload), None)
+    apply(
+      Level.Error,
+      scope,
+      Eval.later(message),
+      Eval.later(payload),
+      throwable
+    )
 
   final def info(
       scope: Scope,
       message: => String = "",
-      payload: => JsonObject = JsonObject.empty
+      payload: => JsonObject = JsonObject.empty,
+      throwable: Option[Throwable] = None
   )(implicit F: Sync[F]): F[Unit] =
-    apply(Level.Info, scope, Eval.later(message), Eval.later(payload), None)
+    apply(
+      Level.Info,
+      scope,
+      Eval.later(message),
+      Eval.later(payload),
+      throwable
+    )
 
   final def failure(
       scope: Scope,
       message: => String = "",
-      payload: => JsonObject = JsonObject.empty
-  )(throwable: Throwable)(implicit F: Sync[F]): F[Unit] =
+      payload: => JsonObject = JsonObject.empty,
+      throwable: Option[Throwable] = None
+  )(implicit F: Sync[F]): F[Unit] =
     apply(
       Level.Failure,
       scope,
       Eval.later(message),
       Eval.later(payload),
-      throwable.some
+      throwable
     )
 
   final def warning(
       scope: Scope,
       message: => String = "",
-      payload: => JsonObject = JsonObject.empty
+      payload: => JsonObject = JsonObject.empty,
+      throwable: Option[Throwable] = None
   )(implicit F: Sync[F]): F[Unit] =
-    apply(Level.Warning, scope, Eval.later(message), Eval.later(payload), None)
+    apply(
+      Level.Warning,
+      scope,
+      Eval.later(message),
+      Eval.later(payload),
+      throwable
+    )
 }
