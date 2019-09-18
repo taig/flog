@@ -12,11 +12,14 @@ object PreparedLogger {
   def apply[F[_]](prepare: Event => Event, logger: Logger[F]): Logger[F] =
     new PreparedLogger[F](prepare, logger)
 
-  def scoped[F[_]](prefix: Scope, logger: Logger[F]): Logger[F] =
+  def prefixed[F[_]](prefix: Scope, logger: Logger[F]): Logger[F] =
     PreparedLogger[F](
       event => event.copy(scope = prefix ++ event.scope),
       logger
     )
+
+  def scoped[F[_]](scope: Scope, logger: Logger[F]): Logger[F] =
+    PreparedLogger[F](_.copy(scope = scope), logger)
 
   def payload[F[_]](payload: JsonObject, logger: Logger[F]): Logger[F] = {
     val prepare = { event: Event =>
