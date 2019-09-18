@@ -3,7 +3,7 @@ package io.taig.flog
 import cats._
 import cats.effect.Sync
 import cats.implicits._
-import io.circe.JsonObject
+import io.circe.{Json, JsonObject}
 import io.taig.flog.internal.Helpers
 
 trait Logger[F[_]] {
@@ -95,4 +95,7 @@ trait Logger[F[_]] {
 
   final def payload(value: JsonObject): Logger[F] =
     PreparedLogger.payload(value, this)
+
+  final def payload(fields: (String, Json)*): Logger[F] =
+    payload(JsonObject(fields: _*))
 }
