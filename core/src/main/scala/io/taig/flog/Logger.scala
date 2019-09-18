@@ -89,4 +89,10 @@ trait Logger[F[_]] {
       Eval.later(payload),
       throwable
     )
+
+  final def prefix(scope: Scope): Logger[F] =
+    PreparedLogger.prefixed(scope, this)
+
+  final def payload(value: JsonObject): Logger[F] =
+    PreparedLogger.payload(value, this)
 }
