@@ -21,7 +21,7 @@ trait Logger[F[_]] {
     } >>= apply
 
   final def debug(
-      scope: Scope,
+      scope: Scope = Scope.Root,
       message: => String = "",
       payload: => JsonObject = JsonObject.empty,
       throwable: Option[Throwable] = None
@@ -35,7 +35,7 @@ trait Logger[F[_]] {
     )
 
   final def error(
-      scope: Scope,
+      scope: Scope = Scope.Root,
       message: => String = "",
       payload: => JsonObject = JsonObject.empty,
       throwable: Option[Throwable] = None
@@ -49,7 +49,7 @@ trait Logger[F[_]] {
     )
 
   final def info(
-      scope: Scope,
+      scope: Scope = Scope.Root,
       message: => String = "",
       payload: => JsonObject = JsonObject.empty,
       throwable: Option[Throwable] = None
@@ -63,7 +63,7 @@ trait Logger[F[_]] {
     )
 
   final def failure(
-      scope: Scope,
+      scope: Scope = Scope.Root,
       message: => String = "",
       payload: => JsonObject = JsonObject.empty,
       throwable: Option[Throwable] = None
@@ -77,7 +77,7 @@ trait Logger[F[_]] {
     )
 
   final def warning(
-      scope: Scope,
+      scope: Scope = Scope.Root,
       message: => String = "",
       payload: => JsonObject = JsonObject.empty,
       throwable: Option[Throwable] = None
