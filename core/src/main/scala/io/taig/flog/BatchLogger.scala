@@ -16,8 +16,9 @@ import scala.concurrent.duration.FiniteDuration
   * This `Logger` is useful when dealing with expensive `Loggers`, e.g.
   * the `SheetsLogger` that performs a network request to submit events.
   */
-final class BatchLogger[F[_]: Sync](enqueue: List[Event] => F[Unit])
-    extends SyncLogger[F] {
+final class BatchLogger[F[_]: Sync](
+    enqueue: List[Event] => F[Unit]
+) extends SyncLogger[F] {
   override def apply(events: List[Event]): F[Unit] = enqueue(events)
 }
 
@@ -33,7 +34,9 @@ object BatchLogger {
     Resource.liftF(Semaphore[F](1)).flatMap { lock =>
       val enqueue = (events: List[Event]) =>
         lock.withPermit(F.delay(buffer.appendAll(events)))
-      val dequeue = lock.withPermit(extract[F](buffer)) >>= logger.apply
+      val dequeue = lock
+        .withPermit(extract[F](buffer))
+        .flatMap(events => logger(_ => events))
 
       Resource
         .make(repeat(sleep >> dequeue).start)(_.cancel *> dequeue)

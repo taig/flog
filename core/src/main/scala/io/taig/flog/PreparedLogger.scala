@@ -1,22 +1,25 @@
 package io.taig.flog
 
+import java.time.Instant
+
 import cats.Applicative
 import io.circe.JsonObject
 
-final class PreparedLogger[F[_]: Applicative](
+final class PreparedLogger[F[_]](
     prepare: Event => Event,
     logger: Logger[F]
-) extends BroadcastLogger[F](List(logger)) {
-  override def apply(events: List[Event]): F[Unit] =
-    logger(events.map(prepare))
+) extends Logger[F] {
+  override def apply(events: Instant => List[Event]): F[Unit] =
+    logger { timestamp =>
+      events(timestamp).map(prepare)
+    }
 }
 
 object PreparedLogger {
   def apply[F[_]: Applicative](
       prepare: Event => Event,
       logger: Logger[F]
-  ): Logger[F] =
-    new PreparedLogger[F](prepare, logger)
+  ): Logger[F] = new PreparedLogger[F](prepare, logger)
 
   def prefixed[F[_]: Applicative](prefix: Scope, logger: Logger[F]): Logger[F] =
     PreparedLogger[F](

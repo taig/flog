@@ -1,10 +1,11 @@
 package io.taig.flog
 
+import java.time.Instant
+
 import cats.Applicative
 
-final class NoopLogger[F[_]](implicit F: Applicative[F])
-    extends BroadcastLogger[F](List.empty) {
-  override def apply(events: List[Event]): F[Unit] = F.unit
+final class NoopLogger[F[_]](implicit F: Applicative[F]) extends Logger[F] {
+  override def apply(events: Instant => List[Event]): F[Unit] = F.unit
 }
 
 object NoopLogger {
