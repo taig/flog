@@ -1,10 +1,13 @@
 package io.taig.flog
 
+import java.util.UUID
+
 import cats._
 import cats.effect.Sync
 import cats.implicits._
+import io.circe.syntax._
 import io.circe.{Json, JsonObject}
-import io.taig.flog.internal.Helpers
+import io.taig.flog.internal.Time
 
 trait Logger[F[_]] {
   def apply(events: List[Event]): F[Unit]
@@ -16,7 +19,7 @@ trait Logger[F[_]] {
       payload: Eval[JsonObject] = Eval.now(JsonObject.empty),
       throwable: Option[Throwable] = None
   )(implicit F: Sync[F]): F[Unit] =
-    Helpers.timestamp[F].map { timestamp =>
+    Time.now[F].map { timestamp =>
       List(Event(level, scope, timestamp, message, payload, throwable))
     } >>= apply
 
@@ -98,4 +101,6 @@ trait Logger[F[_]] {
 
   final def payload(fields: (String, Json)*): Logger[F] =
     payload(JsonObject(fields: _*))
+
+  final def tracer(trace: UUID): Logger[F] = payload("trace" -> trace.asJson)
 }

@@ -8,7 +8,7 @@ import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.{Option => _, _}
 import io.circe.JsonObject
 import io.circe.syntax._
-import io.taig.flog.internal.Helpers
+import io.taig.flog.internal.Shows._
 import io.taig.flog.stackdriver.interal.Circe
 import io.taig.flog.{Event, Level, Logger}
 
@@ -41,7 +41,7 @@ final class StackdriverLogger[F[_]](
       "scope" -> event.scope.show.asJson,
       "message" -> Option(event.message.value).filter(_.nonEmpty).asJson,
       "payload" -> event.payload.value.asJson,
-      "stacktrace" -> event.throwable.map(Helpers.print).asJson
+      "stacktrace" -> event.throwable.map(_.show).asJson
     )
 
     JsonPayload.of(Circe.toJavaMap(json))

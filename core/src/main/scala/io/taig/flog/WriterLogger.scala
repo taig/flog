@@ -5,7 +5,7 @@ import java.io._
 import cats.effect.Sync
 import cats.implicits._
 import io.circe.Json
-import io.taig.flog.internal.Helpers
+import io.taig.flog.internal.Shows._
 
 final class WriterLogger[F[_]](writer: Writer)(implicit F: Sync[F])
     extends Logger[F] {
@@ -24,7 +24,7 @@ final class WriterLogger[F[_]](writer: Writer)(implicit F: Sync[F])
     events.foreach { event =>
       builder
         .append('[')
-        .append(Helpers.TimeFormatter.format(event.timestamp))
+        .append(event.timestamp.show)
         .append("][")
         .append(event.level.show)
         .append("][")
@@ -37,7 +37,7 @@ final class WriterLogger[F[_]](writer: Writer)(implicit F: Sync[F])
       if (payload.nonEmpty)
         builder.append('\n').append(Json.fromJsonObject(payload).spaces2)
 
-      event.throwable.map(Helpers.print).foreach { value =>
+      event.throwable.map(_.show).foreach { value =>
         builder.append('\n').append(value)
       }
 
