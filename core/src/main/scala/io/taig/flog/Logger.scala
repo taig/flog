@@ -3,7 +3,6 @@ package io.taig.flog
 import java.util.UUID
 
 import cats._
-import cats.implicits._
 import io.circe.syntax._
 import io.circe.{Json, JsonObject}
 
