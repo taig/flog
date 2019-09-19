@@ -22,8 +22,8 @@ final class StackdriverLogger[F[_]](
     write: List[WriteOption]
 )(implicit F: Sync[F])
     extends SyncLogger[F] {
-  override def apply(events: List[Event]): F[Unit] =
-    F.delay(logging.write(events.map(entry).asJava, write: _*))
+  override def apply(event: Event): F[Unit] =
+    F.delay(logging.write(List(entry(event)).asJava, write: _*))
 
   def entry(event: Event): LogEntry = {
     val builder = LogEntry

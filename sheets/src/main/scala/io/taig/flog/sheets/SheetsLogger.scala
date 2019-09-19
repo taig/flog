@@ -16,8 +16,8 @@ final class SheetsLogger[F[_]: Sync](
     range: String,
     schema: List[String]
 ) extends SyncLogger[F] {
-  override def apply(events: List[Event]): F[Unit] =
-    Google.append(sheets, id, range)(events.map(row)).void
+  override def apply(event: Event): F[Unit] =
+    Google.append(sheets, id, range)(List(row(event))).void
 
   def row(event: Event): List[AnyRef] = {
     val payload = Circe.flatten(Json.fromJsonObject(event.payload.value))

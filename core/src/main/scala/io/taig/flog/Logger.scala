@@ -4,12 +4,11 @@ import java.time.Instant
 import java.util.UUID
 
 import cats._
-import cats.implicits._
 import io.circe.{Json, JsonObject}
 import io.circe.syntax._
 
 abstract class Logger[F[_]] {
-  def apply(events: Instant => List[Event]): F[Unit]
+  def apply(events: Instant => Event): F[Unit]
 
   final def apply(
       level: Level,
@@ -17,8 +16,7 @@ abstract class Logger[F[_]] {
       message: Eval[String] = Eval.now(""),
       payload: Eval[JsonObject] = Eval.now(JsonObject.empty),
       throwable: Option[Throwable] = None
-  ): F[Unit] =
-    apply(Event(level, scope, _, message, payload, throwable).pure[List])
+  ): F[Unit] = apply(Event(level, scope, _, message, payload, throwable))
 
   final def debug(
       scope: Scope = Scope.Root,

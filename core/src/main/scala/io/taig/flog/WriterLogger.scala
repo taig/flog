@@ -9,42 +9,36 @@ import io.taig.flog.internal.Shows._
 
 final class WriterLogger[F[_]](writer: Writer)(implicit F: Sync[F])
     extends SyncLogger[F] {
-  override def apply(events: List[Event]): F[Unit] =
-    F.unlessA(events.isEmpty) {
-      F.delay {
-        val builder = print(events)
-        writer.write(builder.toString())
-        writer.flush()
-      }
+  override def apply(event: Event): F[Unit] =
+    F.delay {
+      val builder = print(event)
+      writer.write(builder.toString())
+      writer.flush()
     }
 
-  def print(events: List[Event]): StringBuilder = {
+  def print(event: Event): StringBuilder = {
     val builder = new StringBuilder()
 
-    events.foreach { event =>
-      builder
-        .append('[')
-        .append(event.timestamp.show)
-        .append("][")
-        .append(event.level.show)
-        .append("][")
-        .append(event.scope.show)
-        .append("] ")
-        .append(event.message.value)
+    builder
+      .append('[')
+      .append(event.timestamp.show)
+      .append("][")
+      .append(event.level.show)
+      .append("][")
+      .append(event.scope.show)
+      .append("] ")
+      .append(event.message.value)
 
-      val payload = event.payload.value
+    val payload = event.payload.value
 
-      if (payload.nonEmpty)
-        builder.append('\n').append(Json.fromJsonObject(payload).spaces2)
+    if (payload.nonEmpty)
+      builder.append('\n').append(Json.fromJsonObject(payload).spaces2)
 
-      event.throwable.map(_.show).foreach { value =>
-        builder.append('\n').append(value)
-      }
-
-      builder.append('\n')
+    event.throwable.map(_.show).foreach { value =>
+      builder.append('\n').append(value)
     }
 
-    builder
+    builder.append('\n')
   }
 }
 

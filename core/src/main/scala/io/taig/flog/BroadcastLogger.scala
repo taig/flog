@@ -5,8 +5,8 @@ import cats.implicits._
 
 final class BroadcastLogger[F[_]: Sync](loggers: List[Logger[F]])
     extends SyncLogger[F] {
-  override def apply(events: List[Event]): F[Unit] =
-    loggers.traverse_(_.apply(_ => events))
+  override def apply(event: Event): F[Unit] =
+    loggers.traverse_(_.apply(_ => event))
 }
 
 object BroadcastLogger {

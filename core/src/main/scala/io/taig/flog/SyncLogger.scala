@@ -7,8 +7,8 @@ import cats.implicits._
 import io.taig.flog.internal.Time
 
 abstract class SyncLogger[F[_]: Sync] extends Logger[F] {
-  override final def apply(events: Instant => List[Event]): F[Unit] =
-    Time.now[F].flatMap(timestamp => apply(events(timestamp)))
+  override final def apply(event: Instant => Event): F[Unit] =
+    Time.now[F].flatMap(timestamp => apply(event(timestamp)))
 
-  def apply(events: List[Event]): F[Unit]
+  def apply(event: Event): F[Unit]
 }

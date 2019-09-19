@@ -17,9 +17,9 @@ import scala.concurrent.duration.FiniteDuration
   * the `SheetsLogger` that performs a network request to submit events.
   */
 final class BatchLogger[F[_]: Sync](
-    enqueue: List[Event] => F[Unit]
+    enqueue: Event => F[Unit]
 ) extends SyncLogger[F] {
-  override def apply(events: List[Event]): F[Unit] = enqueue(events)
+  override def apply(event: Event): F[Unit] = enqueue(event)
 }
 
 object BatchLogger {
@@ -32,11 +32,13 @@ object BatchLogger {
     val sleep = Timer[F].sleep(interval)
 
     Resource.liftF(Semaphore[F](1)).flatMap { lock =>
-      val enqueue = (events: List[Event]) =>
-        lock.withPermit(F.delay(buffer.appendAll(events)))
+      val enqueue =
+        (event: Event) => lock.withPermit(F.delay(buffer.append(event)))
       val dequeue = lock
         .withPermit(extract[F](buffer))
-        .flatMap(events => logger(_ => events))
+        .flatMap { events =>
+          events.traverse_(event => logger(_ => event))
+        }
 
       Resource
         .make(repeat(sleep >> dequeue).start)(_.cancel *> dequeue)

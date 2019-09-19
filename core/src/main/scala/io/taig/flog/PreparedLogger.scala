@@ -9,9 +9,9 @@ final class PreparedLogger[F[_]](
     prepare: Event => Event,
     logger: Logger[F]
 ) extends Logger[F] {
-  override def apply(events: Instant => List[Event]): F[Unit] =
+  override def apply(event: Instant => Event): F[Unit] =
     logger { timestamp =>
-      events(timestamp).map(prepare)
+      prepare(event(timestamp))
     }
 }
 
