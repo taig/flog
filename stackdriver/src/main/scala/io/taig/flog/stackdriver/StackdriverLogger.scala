@@ -76,4 +76,10 @@ object StackdriverLogger {
       StackdriverLogger[F](logging, name, resource, identity, List.empty)
     }
   }
+
+  def default[F[_]: Sync](
+      name: String,
+      tpe: String = "global"
+  ): Resource[F, Logger[F]] =
+    default(name, MonitoredResource.newBuilder(tpe).build())
 }
