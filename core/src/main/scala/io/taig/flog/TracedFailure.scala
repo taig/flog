@@ -5,7 +5,7 @@ import java.util.UUID
 import cats.implicits._
 import io.circe.JsonObject
 
-final case class TracedFailure[F[_]](
+final case class TracedFailure(
     prefix: Scope,
     preset: JsonObject,
     trace: UUID,
