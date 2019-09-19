@@ -13,11 +13,14 @@ abstract class Logger[F[_]](
 ) {
   def apply(event: Instant => Event): F[Unit]
 
+  def copy(prefix: Scope = prefix, preset: JsonObject = preset): Logger[F] =
+    Logger(prefix, preset, apply)
+
   final def prefix(scope: Scope): Logger[F] =
-    Logger(scope ++ prefix, preset, apply)
+    copy(prefix = scope ++ prefix)
 
   final def add(payload: JsonObject): Logger[F] =
-    Logger(prefix, JsonObject.fromMap(preset.toMap ++ payload.toMap), apply)
+    copy(preset = JsonObject.fromMap(preset.toMap ++ payload.toMap))
 
   final def add(fields: (String, Json)*): Logger[F] =
     add(JsonObject(fields: _*))
