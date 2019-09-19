@@ -1,9 +1,9 @@
 package io.taig.flog
 
 import cats.Monad
+import cats.effect._
 import cats.effect.concurrent.Semaphore
 import cats.effect.implicits._
-import cats.effect._
 import cats.implicits._
 
 import scala.collection.mutable
@@ -16,12 +16,6 @@ import scala.concurrent.duration.FiniteDuration
   * This `Logger` is useful when dealing with expensive `Loggers`, e.g.
   * the `SheetsLogger` that performs a network request to submit events.
   */
-final class BatchLogger[F[_]: Sync](
-    enqueue: Event => F[Unit]
-) extends SyncLogger[F] {
-  override def apply(event: Event): F[Unit] = enqueue(event)
-}
-
 object BatchLogger {
   def apply[F[_]: ContextShift: Timer](
       logger: Logger[F]
@@ -42,7 +36,7 @@ object BatchLogger {
 
       Resource
         .make(repeat(sleep >> dequeue).start)(_.cancel *> dequeue)
-        .as(new BatchLogger[F](enqueue(_).void))
+        .as(SyncLogger[F](enqueue(_).void))
     }
   }
 

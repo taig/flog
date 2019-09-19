@@ -3,7 +3,6 @@ package io.taig.flog.stackdriver
 import cats.effect.{Resource, Sync}
 import cats.implicits._
 import com.google.cloud.MonitoredResource
-import com.google.cloud.logging.Logging.WriteOption
 import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.{Option => _, _}
 import io.circe.JsonObject
@@ -14,27 +13,40 @@ import io.taig.flog.{Event, Level, Logger, SyncLogger}
 
 import scala.jdk.CollectionConverters._
 
-final class StackdriverLogger[F[_]](
-    logging: Logging,
-    name: String,
-    resource: MonitoredResource,
-    build: LogEntry.Builder => LogEntry.Builder,
-    write: List[WriteOption]
-)(implicit F: Sync[F])
-    extends SyncLogger[F] {
-  override def apply(event: Event): F[Unit] =
-    F.delay(logging.write(List(entry(event)).asJava, write: _*))
+object StackdriverLogger {
+  def apply[F[_]](
+      logging: Logging,
+      name: String,
+      resource: MonitoredResource
+  )(implicit F: Sync[F]): Logger[F] = SyncLogger { event =>
+    F.delay(logging.write(List(entry(event, name, resource)).asJava))
+  }
 
-  def entry(event: Event): LogEntry = {
-    val builder = LogEntry
+  // https://cloud.google.com/logging/docs/api/v2/resource-list
+  def default[F[_]](name: String, resource: MonitoredResource)(
+      implicit F: Sync[F]
+  ): Resource[F, Logger[F]] = {
+    val acquire = F.delay(LoggingOptions.getDefaultInstance.getService)
+    val release = (logging: Logging) => F.delay(logging.close())
+    Resource.make(acquire)(release).map { logging =>
+      StackdriverLogger[F](logging, name, resource)
+    }
+  }
+
+  def default[F[_]: Sync](
+      name: String,
+      tpe: String = "global"
+  ): Resource[F, Logger[F]] =
+    default(name, MonitoredResource.newBuilder(tpe).build())
+
+  def entry(event: Event, name: String, resource: MonitoredResource): LogEntry =
+    LogEntry
       .newBuilder(payload(event))
       .setSeverity(severity(event))
       .setResource(resource)
       .setLogName(name)
       .setTimestamp(event.timestamp.toEpochMilli)
-
-    build(builder).build()
-  }
+      .build()
 
   def payload(event: Event): JsonPayload = {
     val json = JsonObject(
@@ -54,32 +66,4 @@ final class StackdriverLogger[F[_]](
     case Level.Info    => Severity.INFO
     case Level.Warning => Severity.WARNING
   }
-}
-
-object StackdriverLogger {
-  def apply[F[_]: Sync](
-      logging: Logging,
-      name: String,
-      resource: MonitoredResource,
-      build: LogEntry.Builder => LogEntry.Builder,
-      write: List[WriteOption]
-  ): Logger[F] =
-    new StackdriverLogger[F](logging, name, resource, build, write)
-
-  // https://cloud.google.com/logging/docs/api/v2/resource-list
-  def default[F[_]](name: String, resource: MonitoredResource)(
-      implicit F: Sync[F]
-  ): Resource[F, Logger[F]] = {
-    val acquire = F.delay(LoggingOptions.getDefaultInstance.getService)
-    val release = (logging: Logging) => F.delay(logging.close())
-    Resource.make(acquire)(release).map { logging =>
-      StackdriverLogger[F](logging, name, resource, identity, List.empty)
-    }
-  }
-
-  def default[F[_]: Sync](
-      name: String,
-      tpe: String = "global"
-  ): Resource[F, Logger[F]] =
-    default(name, MonitoredResource.newBuilder(tpe).build())
 }

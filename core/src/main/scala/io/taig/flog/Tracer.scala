@@ -13,7 +13,7 @@ object Tracer {
     new Tracer[F] {
       override def run[A](f: Logger[F] => F[A]): F[A] =
         UUIDs.random[F].flatMap { trace =>
-          val tracer = logger.tracer(trace)
+          val tracer = logger.trace(trace)
           f(tracer).handleErrorWith { throwable =>
             tracer.failure(throwable = throwable.some) *> throwable
               .raiseError[F, A]
@@ -25,10 +25,10 @@ object Tracer {
     new Tracer[F] {
       override def run[A](f: Logger[F] => F[A]): F[A] =
         UUIDs.random[F].flatMap { trace =>
-          val tracer = logger.tracer(trace)
+          val tracer = logger.trace(trace)
           f(tracer).adaptErr {
             case throwable =>
-              TracedFailure(tracer, trace, throwable)
+              TracedFailure(tracer.prefix, tracer.preset, trace, throwable)
           }
         }
     }
