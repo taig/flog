@@ -10,7 +10,7 @@ import io.circe.JsonObject
 import io.circe.syntax._
 import io.taig.flog.internal.Shows._
 import io.taig.flog.stackdriver.interal.Circe
-import io.taig.flog.{Event, Level, Logger}
+import io.taig.flog.{Event, Level, Logger, SyncLogger}
 
 import scala.jdk.CollectionConverters._
 
@@ -21,7 +21,7 @@ final class StackdriverLogger[F[_]](
     build: LogEntry.Builder => LogEntry.Builder,
     write: List[WriteOption]
 )(implicit F: Sync[F])
-    extends Logger[F] {
+    extends SyncLogger[F] {
   override def apply(events: List[Event]): F[Unit] =
     F.delay(logging.write(events.map(entry).asJava, write: _*))
 

@@ -8,7 +8,7 @@ import io.circe.Json
 import io.taig.flog.internal.Shows._
 
 final class WriterLogger[F[_]](writer: Writer)(implicit F: Sync[F])
-    extends Logger[F] {
+    extends SyncLogger[F] {
   override def apply(events: List[Event]): F[Unit] =
     F.unlessA(events.isEmpty) {
       F.delay {

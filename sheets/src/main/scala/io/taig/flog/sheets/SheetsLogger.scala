@@ -8,14 +8,14 @@ import com.google.api.services.sheets.v4.Sheets
 import io.circe.Json
 import io.taig.flog.internal.Shows._
 import io.taig.flog.sheets.internal.{Circe, Google}
-import io.taig.flog.{Event, Logger}
+import io.taig.flog.{Event, Logger, SyncLogger}
 
 final class SheetsLogger[F[_]: Sync](
     sheets: Sheets,
     id: String,
     range: String,
     schema: List[String]
-) extends Logger[F] {
+) extends SyncLogger[F] {
   override def apply(events: List[Event]): F[Unit] =
     Google.append(sheets, id, range)(events.map(row)).void
 
