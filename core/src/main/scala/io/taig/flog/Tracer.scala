@@ -14,7 +14,7 @@ final class Tracer[F[_], A](logger: Logger[F], f: Logger[F] => F[A])(
   def release(trace: UUID): F[A] =
     release(logger.tracer(trace))
 
-  private def release(logger: Logger[F]): F[A] =
+  def release(logger: Logger[F]): F[A] =
     f(logger).handleErrorWith { throwable =>
       logger.failure(throwable = throwable.some) *> F.raiseError(throwable)
     }
