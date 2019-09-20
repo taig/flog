@@ -4,6 +4,6 @@ import java.time.Instant
 
 import cats.effect.Sync
 
-private[flog] object Time {
+private[flog] object Times {
   def now[F[_]](implicit F: Sync[F]): F[Instant] = F.delay(Instant.now())
 }

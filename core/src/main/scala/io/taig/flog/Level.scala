@@ -2,7 +2,7 @@ package io.taig.flog
 
 import cats.Show
 
-sealed trait Level extends Product with Serializable
+sealed abstract class Level extends Product with Serializable
 
 object Level {
   final case object Debug extends Level

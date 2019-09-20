@@ -25,7 +25,6 @@ test:
   script:
     - sbt -Dmode=strict publishLocal
 
-
 publish:
   stage: publish
   image: $CONTAINER_IMAGE:$CI_COMMIT_SHA
@@ -33,4 +32,4 @@ publish:
     - master
     - tags
   script:
-    - sbt +publish
+    - sbt publishAndRelease

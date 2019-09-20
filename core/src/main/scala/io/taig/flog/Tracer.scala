@@ -5,17 +5,18 @@ import cats.implicits._
 import io.taig.flog.internal.UUIDs
 
 /**
- * Prove an execution context with a `Logger` that carries a `UUID` tracing id
- */
+  * Prove an execution context with a `Logger` that carries a `UUID` tracing id
+  */
 abstract class Tracer[F[_]] { self =>
   def run[A](f: Logger[F] => F[A]): F[A]
 }
 
 object Tracer {
+
   /**
-   * Create a `Tracer` that automatically logs an unhandled failure and then
-   * rethrows it
-   */
+    * Create a `Tracer` that automatically logs an unhandled failure and then
+    * rethrows it
+    */
   def reporting[F[_]: Sync](logger: Logger[F]): Tracer[F] =
     new Tracer[F] {
       override def run[A](f: Logger[F] => F[A]): F[A] =
@@ -29,8 +30,8 @@ object Tracer {
     }
 
   /**
-   * Create a `Tracer` that wraps an unhandled failure in a `TracedFailure`
-   */
+    * Create a `Tracer` that wraps an unhandled failure in a `TracedFailure`
+    */
   def adapting[F[_]: Sync](logger: Logger[F]): Tracer[F] =
     new Tracer[F] {
       override def run[A](f: Logger[F] => F[A]): F[A] =

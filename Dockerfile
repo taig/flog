@@ -19,11 +19,11 @@ RUN         cd ./cache/ && sbt -v exit
 # Cache scala
 ADD         ./scalaVersion.sbt ./cache/
 RUN         echo "class App" > ./cache/src/main/scala/App.scala
-RUN         cd ./cache/ && sbt -v compile
+RUN         cd ./cache/ && sbt -v +compile
 
 # Cache plugins
 ADD         ./project/plugins.sbt ./cache/project/
-RUN         cd ./cache/ && sbt -v compile
+RUN         cd ./cache/ && sbt -v +compile
 
 # Cache dependencies
 ADD         ./project ./cache/project/
