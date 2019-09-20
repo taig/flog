@@ -1,1 +1,1 @@
-addSbtPlugin("io.taig" % "sbt-houserules" % "0.0.5")
+addSbtPlugin("io.taig" % "sbt-houserules" % "0.0.7")
