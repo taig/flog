@@ -52,11 +52,15 @@ object Main extends IOApp {
     } yield body
 
   override def run(args: List[String]): IO[ExitCode] =
-    WriterLogger.stdOut[IO].map(_.prefix(Scope.Root / "load")).flatMap { logger =>
-      val tracer = Tracer.reporting(logger)
-      tracer.run(loadWebsite(url = "https://typelevel.org", _)) *>
-      tracer.run(loadWebsite(url = "foobar", _))
-    }.attempt.as(ExitCode.Success)
+    WriterLogger.stdOut[IO]
+      // Prefix all log events with the "load" scope
+      .map(_.prefix(Scope.Root / "load"))
+      // Create a reporting Tracer that automatically logs failures
+      .map(Tracer.reporting)
+      .flatMap { tracer =>
+        tracer.run(logger => loadWebsite(url = "https://typelevel.org", logger)) *>
+        tracer.run(logger => loadWebsite(url = "foobar", logger))
+      }.attempt.as(ExitCode.Success)
 }
 ```
 
