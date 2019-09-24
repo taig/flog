@@ -1,9 +1,12 @@
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
+
 lazy val root = project
   .in(file("."))
   .settings(noPublishSettings)
-  .aggregate(core, sheets, stackdriver)
+  .aggregate(core.jvm, core.js, sheets, stackdriver)
 
-lazy val core = project
+lazy val core = crossProject(JVMPlatform, JSPlatform)
+  .crossType(CrossType.Pure)
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
@@ -24,7 +27,7 @@ lazy val sheets = project
         Nil,
     name := "flog-sheets"
   )
-  .dependsOn(core)
+  .dependsOn(core.jvm)
 
 lazy val stackdriver = project
   .settings(sonatypePublishSettings)
@@ -35,4 +38,4 @@ lazy val stackdriver = project
         Nil,
     name := "flog-stackdriver"
   )
-  .dependsOn(core)
+  .dependsOn(core.jvm)
