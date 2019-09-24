@@ -28,8 +28,8 @@ test:
 publish:
   stage: publish
   image: $CONTAINER_IMAGE:$CI_COMMIT_SHA
-  only:
-    - master
-    - tags
+#   only:
+#     - master
+#     - tags
   script:
     - sbt publishAndRelease
