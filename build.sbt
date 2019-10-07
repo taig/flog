@@ -33,7 +33,7 @@ lazy val stackdriver = project
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "com.google.cloud" % "google-cloud-logging" % "1.92.0" ::
+      "com.google.cloud" % "google-cloud-logging" % "1.96.0" ::
         "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.2" ::
         Nil,
     name := "flog-stackdriver"
