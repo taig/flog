@@ -1,6 +1,6 @@
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
-lazy val root = project
+lazy val flog = project
   .in(file("."))
   .settings(noPublishSettings)
   .aggregate(core.jvm, core.js, sheets, stackdriver)
@@ -12,8 +12,7 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
     libraryDependencies ++=
       "io.circe" %% "circe-core" % "0.12.2" ::
         "org.typelevel" %% "cats-effect" % "2.0.0" ::
-        Nil,
-    name := "flog-core"
+        Nil
   )
 
 lazy val sheets = project
@@ -24,8 +23,7 @@ lazy val sheets = project
         "com.google.apis" % "google-api-services-sheets" % "v4-rev581-1.25.0" ::
         "com.google.oauth-client" % "google-oauth-client-jetty" % "1.25.0" ::
         "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.2" ::
-        Nil,
-    name := "flog-sheets"
+        Nil
   )
   .dependsOn(core.jvm)
 
@@ -35,7 +33,6 @@ lazy val stackdriver = project
     libraryDependencies ++=
       "com.google.cloud" % "google-cloud-logging" % "1.96.0" ::
         "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.2" ::
-        Nil,
-    name := "flog-stackdriver"
+        Nil
   )
   .dependsOn(core.jvm)
