@@ -10,7 +10,7 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "io.circe" %% "circe-core" % "0.12.1" ::
+      "io.circe" %% "circe-core" % "0.12.2" ::
         "org.typelevel" %% "cats-effect" % "2.0.0" ::
         Nil,
     name := "flog-core"
