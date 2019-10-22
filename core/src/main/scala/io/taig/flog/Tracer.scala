@@ -5,9 +5,9 @@ import cats.implicits._
 import io.taig.flog.internal.UUIDs
 
 /**
-  * Prove an execution context with a `Logger` that carries a `UUID` tracing id
+  * Provides an execution context with a `Logger` that carries a `UUID` tracing id
   */
-abstract class Tracer[F[_]] { self =>
+abstract class Tracer[F[_]] {
   def run[A](f: Logger[F] => F[A]): F[A]
 }
 
