@@ -17,6 +17,10 @@ abstract class Logger[F[_]] {
   final def trace(id: UUID): Logger[F] =
     Logger.preset(JsonObject("trace" -> id.asJson), this)
 
+  final def prefix(scope: Scope): Logger[F] = Logger.prefix(scope, this)
+
+  final def prefix(segment: String): Logger[F] = prefix(Scope.Root / segment)
+
   final def apply(
       level: Level,
       scope: Scope = Scope.Root,
