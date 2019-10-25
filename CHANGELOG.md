@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.0.3
+
+ * Simplify logger by removing state, and weaken `TracedFailure` accordingly
+ * Upgrade to circe 0.12.3
+
+_2019-10-25_
+
 ## 0.0.2
 
 _2019-10-19_
