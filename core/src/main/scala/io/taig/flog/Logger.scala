@@ -1,31 +1,21 @@
 package io.taig.flog
 
+import java.io.{BufferedWriter, OutputStream, OutputStreamWriter}
 import java.time.Instant
 import java.util.UUID
 
 import cats._
-import io.circe.{Json, JsonObject}
+import cats.effect.Sync
+import cats.implicits._
+import io.circe.JsonObject
 import io.circe.syntax._
+import io.taig.flog.internal.Times
 
-abstract class Logger[F[_]](
-    val prefix: Scope = Scope.Root,
-    val preset: JsonObject = JsonObject.empty
-) {
+abstract class Logger[F[_]] {
   def apply(event: Instant => Event): F[Unit]
 
-  def copy(prefix: Scope = prefix, preset: JsonObject = preset): Logger[F] =
-    Logger(prefix, preset, apply)
-
-  final def prefix(scope: Scope): Logger[F] =
-    copy(prefix = scope ++ prefix)
-
-  final def add(payload: JsonObject): Logger[F] =
-    copy(preset = JsonObject.fromMap(preset.toMap ++ payload.toMap))
-
-  final def add(fields: (String, Json)*): Logger[F] =
-    add(JsonObject(fields: _*))
-
-  final def trace(id: UUID): Logger[F] = add("trace" -> id.asJson)
+  final def trace(id: UUID): Logger[F] =
+    Logger.preset(JsonObject("trace" -> id.asJson), this)
 
   final def apply(
       level: Level,
@@ -36,10 +26,10 @@ abstract class Logger[F[_]](
   ): F[Unit] = apply { timestamp =>
     Event(
       level,
-      prefix ++ scope,
+      scope,
       timestamp,
       message,
-      payload.map(payload => JsonObject.fromMap(preset.toMap ++ payload.toMap)),
+      payload,
       throwable
     )
   }
@@ -116,17 +106,41 @@ abstract class Logger[F[_]](
 }
 
 object Logger {
-  def apply[F[_]](
-      prefix: Scope,
-      payload: JsonObject,
-      f: (Instant => Event) => F[Unit]
-  ): Logger[F] = new Logger[F](prefix, payload) {
-    override def apply(event: Instant => Event): F[Unit] = f(event)
-  }
+  def apply[F[_]: Sync](f: Event => F[Unit]): Logger[F] =
+    event => Times.now[F].map(event) >>= f
 
-  def apply[F[_]](
-      f: (Instant => Event) => F[Unit]
-  ): Logger[F] = new Logger[F]() {
-    override def apply(event: Instant => Event): F[Unit] = f(event)
-  }
+  def writer[F[_]](
+      target: OutputStream
+  )(implicit F: Sync[F]): F[Logger[F]] =
+    F.delay(new BufferedWriter(new OutputStreamWriter(target), 1024))
+      .map { writer =>
+        val flush = F.delay(writer.flush())
+        Logger(event => F.delay(writer.write(event.show)) *> flush)
+      }
+
+  def stdOut[F[_]: Sync]: F[Logger[F]] = writer(System.out)
+
+  def broadcast[F[_]: Applicative](loggers: Logger[F]*): Logger[F] =
+    event => loggers.toList.traverse_(_.apply(event))
+
+  def noop[F[_]](implicit F: Applicative[F]): Logger[F] = _ => F.unit
+
+  def prefix[F[_]](scope: Scope, logger: Logger[F]): Logger[F] =
+    event =>
+      logger { timestamp =>
+        val previous = event(timestamp)
+        previous.copy(scope = scope ++ previous.scope)
+      }
+
+  def preset[F[_]](payload: JsonObject, logger: Logger[F]): Logger[F] =
+    event =>
+      logger { timestamp =>
+        val previous = event(timestamp)
+        val preset = payload.toMap
+        val update = previous.payload.map { payload =>
+          JsonObject.fromMap(preset ++ payload.toMap)
+        }
+        previous.copy(payload = update)
+      }
+
 }

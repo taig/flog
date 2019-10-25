@@ -7,14 +7,14 @@ import cats.implicits._
 import io.circe.Json
 import io.taig.flog.internal.Shows._
 import io.taig.flog.sheets.internal.{Circe, Google}
-import io.taig.flog.{Event, Logger, SyncLogger}
+import io.taig.flog.{Event, Logger}
 
 object SheetsLogger {
   def apply[F[_]: Sync](
       credentials: F[InputStream]
   )(id: String, range: String, schema: List[String]): F[Logger[F]] =
     Google.sheets[F](credentials).map { sheets =>
-      SyncLogger { event =>
+      Logger { event =>
         Google.append(sheets, id, range)(List(row(schema, event))).void
       }
     }

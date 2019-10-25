@@ -9,7 +9,7 @@ import io.circe.JsonObject
 import io.circe.syntax._
 import io.taig.flog.internal.Shows._
 import io.taig.flog.stackdriver.interal.Circe
-import io.taig.flog.{Event, Level, Logger, SyncLogger}
+import io.taig.flog.{Event, Level, Logger}
 
 import scala.jdk.CollectionConverters._
 
@@ -18,7 +18,7 @@ object StackdriverLogger {
       logging: Logging,
       name: String,
       resource: MonitoredResource
-  )(implicit F: Sync[F]): Logger[F] = SyncLogger { event =>
+  )(implicit F: Sync[F]): Logger[F] = Logger { event =>
     F.delay(logging.write(List(entry(event, name, resource)).asJava))
   }
 

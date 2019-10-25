@@ -23,8 +23,8 @@ object Tracer {
         UUIDs.random[F].flatMap { trace =>
           val tracer = logger.trace(trace)
           f(tracer).handleErrorWith { throwable =>
-            tracer.failure(throwable = throwable.some) *> throwable
-              .raiseError[F, A]
+            tracer.failure(throwable = throwable.some) *>
+              TracedFailure(trace, throwable).raiseError[F, A]
           }
         }
     }
@@ -38,8 +38,7 @@ object Tracer {
         UUIDs.random[F].flatMap { trace =>
           val tracer = logger.trace(trace)
           f(tracer).adaptErr {
-            case throwable =>
-              TracedFailure(tracer.prefix, tracer.preset, trace, throwable)
+            case throwable => TracedFailure(trace, throwable)
           }
         }
     }
