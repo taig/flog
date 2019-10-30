@@ -14,6 +14,8 @@ import io.taig.flog.internal.Times
 abstract class Logger[F[_]] {
   def apply(event: Instant => Event): F[Unit]
 
+  final def mapK[G[_]](f: F ~> G): Logger[G] = event => f(apply(event))
+
   final def trace(id: UUID): Logger[F] =
     Logger.preset(JsonObject("trace" -> id.asJson), this)
 
