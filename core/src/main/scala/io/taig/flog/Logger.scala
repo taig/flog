@@ -1,7 +1,6 @@
 package io.taig.flog
 
 import java.io.{BufferedWriter, OutputStream, OutputStreamWriter}
-import java.time.Instant
 import java.util.UUID
 
 import cats._
@@ -11,142 +10,113 @@ import io.circe.JsonObject
 import io.circe.syntax._
 import io.taig.flog.internal.Times
 
-abstract class Logger[F[_]] {
-  def apply(event: Instant => Event): F[Unit]
+import scala.reflect._
 
-  final def mapK[G[_]](f: F ~> G): Logger[G] = event => f(apply(event))
+abstract class Logger[F[_]](val prefix: Scope, val presets: JsonObject) {
+  protected def write(event: => Event): F[Unit]
 
-  final def trace(id: UUID): Logger[F] =
-    Logger.preset(JsonObject("trace" -> id.asJson), this)
+  final def apply(event: => Event): F[Unit] = write(build(event))
 
-  final def prefix(scope: Scope): Logger[F] = Logger.prefix(scope, this)
-
-  final def prefix(segment: String): Logger[F] = prefix(Scope.Root / segment)
+  private def build(event: Event): Event =
+    event.copy(scope = prefix ++ event.scope)
 
   final def apply(
       level: Level,
       scope: Scope = Scope.Root,
-      message: Eval[String] = Eval.now(""),
-      payload: Eval[JsonObject] = Eval.now(JsonObject.empty),
+      message: String = "",
+      payload: => JsonObject = JsonObject.empty,
       throwable: Option[Throwable] = None
-  ): F[Unit] = apply { timestamp =>
-    Event(
-      level,
-      scope,
-      timestamp,
-      message,
-      payload,
-      throwable
-    )
-  }
+  ): F[Unit] = apply(Event(level, scope, message, payload, throwable))
+
+  final def mapK[G[_]](f: F ~> G): Logger[G] =
+    Logger(event => f(write(event)), prefix, presets)
+
+  final def trace(uuid: UUID): Logger[F] =
+    Logger.preset(JsonObject("trace" -> uuid.asJson), this)
+
+  final def append(scope: Scope): Logger[F] = Logger.append(scope, this)
+
+  final def append(segment: String): Logger[F] = append(Scope.Root / segment)
+
+  /** Append simple name of `A` as `Scope` */
+  final def append[A: ClassTag]: Logger[F] =
+    append(classTag[A].runtimeClass.getSimpleName)
+
+  final def scope[A: ClassTag]: Logger[F] =
+    Logger(write, Scope.fromClassName[A], presets)
 
   final def debug(
       scope: Scope = Scope.Root,
-      message: => String = "",
+      message: String = "",
       payload: => JsonObject = JsonObject.empty,
       throwable: Option[Throwable] = None
-  ): F[Unit] =
-    apply(
-      Level.Debug,
-      scope,
-      Eval.later(message),
-      Eval.later(payload),
-      throwable
-    )
+  ): F[Unit] = apply(Level.Debug, scope, message, payload, throwable)
 
   final def error(
       scope: Scope = Scope.Root,
-      message: => String = "",
+      message: String = "",
       payload: => JsonObject = JsonObject.empty,
       throwable: Option[Throwable] = None
-  ): F[Unit] =
-    apply(
-      Level.Error,
-      scope,
-      Eval.later(message),
-      Eval.later(payload),
-      throwable
-    )
+  ): F[Unit] = apply(Level.Error, scope, message, payload, throwable)
 
   final def info(
       scope: Scope = Scope.Root,
-      message: => String = "",
+      message: String = "",
       payload: => JsonObject = JsonObject.empty,
       throwable: Option[Throwable] = None
-  ): F[Unit] =
-    apply(
-      Level.Info,
-      scope,
-      Eval.later(message),
-      Eval.later(payload),
-      throwable
-    )
-
-  final def failure(
-      scope: Scope = Scope.Root,
-      message: => String = "",
-      payload: => JsonObject = JsonObject.empty,
-      throwable: Option[Throwable] = None
-  ): F[Unit] =
-    apply(
-      Level.Failure,
-      scope,
-      Eval.later(message),
-      Eval.later(payload),
-      throwable
-    )
+  ): F[Unit] = apply(Level.Info, scope, message, payload, throwable)
 
   final def warning(
       scope: Scope = Scope.Root,
-      message: => String = "",
+      message: String = "",
       payload: => JsonObject = JsonObject.empty,
       throwable: Option[Throwable] = None
-  ): F[Unit] =
-    apply(
-      Level.Warning,
-      scope,
-      Eval.later(message),
-      Eval.later(payload),
-      throwable
-    )
+  ): F[Unit] = apply(Level.Warning, scope, message, payload, throwable)
 }
 
 object Logger {
-  def apply[F[_]: Sync](f: Event => F[Unit]): Logger[F] =
-    event => Times.now[F].map(event) >>= f
+  def apply[F[_]](
+      f: (=> Event) => F[Unit],
+      prefix: Scope = Scope.Root,
+      presets: JsonObject = JsonObject.empty
+  ): Logger[F] =
+    new Logger[F](prefix, presets) {
+      override def write(event: => Event): F[Unit] = f(event)
+    }
 
   def writer[F[_]](
-      target: OutputStream
+      target: OutputStream,
+      buffer: Int
   )(implicit F: Sync[F]): F[Logger[F]] =
-    F.delay(new BufferedWriter(new OutputStreamWriter(target), 1024))
+    F.delay(new BufferedWriter(new OutputStreamWriter(target), buffer))
       .map { writer =>
         val flush = F.delay(writer.flush())
-        Logger(event => F.delay(writer.write(event.show)) *> flush)
+
+        Logger { event =>
+          Times.now[F].flatMap { timestamp =>
+            F.delay(writer.write(Event.render(timestamp, event).show))
+          } *> flush
+        }
       }
 
-  def stdOut[F[_]: Sync]: F[Logger[F]] = writer(System.out)
+  def stdOut[F[_]: Sync](buffer: Int): F[Logger[F]] = writer(System.out, buffer)
+
+  def stdOut[F[_]: Sync]: F[Logger[F]] = stdOut[F](buffer = 1024)
 
   def broadcast[F[_]: Applicative](loggers: Logger[F]*): Logger[F] =
-    event => loggers.toList.traverse_(_.apply(event))
+    Logger(event => loggers.toList.traverse_(_.apply(event)))
 
-  def noop[F[_]](implicit F: Applicative[F]): Logger[F] = _ => F.unit
+  def noop[F[_]](implicit F: Applicative[F]): Logger[F] = Logger(_ => F.unit)
 
-  def prefix[F[_]](scope: Scope, logger: Logger[F]): Logger[F] =
-    event =>
-      logger { timestamp =>
-        val previous = event(timestamp)
-        previous.copy(scope = scope ++ previous.scope)
-      }
+  def scoped[F[_]](logger: Logger[F])(f: Scope => Scope): Logger[F] =
+    Logger(logger.write, f(logger.prefix), logger.presets)
 
-  def preset[F[_]](payload: JsonObject, logger: Logger[F]): Logger[F] =
-    event =>
-      logger { timestamp =>
-        val previous = event(timestamp)
-        val preset = payload.toMap
-        val update = previous.payload.map { payload =>
-          JsonObject.fromMap(preset ++ payload.toMap)
-        }
-        previous.copy(payload = update)
-      }
+  /** Append `Scope` to the `Logger` */
+  def append[F[_]](scope: Scope, logger: Logger[F]): Logger[F] =
+    scoped(logger)(_ ++ scope)
 
+  def preset[F[_]](payload: JsonObject, logger: Logger[F]): Logger[F] = {
+    val update = JsonObject.fromMap(logger.presets.toMap ++ payload.toMap)
+    Logger(logger.write, logger.prefix, update)
+  }
 }

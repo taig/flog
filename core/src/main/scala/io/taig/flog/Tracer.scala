@@ -14,7 +14,7 @@ abstract class Tracer[F[_]] {
 object Tracer {
 
   /**
-    * Create a `Tracer` that automatically logs an unhandled failure and then
+    * Create a `Tracer` that automatically logs an unhandled error and then
     * rethrows it
     */
   def reporting[F[_]: Sync](logger: Logger[F]): Tracer[F] =
@@ -23,14 +23,15 @@ object Tracer {
         UUIDs.random[F].flatMap { trace =>
           val tracer = logger.trace(trace)
           f(tracer).handleErrorWith { throwable =>
-            tracer.failure(throwable = throwable.some) *>
-              TracedFailure(trace, throwable).raiseError[F, A]
+            tracer.error(throwable = throwable.some) *>
+              TracedFailure(trace, logger.prefix, logger.presets, throwable)
+                .raiseError[F, A]
           }
         }
     }
 
   /**
-    * Create a `Tracer` that wraps an unhandled failure in a `TracedFailure`
+    * Create a `Tracer` that wraps an unhandled error in a `TracedFailure`
     */
   def adapting[F[_]: Sync](logger: Logger[F]): Tracer[F] =
     new Tracer[F] {
@@ -38,7 +39,8 @@ object Tracer {
         UUIDs.random[F].flatMap { trace =>
           val tracer = logger.trace(trace)
           f(tracer).adaptErr {
-            case throwable => TracedFailure(trace, throwable)
+            case throwable =>
+              TracedFailure(trace, logger.prefix, logger.presets, throwable)
           }
         }
     }

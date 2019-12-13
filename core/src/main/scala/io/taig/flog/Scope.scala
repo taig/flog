@@ -3,6 +3,8 @@ package io.taig.flog
 import cats._
 import cats.implicits._
 
+import scala.reflect.{classTag, ClassTag}
+
 final case class Scope(segments: List[String]) extends AnyVal {
   def /(segment: String): Scope =
     if (segment.isEmpty) this else Scope(segments :+ segment)
@@ -19,6 +21,12 @@ object Scope {
   def apply(root: String): Scope = Scope(List(root))
 
   def of(segments: String*): Scope = Scope(segments.toList)
+
+  def fromClassName[A: ClassTag]: Scope = {
+    val name = classTag[A].runtimeClass.getName
+    val normalized = if (name.endsWith("$")) name.init else name
+    Scope(normalized.split('.').toList)
+  }
 
   implicit val monoid: Monoid[Scope] = new Monoid[Scope] {
     override def empty: Scope = Root
