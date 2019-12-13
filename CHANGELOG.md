@@ -1,11 +1,23 @@
 # CHANGELOG
 
+## 0.0.4
+
+_2019-12-13_
+
+ * Add basic slf4j module
+ * Add `Logger.mapK`
+ * Add `Logger#append` helpers
+ * Upgrade to sbt-scalajs 0.6.31
+ * Upgrade to google-cloud-logging 1.99.0
+ * Upgrade to scala-collection-compat 2.1.3
+ * Upgrade to sbt 1.3.5
+
 ## 0.0.3
+
+_2019-10-25_
 
  * Simplify logger by removing state, and weaken `TracedFailure` accordingly
  * Upgrade to circe 0.12.3
-
-_2019-10-25_
 
 ## 0.0.2
 
