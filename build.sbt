@@ -1,7 +1,6 @@
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 val CatsEffectVersion = "2.0.0"
-val CatsEffectTestingVersion = "0.3.0"
 val CirceVersion = "0.12.3"
 val GoogleApiClientVersion = "1.25.1"
 val GoogleApiServicesSheetsVersion = "v4-rev581-1.25.0"
@@ -21,10 +20,9 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "io.circe" %% "circe-core" % CirceVersion ::
-        "org.typelevel" %% "cats-effect" % CatsEffectVersion ::
-        "com.codecommit" %% "cats-effect-testing-scalatest" % CatsEffectTestingVersion % "test" ::
-        "org.scalatest" %% "scalatest" % ScalatestVersion % "test" ::
+      "io.circe" %%% "circe-core" % CirceVersion ::
+        "org.typelevel" %%% "cats-effect" % CatsEffectVersion ::
+        "org.scalatest" %%% "scalatest" % ScalatestVersion % "test" ::
         Nil
   )
 
