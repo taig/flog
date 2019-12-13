@@ -1,6 +1,5 @@
-FROM        openjdk:8u191-jdk-alpine3.8
+FROM        adoptopenjdk/openjdk12:x86_64-alpine-jdk-12.0.2_10-slim
 
-RUN         apk update
 RUN         apk add --no-cache bash git nodejs
 
 # Install sbt
