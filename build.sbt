@@ -7,7 +7,7 @@ val GoogleApiClientVersion = "1.25.1"
 val GoogleApiServicesSheetsVersion = "v4-rev581-1.25.0"
 val GoogleCloudLoggingVersion = "1.98.0"
 val GoogleOauthClientJettyVersion = "1.25.0"
-val ScalaCollectionCompatVersion = "2.1.2"
+val ScalaCollectionCompatVersion = "2.1.3"
 val ScalatestVersion = "3.1.0"
 val Slf4jVersion = "1.7.29"
 
