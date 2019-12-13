@@ -1,4 +1,4 @@
-FROM        adoptopenjdk/openjdk12:x86_64-alpine-jdk-12.0.2_10-slim
+FROM        adoptopenjdk/openjdk12:alpine
 
 RUN         apk add --no-cache bash git nodejs
 
@@ -31,4 +31,5 @@ RUN         cd ./cache/ && sbt -v +compile
 # Clean cache
 RUN         rm -r ./cache/
 
-WORKDIR     /home/flog/
+ENTRYPOINT  /bin/bash
+WORKDIR     /root/flog/
