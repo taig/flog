@@ -3,9 +3,7 @@ FROM        adoptopenjdk/openjdk12:x86_64-alpine-jdk-12.0.2_10-slim
 RUN         apk add --no-cache bash git nodejs
 
 # Install sbt
-RUN         apk add --no-cache --virtual=build-dependencies
 RUN         wget -O /usr/local/bin/sbt https://git.io/sbt && chmod 0755 /usr/local/bin/sbt
-RUN         apk del build-dependencies
 
 # Cache sbt
 RUN         mkdir -p \
