@@ -1,8 +1,9 @@
 package io.taig.flog
 
+import java.util.UUID
+
 import cats.effect.Sync
 import cats.implicits._
-import io.taig.flog.internal.UUIDs
 
 /**
   * Provides an execution context with a `Logger` that carries a `UUID` tracing id
@@ -12,6 +13,7 @@ abstract class Tracer[F[_]] {
 }
 
 object Tracer {
+  def uuid[F[_]](implicit F: Sync[F]): F[UUID] = F.delay(UUID.randomUUID())
 
   /**
     * Create a `Tracer` that automatically logs an unhandled error and then
@@ -20,7 +22,7 @@ object Tracer {
   def reporting[F[_]: Sync](logger: Logger[F]): Tracer[F] =
     new Tracer[F] {
       override def run[A](f: Logger[F] => F[A]): F[A] =
-        UUIDs.random[F].flatMap { trace =>
+        uuid[F].flatMap { trace =>
           val tracer = logger.trace(trace)
           f(tracer).handleErrorWith { throwable =>
             tracer.error(throwable = throwable.some) *>
@@ -36,7 +38,7 @@ object Tracer {
   def adapting[F[_]: Sync](logger: Logger[F]): Tracer[F] =
     new Tracer[F] {
       override def run[A](f: Logger[F] => F[A]): F[A] =
-        UUIDs.random[F].flatMap { trace =>
+        uuid[F].flatMap { trace =>
           val tracer = logger.trace(trace)
           f(tracer).adaptErr {
             case throwable =>
