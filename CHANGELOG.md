@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.0.5
+
+_2019-12-21_
+
+ * Bring back support for native timestamps
+ * Improve CI integration
+
 ## 0.0.4
 
 _2019-12-13_
