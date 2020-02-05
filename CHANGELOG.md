@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.1.0
+
+_2020-02-05_
+
+ * Switch to zio/monix `FiberRef` for contextual logging (#2)
+
 ## 0.0.5
 
 _2019-12-21_
