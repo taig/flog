@@ -15,6 +15,9 @@ object monix {
 
           override def locally[B](value: A)(use: Task[B]): Task[B] =
             ref.bind(value)(use)
+
+          override def locallyF[B](value: Task[A])(use: Task[B]): Task[B] =
+            ref.bindL(value)(use)
         }
       }
   }

@@ -15,6 +15,9 @@ object zio {
 
           override def locally[B](value: A)(use: Task[B]): Task[B] =
             zio.locally(value)(use)
+
+          override def locallyF[B](value: Task[A])(use: Task[B]): Task[B] =
+            value.flatMap(zio.locally(_)(use))
         }
       }
   }

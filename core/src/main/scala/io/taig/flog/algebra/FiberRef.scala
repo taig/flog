@@ -6,4 +6,6 @@ abstract class FiberRef[F[_], A] {
   def set(value: A): F[Unit]
 
   def locally[B](value: A)(use: F[B]): F[B]
+
+  def locallyF[B](value: F[A])(use: F[B]): F[B]
 }
