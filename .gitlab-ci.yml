@@ -19,11 +19,17 @@ docker:
     - docker build --cache-from $CONTAINER_IMAGE:latest --tag $CONTAINER_IMAGE:latest --tag $CONTAINER_IMAGE:$CI_COMMIT_SHA .
     - docker push $CONTAINER_IMAGE
 
-test:
+format:
   stage: test
   image: $CONTAINER_IMAGE:$CI_COMMIT_SHA
   script:
-    - sbt -Dmode=strict test publishLocal
+    - sbt -Dmode=strict scalafmtCheckAll
+
+unit:
+  stage: test
+  image: $CONTAINER_IMAGE:$CI_COMMIT_SHA
+  script:
+    - sbt -Dmode=strict +test publishLocal
 
 artifacts:
   stage: deploy

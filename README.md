@@ -39,21 +39,30 @@ libraryDependencies ++=
 ## Usage
 
 ```scala
-import cats.effect.{ExitCode, IO, IOApp}
+import java.util.UUID
+
+import cats.effect.ExitCode
 import cats.implicits._
 import io.circe.JsonObject
+import io.circe.syntax._
+import io.taig.flog.algebra.{ContextualLogger, Logger}
+import io.taig.flog.data.Scope
+import io.taig.flog.interop.monix._
+import monix.eval._
 
 import scala.io.Source
-import io.circe.syntax._
 
-object Main extends IOApp {
-  def loadWebsite(url: String, logger: Logger[IO]): IO[String] =
+object Playground extends TaskApp {
+  def loadWebsite(url: String, logger: Logger[Task]): Task[String] =
     for {
       _ <- logger.info(
         Scope.Root / "request",
         message = url
       )
-      body <- IO(Source.fromURL(url).mkString)
+      body <- Task(Source.fromURL(url))
+        .bracket(source => Task(source.mkString))(
+          source => Task(source.close())
+        )
       _ <- logger.info(
         Scope.Root / "response",
         message = url,
@@ -61,50 +70,49 @@ object Main extends IOApp {
       )
     } yield body
 
-  override def run(args: List[String]): IO[ExitCode] =
-    WriterLogger.stdOut[IO]
-      // Prefix all log events with the "load" scope
-      .map(_.prefix(Scope.Root / "load"))
-      // Create a reporting Tracer that automatically logs failures
-      .map(Tracer.reporting)
-      .flatMap { tracer =>
-        tracer.run(logger => loadWebsite(url = "https://typelevel.org", logger)) *>
-        tracer.run(logger => loadWebsite(url = "foobar", logger))
-      }.attempt.as(ExitCode.Success)
+  def app(logger: Logger[Task]): Task[Unit] =
+    (loadWebsite(url = "https://typelevel.org", logger) *>
+      loadWebsite(url = "foobar", logger)).void
+      .onErrorHandleWith { throwable =>
+        logger.error(message = "Execution failed", throwable = throwable.some)
+      }
+
+  override def run(args: List[String]): Task[ExitCode] =
+    (for {
+      // Pick a simple std out logger ...
+      stdOutLogger <- Logger.stdOut[Task]
+      // ... and lift it into contextual mode (which is only possible with
+      // monix.eval.Task and ZIO)
+      contextualLogger <- ContextualLogger[Task](stdOutLogger)
+      uuid <- Task(UUID.randomUUID())
+      _ <- contextualLogger.locally(_.trace(uuid))(app(contextualLogger))
+    } yield ExitCode.Success)
+      .executeWithOptions(_.enableLocalContextPropagation)
 }
 ```
 
 ``` 
-[2019-09-20 10:15:48.919][info][load / request] https://typelevel.org
+[2020-02-05 18:57:13.504][info][request] https://typelevel.org
 {
-  "trace" : "1125b13f-69fc-4883-9f54-ca092a74455c"
+  "trace" : "95cf9ca5-9e10-4451-9d61-111f8850ca0a"
 }
-[2019-09-20 10:15:49.263][info][load / response] https://typelevel.org
+[2020-02-05 18:57:13.659][info][response] https://typelevel.org
 {
-  "trace" : "1125b13f-69fc-4883-9f54-ca092a74455c",
+  "trace" : "95cf9ca5-9e10-4451-9d61-111f8850ca0a",
   "body" : "<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"X-UA-Compatible\" co..."
 }
-[2019-09-20 10:15:49.264][info][load / request] foobar
+[2020-02-05 18:57:13.659][info][request] foobar
 {
-  "trace" : "64aae8ad-0bdf-4ce9-ba8e-9d4e99842e7d"
+  "trace" : "95cf9ca5-9e10-4451-9d61-111f8850ca0a"
 }
-[2019-09-20 10:15:49.265][failure][load] 
+[2020-02-05 18:57:13.661][error][/] Execution failed
 {
-  "trace" : "64aae8ad-0bdf-4ce9-ba8e-9d4e99842e7d"
+  "trace" : "95cf9ca5-9e10-4451-9d61-111f8850ca0a"
 }
 java.net.MalformedURLException: no protocol: foobar
-	at java.net.URL.<init>(URL.java:593)
-	at java.net.URL.<init>(URL.java:490)
-	at java.net.URL.<init>(URL.java:439)
+	at java.net.URL.<init>(URL.java:610)
+	at java.net.URL.<init>(URL.java:507)
+	at java.net.URL.<init>(URL.java:456)
 	at scala.io.Source$.fromURL(Source.scala:132)
-	at io.taig.flog.Main$.$anonfun$loadWebsite$4(Main.scala:17)
-	at cats.effect.internals.IORunLoop$.cats$effect$internals$IORunLoop$$loop(IORunLoop.scala:87)
-	at cats.effect.internals.IORunLoop$RestartCallback.signal(IORunLoop.scala:355)
-	at cats.effect.internals.IORunLoop$RestartCallback.apply(IORunLoop.scala:376)
-	at cats.effect.internals.IORunLoop$RestartCallback.apply(IORunLoop.scala:316)
-	at cats.effect.internals.IOShift$Tick.run(IOShift.scala:36)
-	at cats.effect.internals.PoolUtils$$anon$2$$anon$3.run(PoolUtils.scala:51)
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
-	at java.lang.Thread.run(Thread.java:748)
+	[...]
 ```
