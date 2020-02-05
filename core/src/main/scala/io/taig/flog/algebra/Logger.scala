@@ -12,7 +12,7 @@ import io.taig.flog.util.Printer
 
 import scala.concurrent.duration.MILLISECONDS
 
-abstract class Logger[F[_]] { self =>
+abstract class Logger[F[_]] {
   def log(event: Long => Event): F[Unit]
 
   /** Write the `Event` after adding `prefix` and `presets` to the `Logger`'s
@@ -20,6 +20,8 @@ abstract class Logger[F[_]] { self =>
     */
   final def apply(event: Long => Event): F[Unit] =
     log(timestamp => event(timestamp))
+
+  final def mapK[G[_]](fk: F ~> G): Logger[G] = event => fk(log(event))
 
   /** Write the `Event` after adding `prefix`, `presets` and the current
     * timestamp to the `Logger`'s effect

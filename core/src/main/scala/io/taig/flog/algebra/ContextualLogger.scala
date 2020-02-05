@@ -2,9 +2,10 @@ package io.taig.flog.algebra
 
 import java.util.UUID
 
-import cats.FlatMap
+import cats.data.Kleisli
 import cats.effect.Sync
 import cats.implicits._
+import cats.{FlatMap, Monad}
 import io.circe.JsonObject
 import io.circe.syntax._
 import io.taig.flog.HasFiberRef
@@ -46,5 +47,20 @@ object ContextualLogger {
         override def locally[A](f: Context => Context)(run: F[A]): F[A] =
           context.flatMap(context => ref.locally(f(context))(run))
       }
+    }
+
+  def kleisli[F[_]: Monad](
+      logger: Logger[F]
+  ): ContextualLogger[Kleisli[F, Context, *]] =
+    new ContextualLogger[Kleisli[F, Context, *]](
+      logger.mapK(Kleisli.liftK[F, Context])
+    ) {
+      override def context: Kleisli[F, Context, Context] =
+        Kleisli.ask[F, Context]
+
+      override def locally[A](
+          f: Context => Context
+      )(run: Kleisli[F, Context, A]): Kleisli[F, Context, A] =
+        run.local(f)
     }
 }
