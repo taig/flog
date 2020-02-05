@@ -29,6 +29,7 @@ lazy val flog = project
 
 lazy val core = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
+  .in(file("modules/core"))
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
@@ -40,6 +41,7 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
 
 lazy val zio = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
+  .in(file("modules/interop-zio"))
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
@@ -51,6 +53,7 @@ lazy val zio = crossProject(JVMPlatform, JSPlatform)
 
 lazy val monix = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
+  .in(file("modules/interop-monix"))
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
@@ -61,6 +64,7 @@ lazy val monix = crossProject(JVMPlatform, JSPlatform)
   .dependsOn(core)
 
 lazy val slf4j = project
+  .in(file("modules/slf4j"))
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
@@ -70,6 +74,7 @@ lazy val slf4j = project
   .dependsOn(core.jvm)
 
 lazy val sheets = project
+  .in(file("modules/sheets"))
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
@@ -82,6 +87,7 @@ lazy val sheets = project
   .dependsOn(core.jvm)
 
 lazy val stackdriver = project
+  .in(file("modules/stackdriver"))
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
