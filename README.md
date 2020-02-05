@@ -9,32 +9,22 @@
 ```scala
 libraryDependencies ++=
   "io.taig" %% "flog-core" % "x.x.x" ::
+  "io.taig" %% "flog-interop-zio" % "x.x.x" ::
+  "io.taig" %% "flog-interop-monix" % "x.x.x" ::
   "io.taig" %% "flog-sheets" % "x.x.x" ::
   "io.taig" %% "flog-stackdriver" % "x.x.x" ::
   Nil
 ```
 
-The `core` module is also available for Scala.js.
+The `core` and `interop` modules are also available for Scala.js.
 
 ```
 libraryDependencies ++=
   "io.taig" %%% "flog-core" % "x.x.x" ::
+  "io.taig" %%% "flog-interop-zio" % "x.x.x" ::
+  "io.taig" %%% "flog-interop-monix" % "x.x.x" ::
   Nil
 ```
-
-## Available loggers
-
-- `WriterLogger`  
-  Print events to a `Writer` (e.g. std out)
-- `BatchLogger`  
-  Collect events for a given interval before forwarding to another `Logger`
-- `BroadcastLogger`  
-  Forward events to multiple `Loggers`
-- `SheetsLogger`  
-  Send events to _Google Sheets_
-- `StackdriverLogger`  
-  Send events to _Stackdriver_ (on _Google Cloud Platform_)
-- `NoopLogger`
 
 ## Usage
 
