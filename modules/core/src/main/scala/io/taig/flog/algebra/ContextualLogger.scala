@@ -10,7 +10,7 @@ import io.taig.flog.util.Circe
 
 abstract class ContextualLogger[F[_]: FlatMap](logger: Logger[F])
     extends Logger[F] {
-  override final def log(event: Long => Event): F[Unit] =
+  final override def log(event: Long => Event): F[Unit] =
     context.flatMap(log(_, event))
 
   final def log(context: Context, event: Long => Event): F[Unit] =

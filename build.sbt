@@ -1,15 +1,15 @@
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
-val CatsEffectVersion = "2.0.0"
+val CatsEffectVersion = "2.1.0"
 val CirceVersion = "0.12.3"
 val GoogleApiClientVersion = "1.25.1"
 val GoogleApiServicesSheetsVersion = "v4-rev581-1.25.0"
-val GoogleCloudLoggingVersion = "1.99.0"
+val GoogleCloudLoggingVersion = "1.100.0"
 val GoogleOauthClientJettyVersion = "1.25.0"
 val MonixVersion = "3.1.0"
 val ScalaCollectionCompatVersion = "2.1.3"
 val ScalatestVersion = "3.1.0"
-val Slf4jVersion = "1.7.29"
+val Slf4jVersion = "1.7.30"
 val ZioVersion = "1.0.0-RC17"
 
 lazy val flog = project
