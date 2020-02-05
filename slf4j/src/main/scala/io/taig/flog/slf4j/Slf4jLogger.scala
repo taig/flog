@@ -2,15 +2,13 @@ package io.taig.flog.slf4j
 
 import cats.effect.Sync
 import cats.implicits._
-import io.circe.JsonObject
 import io.taig.flog.algebra.Logger
-import io.taig.flog.data.{Event, Scope}
-import io.taig.flog.{Event, Level}
+import io.taig.flog.data.{Event, Level, Scope}
 import org.slf4j.{Logger => JLogger, LoggerFactory => JLoggerFactory}
 
 object Slf4jLogger {
   def apply[F[_]](implicit F: Sync[F]): Logger[F] =
-    new Logger[F](Scope.Root, JsonObject.empty) {
+    new Logger[F] {
       override def log(f: Long => Event): F[Unit] = {
         // slf4j ignores our timestamp anyway and provides its own,
         // so we use an arbitrary value here

@@ -9,7 +9,7 @@ import cats.{FlatMap, Monad}
 import io.circe.JsonObject
 import io.circe.syntax._
 import io.taig.flog.HasFiberRef
-import io.taig.flog.data.{Context, Event}
+import io.taig.flog.data.{Context, Event, Scope}
 import io.taig.flog.util.Circe
 
 abstract class ContextualLogger[F[_]: FlatMap](logger: Logger[F])
@@ -29,7 +29,16 @@ abstract class ContextualLogger[F[_]: FlatMap](logger: Logger[F])
 
   def locally[A](f: Context => Context)(run: F[A]): F[A]
 
-  final def traced[A](run: F[A])(implicit F: Sync[F]): F[A] =
+  final def prefix[A](f: Scope => Scope)(run: F[A]): F[A] =
+    locally(context => context.copy(prefix = f(context.prefix)))(run)
+
+  final def payload[A](f: JsonObject => JsonObject)(run: F[A]): F[A] =
+    locally(context => context.copy(payload = f(context.payload)))(run)
+
+  final def append[A](scope: Scope)(run: F[A]): F[A] =
+    prefix(_ ++ scope)(run)
+
+  final def trace[A](run: F[A])(implicit F: Sync[F]): F[A] =
     for {
       uuid <- F.delay(UUID.randomUUID())
       result <- locally(_.combine(JsonObject("trace" := uuid)))(run)
