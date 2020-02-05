@@ -5,13 +5,15 @@ import cats.effect.{ContextShift, IO, Timer}
 import cats.implicits._
 import io.circe.JsonObject
 import io.circe.syntax._
+import io.taig.flog.algebra.Logger
+import io.taig.flog.data.{Event, Scope}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
 
 import scala.concurrent.ExecutionContext
 
 final class LoggerTest extends AsyncWordSpec with Matchers {
-  val event: Long => Event = Event(
+  val event: Long => Event = data.Event(
     _,
     Level.Info,
     Scope.Root / "foobar",

@@ -5,9 +5,10 @@ import java.io.InputStream
 import cats.effect.{Clock, Sync}
 import cats.implicits._
 import io.circe.Json
-import io.taig.flog.internal.Printer
+import io.taig.flog.util.Printer
 import io.taig.flog.sheets.internal.{Circe, Google}
-import io.taig.flog.{Event, Logger}
+import io.taig.flog.algebra.Logger
+import io.taig.flog.data.Event
 
 object SheetsLogger {
   def apply[F[_]: Sync: Clock](

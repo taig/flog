@@ -3,7 +3,9 @@ package io.taig.flog.slf4j
 import cats.effect.Sync
 import cats.implicits._
 import io.circe.JsonObject
-import io.taig.flog.{Event, Level, Logger, Scope}
+import io.taig.flog.algebra.Logger
+import io.taig.flog.data.{Event, Scope}
+import io.taig.flog.{Event, Level}
 import org.slf4j.{Logger => JLogger, LoggerFactory => JLoggerFactory}
 
 object Slf4jLogger {

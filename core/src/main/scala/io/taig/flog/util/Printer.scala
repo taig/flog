@@ -1,12 +1,12 @@
-package io.taig.flog.internal
+package io.taig.flog.util
 
 import java.io.{PrintWriter, StringWriter}
 import java.text.SimpleDateFormat
 import java.util.TimeZone
-import cats.implicits._
 
+import cats.implicits._
 import io.circe.Json
-import io.taig.flog.Event
+import io.taig.flog.data.Event
 
 object Printer {
   val throwable: Throwable => String = { throwable =>

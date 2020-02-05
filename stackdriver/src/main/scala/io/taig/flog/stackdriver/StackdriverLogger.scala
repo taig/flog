@@ -7,9 +7,11 @@ import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.{Option => _, _}
 import io.circe.JsonObject
 import io.circe.syntax._
-import io.taig.flog.internal.Printer
+import io.taig.flog.algebra.Logger
+import io.taig.flog.util.Printer
 import io.taig.flog.stackdriver.interal.Circe
-import io.taig.flog.{Event, Level, Logger}
+import io.taig.flog.Event
+import io.taig.flog.data.Event
 
 import scala.jdk.CollectionConverters._
 

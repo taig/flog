@@ -1,5 +1,6 @@
 package io.taig.flog
 
+import io.taig.flog.data.Scope
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 

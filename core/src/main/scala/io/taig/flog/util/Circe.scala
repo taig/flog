@@ -1,4 +1,4 @@
-package io.taig.flog.internal
+package io.taig.flog.util
 
 import io.circe.JsonObject
 
