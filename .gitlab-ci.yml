@@ -23,7 +23,7 @@ test:
   stage: test
   image: $CONTAINER_IMAGE:$CI_COMMIT_SHA
   script:
-    - sbt -Dmode=strict test publishLocal
+    - sbt -Dmode=strict +test publishLocal
 
 artifacts:
   stage: deploy
