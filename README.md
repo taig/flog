@@ -29,13 +29,14 @@ libraryDependencies ++=
 ## Usage
 
 ```scala
+
 import java.util.UUID
 
 import cats.effect.ExitCode
 import cats.implicits._
 import io.circe.JsonObject
 import io.circe.syntax._
-import io.taig.flog.algebra.{ContextualLogger, Logger}
+import io.taig.flog.algebra.Logger
 import io.taig.flog.data.Scope
 import io.taig.flog.interop.monix._
 import monix.eval._
@@ -50,8 +51,7 @@ object Playground extends TaskApp {
         message = url
       )
       body <- Task(Source.fromURL(url))
-        .bracket(source => Task(source.mkString))(
-          source => Task(source.close())
+        .bracket(source => Task(source.mkString))(source => Task(source.close())
         )
       _ <- logger.info(
         Scope.Root / "response",
@@ -73,11 +73,10 @@ object Playground extends TaskApp {
       stdOutLogger <- Logger.stdOut[Task]
       // ... and lift it into contextual mode (which is only possible with
       // monix.eval.Task and ZIO)
-      contextualLogger <- ContextualLogger[Task](stdOutLogger)
+      contextualLogger <- contextualMonixLogger(stdOutLogger)
       uuid <- Task(UUID.randomUUID())
       _ <- contextualLogger.locally(_.trace(uuid))(app(contextualLogger))
-    } yield ExitCode.Success)
-      .executeWithOptions(_.enableLocalContextPropagation)
+    } yield ExitCode.Success).executeWithOptions(_.enableLocalContextPropagation)
 }
 ```
 

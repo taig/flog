@@ -1,24 +1,29 @@
 package io.taig.flog.interop
 
 import _root_.monix.eval.{Task, TaskLocal}
-import io.taig.flog.HasFiberRef
-import io.taig.flog.algebra.FiberRef
+import cats.Applicative
+import cats.mtl.ApplicativeLocal
+import io.taig.flog.algebra.{ContextualLogger, Logger}
+import io.taig.flog.data.Context
 
 object monix {
-  implicit val hasFiberRefMonix: HasFiberRef[Task] = new HasFiberRef[Task] {
-    override def make[A](value: A): Task[FiberRef[Task, A]] =
-      TaskLocal(value).map { ref =>
-        new FiberRef[Task, A] {
-          override val get: Task[A] = ref.read
+  def applicativeLocal[A](ref: TaskLocal[A]): ApplicativeLocal[Task, A] =
+    new ApplicativeLocal[Task, A] {
+      override def local[B](f: A => A)(fa: Task[B]): Task[B] =
+        ref.bindL(ask map f)(fa)
 
-          override def set(value: A): Task[Unit] = ref.write(value)
+      override def scope[B](e: A)(fa: Task[B]): Task[B] = ref.bind(e)(fa)
 
-          override def locally[B](value: A)(use: Task[B]): Task[B] =
-            ref.bind(value)(use)
+      override val applicative: Applicative[Task] = Applicative[Task]
 
-          override def locallyF[B](value: Task[A])(use: Task[B]): Task[B] =
-            ref.bindL(value)(use)
-        }
-      }
-  }
+      override val ask: Task[A] = ref.read
+
+      override def reader[B](f: A => B): Task[B] = ask.map(f)
+    }
+
+  def contextualMonixLogger(logger: Logger[Task]): Task[ContextualLogger[Task]] =
+    TaskLocal(Context.Empty).map { ref =>
+      implicit val F: ApplicativeLocal[Task, Context] = applicativeLocal(ref)
+      ContextualLogger(logger)
+    }
 }

@@ -1,6 +1,7 @@
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 val CatsEffectVersion = "2.1.0"
+val CatsMtlVersion = "0.7.0"
 val CirceVersion = "0.12.3"
 val GoogleApiClientVersion = "1.25.1"
 val GoogleApiServicesSheetsVersion = "v4-rev581-1.25.0"
@@ -11,6 +12,7 @@ val ScalaCollectionCompatVersion = "2.1.3"
 val ScalatestVersion = "3.1.0"
 val Slf4jVersion = "1.7.30"
 val ZioVersion = "1.0.0-RC17"
+val ZioInteropCatsVersion = "2.0.0.0-RC10"
 
 lazy val flog = project
   .in(file("."))
@@ -33,7 +35,8 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "io.circe" %%% "circe-core" % CirceVersion ::
+      "org.typelevel" %% "cats-mtl-core" % CatsMtlVersion ::
+        "io.circe" %%% "circe-core" % CirceVersion ::
         "org.typelevel" %%% "cats-effect" % CatsEffectVersion ::
         "org.scalatest" %%% "scalatest" % ScalatestVersion % "test" ::
         Nil
@@ -45,7 +48,8 @@ lazy val zio = crossProject(JVMPlatform, JSPlatform)
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "dev.zio" %%% "zio" % ZioVersion ::
+      "dev.zio" %% "zio-interop-cats" % ZioInteropCatsVersion ::
+        "dev.zio" %%% "zio" % ZioVersion ::
         Nil,
     name := "interop-zio"
   )

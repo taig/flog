@@ -1,24 +1,30 @@
 package io.taig.flog.interop
 
-import _root_.zio.{Task, FiberRef => ZioFiberRef}
-import io.taig.flog.HasFiberRef
-import io.taig.flog.algebra.FiberRef
+import _root_.zio.{FiberRef, Task}
+import _root_.zio.interop.catz._
+import cats.Applicative
+import cats.mtl.ApplicativeLocal
+import io.taig.flog.algebra.{ContextualLogger, Logger}
+import io.taig.flog.data.Context
 
 object zio {
-  implicit val hasFiberRefZio: HasFiberRef[Task] = new HasFiberRef[Task] {
-    override def make[A](value: A): Task[FiberRef[Task, A]] =
-      ZioFiberRef.make(value).map { zio =>
-        new FiberRef[Task, A] {
-          override val get: Task[A] = zio.get
+  def applicativeLocal[A](ref: FiberRef[A]): ApplicativeLocal[Task, A] =
+    new ApplicativeLocal[Task, A] {
+      override def local[B](f: A => A)(fa: Task[B]): Task[B] =
+        ref.get.flatMap(a => ref.locally(f(a))(fa))
 
-          override def set(value: A): Task[Unit] = zio.set(value)
+      override def scope[B](e: A)(fa: Task[B]): Task[B] = ref.locally(e)(fa)
 
-          override def locally[B](value: A)(use: Task[B]): Task[B] =
-            zio.locally(value)(use)
+      override val applicative: Applicative[Task] = Applicative[Task]
 
-          override def locallyF[B](value: Task[A])(use: Task[B]): Task[B] =
-            value.flatMap(zio.locally(_)(use))
-        }
-      }
-  }
+      override val ask: Task[A] = ref.get
+
+      override def reader[B](f: A => B): Task[B] = ask.map(f)
+    }
+
+  def contextualZioLogger(logger: Logger[Task]): Task[ContextualLogger[Task]] =
+    FiberRef.make(Context.Empty).map { ref =>
+      implicit val F: ApplicativeLocal[Task, Context] = applicativeLocal(ref)
+      ContextualLogger(logger)
+    }
 }
