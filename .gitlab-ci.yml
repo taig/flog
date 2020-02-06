@@ -29,7 +29,13 @@ unit:
   stage: test
   image: $CONTAINER_IMAGE:$CI_COMMIT_SHA
   script:
-    - sbt -Dmode=strict +test publishLocal
+    - sbt +test
+
+warnings:
+  stage: test
+  image: $CONTAINER_IMAGE:$CI_COMMIT_SHA
+  script:
+    - sbt -Dmode=strict +publishLocal
 
 artifacts:
   stage: deploy
