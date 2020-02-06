@@ -1,4 +1,10 @@
-# CHANGELOG
+# Changelog
+
+## 0.2.0
+
+_2020-02-06_
+
+ * Switch from custom `FiberRef` with `HasFiberRef` typeclass to `cats-mtl.ApplicativeLocal`
 
 ## 0.1.0
 
