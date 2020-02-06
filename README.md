@@ -18,7 +18,7 @@ libraryDependencies ++=
 
 The `core` and `interop` modules are also available for Scala.js.
 
-```
+```scala
 libraryDependencies ++=
   "io.taig" %%% "flog-core" % "x.x.x" ::
   "io.taig" %%% "flog-interop-zio" % "x.x.x" ::
@@ -29,7 +29,6 @@ libraryDependencies ++=
 ## Usage
 
 ```scala
-
 import java.util.UUID
 
 import cats.effect.ExitCode
