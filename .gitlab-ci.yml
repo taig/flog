@@ -23,7 +23,7 @@ format:
   stage: test
   image: $CONTAINER_IMAGE:$CI_COMMIT_SHA
   script:
-    - sbt -Dmode=strict scalafmtCheckAll
+    - sbt scalafmtCheckAll
 
 unit:
   stage: test
