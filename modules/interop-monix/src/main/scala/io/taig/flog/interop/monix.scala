@@ -21,7 +21,9 @@ object monix {
       override def reader[B](f: A => B): Task[B] = ask.map(f)
     }
 
-  def contextualMonixLogger(logger: Logger[Task]): Task[ContextualLogger[Task]] =
+  def contextualMonixLogger(
+      logger: Logger[Task]
+  ): Task[ContextualLogger[Task]] =
     TaskLocal(Context.Empty).map { ref =>
       implicit val F: ApplicativeLocal[Task, Context] = applicativeLocal(ref)
       ContextualLogger(logger)
