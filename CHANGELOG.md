@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1
+
+_2020-02-08_
+
+ * Upgrade to cats-effect 2.1.1
+ * Upgrade to circe 0.13.0
+
 ## 0.2.0
 
 _2020-02-06_
