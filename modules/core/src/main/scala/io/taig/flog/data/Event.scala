@@ -23,7 +23,7 @@ object Event {
         "scope" := event.scope.show,
         "message" := Some(event.message).filter(_.nonEmpty),
         "payload" := Some(event.payload).filter(_.nonEmpty),
-        "throwable" := event.throwable.map(Printer.throwable)
+        "stacktrace" := event.throwable.map(Printer.throwable)
       )
     }
 }

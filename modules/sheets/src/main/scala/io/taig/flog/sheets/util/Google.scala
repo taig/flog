@@ -1,16 +1,19 @@
-package io.taig.flog.sheets.internal
+package io.taig.flog.sheets.util
 
 import java.io.{FileNotFoundException, InputStream}
 import java.util.Collections
 
 import cats.effect.{Resource, Sync}
 import cats.implicits._
-import com.google.api.client.googleapis.auth.oauth2._
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
-import com.google.api.services.sheets.v4._
-import com.google.api.services.sheets.v4.model._
+import com.google.api.services.sheets.v4.model.{
+  AppendValuesResponse,
+  ValueRange
+}
+import com.google.api.services.sheets.v4.{Sheets, SheetsScopes}
 
 import scala.jdk.CollectionConverters._
 

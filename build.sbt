@@ -7,6 +7,7 @@ val GoogleApiClientVersion = "1.25.1"
 val GoogleApiServicesSheetsVersion = "v4-rev581-1.25.0"
 val GoogleCloudLoggingVersion = "1.100.0"
 val GoogleOauthClientJettyVersion = "1.25.0"
+val Fs2Version = "2.2.2"
 val MonixVersion = "3.1.0"
 val ScalaCollectionCompatVersion = "2.1.3"
 val ScalatestVersion = "3.1.0"
@@ -26,7 +27,8 @@ lazy val flog = project
     zio.js,
     slf4j,
     sheets,
-    stackdriver
+    stackdriver,
+    logstash
   )
 
 lazy val core = crossProject(JVMPlatform, JSPlatform)
@@ -35,9 +37,10 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "org.typelevel" %% "cats-mtl-core" % CatsMtlVersion ::
+      "co.fs2" %%% "fs2-core" % Fs2Version ::
         "io.circe" %%% "circe-core" % CirceVersion ::
         "org.typelevel" %%% "cats-effect" % CatsEffectVersion ::
+        "org.typelevel" %% "cats-mtl-core" % CatsMtlVersion ::
         "org.scalatest" %%% "scalatest" % ScalatestVersion % "test" ::
         Nil
   )
@@ -99,4 +102,9 @@ lazy val stackdriver = project
         "org.scala-lang.modules" %% "scala-collection-compat" % ScalaCollectionCompatVersion ::
         Nil
   )
+  .dependsOn(core.jvm)
+
+lazy val logstash = project
+  .in(file("modules/logstash"))
+  .settings(sonatypePublishSettings)
   .dependsOn(core.jvm)

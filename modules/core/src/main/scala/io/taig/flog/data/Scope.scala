@@ -6,6 +6,8 @@ import cats.implicits._
 import scala.reflect.{classTag, ClassTag}
 
 final case class Scope(segments: List[String]) extends AnyVal {
+  def isEmpty: Boolean = segments.isEmpty
+
   def /(segment: String): Scope =
     if (segment.isEmpty) this else Scope(segments :+ segment)
 
