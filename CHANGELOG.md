@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0
+
+_2020-02-13_
+
+ * Add `logstash` module
+ * Add `fs2-core` dependency to `core` module
+ * Improve resource handling of `Logger` builders
+ * Add `Logger.queued` builder that handles events asynchronously and guarantees thread safety
+
 ## 0.2.1
 
 _2020-02-08_
