@@ -90,6 +90,9 @@ object Logger {
   )(implicit clock: Clock[F]): Logger[F] =
     raw[F](clock.realTime(TimeUnit.MILLISECONDS), write)
 
+  def noTimestamp[F[_]](log: Event => F[Unit]): Logger[F] =
+    event => log(event(-1))
+
   def output[F[_]: Clock](
       target: OutputStream,
       buffer: Int,
