@@ -104,3 +104,24 @@ java.net.MalformedURLException: no protocol: foobar
 	at scala.io.Source$.fromURL(Source.scala:132)
 	[...]
 ```
+
+## Logstash
+
+Basic configuration to receive message from the `LogstashLogger`
+
+```
+filter {
+  json {
+	  source => "message"
+	}
+
+	date {
+		match => [ "timestamp", "UNIX_MS" ]
+		target => "@timestamp"
+	}
+
+	mutate {
+    remove_field => [ "timestamp" ]
+  }
+}
+```
