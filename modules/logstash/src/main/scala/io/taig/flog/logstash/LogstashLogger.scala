@@ -1,15 +1,15 @@
 package io.taig.flog.logstash
 
-import io.taig.flog.algebra.Logger
-import io.taig.flog.data.{Event, Scope}
 import java.io.{BufferedOutputStream, DataOutputStream}
 import java.net.Socket
 import java.util.concurrent.TimeUnit
 
 import cats.effect._
 import cats.implicits._
-import io.circe.{JsonObject, Printer}
+import io.circe.Printer
 import io.circe.syntax._
+import io.taig.flog.algebra.Logger
+import io.taig.flog.data.Event
 
 final class LogstashLogger[F[_]: ContextShift](
     channel: DataOutputStream,
@@ -49,28 +49,4 @@ object LogstashLogger {
         new LogstashLogger[F](channel, blocker)
       }
   }
-}
-
-object App extends IOApp {
-  import scala.concurrent.duration._
-  override def run(args: List[String]): IO[ExitCode] =
-    (for {
-      blocker <- Blocker[IO]
-      logger <- LogstashLogger[IO]("localhost", 5000, blocker).flatMap(
-        Logger.queued[IO](_)
-      )
-    } yield logger).use { logger =>
-      logger.info(
-        scope = Scope.Root / "foo" / "bar",
-        message = "hello world",
-        payload = JsonObject(
-          "yolo" := "swag",
-          "foo" := JsonObject(
-            "bar" := 42
-          )
-        ),
-        throwable = Some(new RuntimeException("This did not go well"))
-      ) *>
-        IO.sleep(3.seconds).as(ExitCode.Success)
-    }
 }
