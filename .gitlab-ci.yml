@@ -12,7 +12,7 @@ docker:
   stage: docker
   image: docker
   services:
-    - docker:dind
+    - docker:19.03.5-dind
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CONTAINER_REGISTRY
     - docker pull $CONTAINER_IMAGE:latest || true
