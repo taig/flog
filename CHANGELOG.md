@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.1
+
+_2020-02-28_
+
+ * Add `ContextualLogger.noop`
+ * Add `Logger.noTimestamp` and simplify `Slf4jLogger`
+ * Document logstash config
+ * Upgrade to scalatest 3.1.1
+
 ## 0.3.0
 
 _2020-02-13_
