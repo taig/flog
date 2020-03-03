@@ -14,6 +14,10 @@ import org.http4s.client.Client
 import org.http4s._
 
 object LoggingClient {
+  val RequestScope = Scope.Root / "client" / "request"
+
+  val ResponseScope = Scope.Root / "client" / "response"
+
   def apply[F[_]: Concurrent](
       client: Client[F],
       logger: Logger[F],
@@ -94,31 +98,39 @@ object LoggingClient {
     } else none[Json].pure[F]
 
     message match {
-      case Request(method, uri, _, headers, _, _) =>
+      case request: Request[F] =>
         body.flatMap { body =>
-          val payload = JsonObject(
-            "request" := JsonObject(
-              "method" := method.renderString,
-              "uri" := uri.renderString,
-              "headers" := headers.toList.map(_.renderString),
-              "body" := body
-            )
-          )
-
-          logger.info(Scope.Root / "client" / "request", payload = payload)
+          logger.info(RequestScope, payload = encode(request, body))
         }
-      case Response(status, _, headers, _, _) =>
+      case response: Response[F] =>
         body.flatMap { body =>
-          val payload = JsonObject(
-            "response" := JsonObject(
-              "status" := status.renderString,
-              "headers" := headers.toList.map(_.renderString),
-              "body" := body
-            )
-          )
-
-          logger.info(Scope.Root / "client" / "response", payload = payload)
+          logger.info(ResponseScope, payload = encode(response, body))
         }
     }
   }
+
+  private def encode[F[_]](
+      request: Request[F],
+      body: Option[Json]
+  ): JsonObject =
+    JsonObject(
+      "request" := JsonObject(
+        "method" := request.method.renderString,
+        "uri" := request.uri.renderString,
+        "headers" := request.headers.toList.map(_.renderString),
+        "body" := body
+      )
+    )
+
+  private def encode[F[_]](
+      response: Response[F],
+      body: Option[Json]
+  ): JsonObject =
+    JsonObject(
+      "response" := JsonObject(
+        "status" := response.status.renderString,
+        "headers" := response.headers.toList.map(_.renderString),
+        "body" := body
+      )
+    )
 }

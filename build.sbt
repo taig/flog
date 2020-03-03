@@ -30,7 +30,8 @@ lazy val flog = project
     sheets,
     stackdriver,
     logstash,
-    http4sClient
+    http4sClient,
+    http4sServer
   )
 
 lazy val core = crossProject(JVMPlatform, JSPlatform)
@@ -118,6 +119,16 @@ lazy val http4sClient = project
     libraryDependencies ++=
       "io.circe" %%% "circe-parser" % CirceVersion ::
         "org.http4s" %% "http4s-blaze-client" % Http4sVersion ::
+        Nil
+  )
+  .dependsOn(core.jvm)
+
+lazy val http4sServer = project
+  .in(file("modules/http4s-server"))
+  .settings(sonatypePublishSettings)
+  .settings(
+    libraryDependencies ++=
+      "org.http4s" %% "http4s-blaze-server" % Http4sVersion ::
         Nil
   )
   .dependsOn(core.jvm)
