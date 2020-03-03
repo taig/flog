@@ -7,6 +7,7 @@ val GoogleApiClientVersion = "1.25.1"
 val GoogleApiServicesSheetsVersion = "v4-rev581-1.25.0"
 val GoogleCloudLoggingVersion = "1.100.0"
 val GoogleOauthClientJettyVersion = "1.25.0"
+val Http4sVersion = "0.21.1"
 val Fs2Version = "2.2.2"
 val MonixVersion = "3.1.0"
 val ScalaCollectionCompatVersion = "2.1.4"
@@ -28,7 +29,8 @@ lazy val flog = project
     slf4j,
     sheets,
     stackdriver,
-    logstash
+    logstash,
+    http4sClient
   )
 
 lazy val core = crossProject(JVMPlatform, JSPlatform)
@@ -107,4 +109,15 @@ lazy val stackdriver = project
 lazy val logstash = project
   .in(file("modules/logstash"))
   .settings(sonatypePublishSettings)
+  .dependsOn(core.jvm)
+
+lazy val http4sClient = project
+  .in(file("modules/http4s-client"))
+  .settings(sonatypePublishSettings)
+  .settings(
+    libraryDependencies ++=
+      "io.circe" %%% "circe-parser" % CirceVersion ::
+        "org.http4s" %% "http4s-blaze-client" % Http4sVersion ::
+        Nil
+  )
   .dependsOn(core.jvm)
