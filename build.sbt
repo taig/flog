@@ -1,6 +1,6 @@
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
-val CatsEffectVersion = "2.1.1"
+val CatsEffectVersion = "2.1.2"
 val CatsMtlVersion = "0.7.0"
 val CirceVersion = "0.13.0"
 val GoogleApiClientVersion = "1.25.1"
@@ -119,7 +119,8 @@ lazy val http4sClient = project
     libraryDependencies ++=
       "io.circe" %%% "circe-parser" % CirceVersion ::
         "org.http4s" %% "http4s-blaze-client" % Http4sVersion ::
-        Nil
+        Nil,
+    name := "http4s-client"
   )
   .dependsOn(core.jvm)
 
@@ -129,6 +130,7 @@ lazy val http4sServer = project
   .settings(
     libraryDependencies ++=
       "org.http4s" %% "http4s-blaze-server" % Http4sVersion ::
-        Nil
+        Nil,
+    name := "http4s-server"
   )
   .dependsOn(core.jvm)
