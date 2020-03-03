@@ -43,7 +43,7 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
       "co.fs2" %%% "fs2-core" % Fs2Version ::
         "io.circe" %%% "circe-core" % CirceVersion ::
         "org.typelevel" %%% "cats-effect" % CatsEffectVersion ::
-        "org.typelevel" %% "cats-mtl-core" % CatsMtlVersion ::
+        "org.typelevel" %%% "cats-mtl-core" % CatsMtlVersion ::
         "org.scalatest" %%% "scalatest" % ScalatestVersion % "test" ::
         Nil
   )
@@ -54,7 +54,7 @@ lazy val zio = crossProject(JVMPlatform, JSPlatform)
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "dev.zio" %% "zio-interop-cats" % ZioInteropCatsVersion ::
+      "dev.zio" %%% "zio-interop-cats" % ZioInteropCatsVersion ::
         "dev.zio" %%% "zio" % ZioVersion ::
         Nil,
     name := "interop-zio"
