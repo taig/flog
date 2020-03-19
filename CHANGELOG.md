@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.2
+
+_2020-03-19_
+
+ * Fix erroneous libraryDependencies not loading scalajs
+ * Add `http4s-server` module
+ * Add `http4s-client` module
+ * Upgrade to cats-mtl 0.7.1
+ * Upgrade to zio-interop-cats 2.0.0.0-RC12
+ * Upgrade to zio 1.0.0-RC18-2
+ * Upgrade to cats-effect 2.1.2
+
 ## 0.3.1
 
 _2020-02-28_
