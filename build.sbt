@@ -14,7 +14,7 @@ val ScalaCollectionCompatVersion = "2.1.4"
 val ScalatestVersion = "3.1.1"
 val Slf4jVersion = "1.7.30"
 val ZioVersion = "1.0.0-RC18-2"
-val ZioInteropCatsVersion = "2.0.0.0-RC10"
+val ZioInteropCatsVersion = "2.0.0.0-RC12"
 
 lazy val flog = project
   .in(file("."))
