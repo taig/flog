@@ -24,8 +24,8 @@ abstract class Logger[F[_]] {
       payload: => JsonObject = JsonObject.empty,
       throwable: Option[Throwable] = None
   ): F[Unit] = log { timestamp =>
-      List(Event(timestamp, level, scope, message, payload, throwable))
-    }
+    List(Event(timestamp, level, scope, message, payload, throwable))
+  }
 
   final def debug(
       scope: Scope = Scope.Root,
@@ -137,7 +137,9 @@ object Logger {
   )(implicit clock: Clock[F]): Resource[F, Logger[F]] =
     queued[F](clock.realTime(TimeUnit.MILLISECONDS), logger)
 
-  def broadcast[F[_]: Monad](loggers: List[Logger[F]])(implicit clock: Clock[F]): Logger[F] =
+  def broadcast[F[_]: Monad](
+      loggers: List[Logger[F]]
+  )(implicit clock: Clock[F]): Logger[F] =
     if (loggers.isEmpty) noop[F]
     else {
       val timestamp = clock.realTime(TimeUnit.MILLISECONDS)

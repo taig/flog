@@ -7,7 +7,7 @@ import io.taig.flog.data.{Context, Event}
 import io.taig.flog.util.Circe
 
 abstract class ContextualLogger[F[_]] extends Logger[F] {
-  def log(context: Context, event: Long => Event): F[Unit]
+  def log(context: Context, events: Long => List[Event]): F[Unit]
 
   def context: F[Context]
 
@@ -21,16 +21,20 @@ object ContextualLogger {
       logger: Logger[F]
   )(implicit F: ApplicativeLocal[F, Context]): ContextualLogger[F] =
     new ContextualLogger[F] {
-      final override def log(event: Long => Event): F[Unit] =
-        context.flatMap(log(_, event))
+      override def log(events: Long => List[Event]): F[Unit] =
+        context.flatMap(log(_, events))
 
-      final override def log(context: Context, event: Long => Event): F[Unit] =
+      final override def log(
+          context: Context,
+          events: Long => List[Event]
+      ): F[Unit] =
         logger.log { timestamp =>
-          val raw = event(timestamp)
-          raw.copy(
-            scope = context.prefix ++ raw.scope,
-            payload = Circe.combine(context.payload, raw.payload)
-          )
+          events(timestamp).map { event =>
+            event.copy(
+              scope = context.prefix ++ event.scope,
+              payload = Circe.combine(context.payload, event.payload)
+            )
+          }
         }
 
       final override val context: F[Context] = F.ask
@@ -44,7 +48,8 @@ object ContextualLogger {
 
   def noop[F[_]](implicit F: Applicative[F]): ContextualLogger[F] =
     new ContextualLogger[F] {
-      override def log(context: Context, event: Long => Event): F[Unit] = F.unit
+      override def log(context: Context, events: Long => List[Event]): F[Unit] =
+        F.unit
 
       override def context: F[Context] = F.pure(Context.Empty)
 
@@ -52,6 +57,6 @@ object ContextualLogger {
 
       override def scope[A](context: Context)(run: F[A]): F[A] = run
 
-      override def log(event: Long => Event): F[Unit] = F.unit
+      override def log(events: Long => List[Event]): F[Unit] = F.unit
     }
 }

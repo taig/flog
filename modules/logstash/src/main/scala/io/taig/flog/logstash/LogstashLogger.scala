@@ -22,13 +22,16 @@ final class LogstashLogger[F[_]: ContextShift](
 
   val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
 
-  def write(event: Event): F[Unit] = F.delay {
-    channel.writeBytes(printer.print(event.asJson) + '\n')
+  def write(events: List[Event]): F[Unit] = F.delay {
+    events.foreach { event =>
+      channel.writeBytes(printer.print(event.asJson) + '\n')
+    }
+
     channel.flush()
   }
 
-  override def log(event: Long => Event): F[Unit] =
-    timestamp.flatMap(timestamp => blocker.blockOn(write(event(timestamp))))
+  override def log(events: Long => List[Event]): F[Unit] =
+    timestamp.flatMap(timestamp => blocker.blockOn(write(events(timestamp))))
 }
 
 object LogstashLogger {
