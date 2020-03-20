@@ -10,10 +10,11 @@ import fs2.Stream
 import fs2.concurrent.Queue
 import io.circe.JsonObject
 import io.taig.flog.data.{Event, Level, Scope}
+import io.taig.flog.internal.Filters
 import io.taig.flog.util.Printer
 
 abstract class Logger[F[_]] {
-  def log(event: Long => List[Event]): F[Unit]
+  def log(events: Long => List[Event]): F[Unit]
 
   final def mapK[G[_]](fk: F ~> G): Logger[G] = event => fk(log(event))
 
@@ -56,7 +57,7 @@ abstract class Logger[F[_]] {
   ): F[Unit] = apply(Level.Warning, scope, message, payload, throwable)
 }
 
-object Logger {
+object Logger extends Filters[Logger] {
 
   /** Create a basic `Logger` that executes the given `write` function when
     * an `Event` is received
@@ -154,4 +155,9 @@ object Logger {
     }
 
   def noop[F[_]](implicit F: Applicative[F]): Logger[F] = _ => F.unit
+
+  override def filter[F[_]](
+      logger: Logger[F]
+  )(filter: Event => Boolean): Logger[F] =
+    events => logger.log(events(_).filter(filter))
 }

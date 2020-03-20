@@ -4,6 +4,7 @@ import cats.{Applicative, FlatMap}
 import cats.implicits._
 import cats.mtl.ApplicativeLocal
 import io.taig.flog.data.{Context, Event}
+import io.taig.flog.internal.Filters
 import io.taig.flog.util.Circe
 
 abstract class ContextualLogger[F[_]] extends Logger[F] {
@@ -16,7 +17,7 @@ abstract class ContextualLogger[F[_]] extends Logger[F] {
   def scope[A](context: Context)(run: F[A]): F[A]
 }
 
-object ContextualLogger {
+object ContextualLogger extends Filters[ContextualLogger] {
   def apply[F[_]: FlatMap](
       logger: Logger[F]
   )(implicit F: ApplicativeLocal[F, Context]): ContextualLogger[F] =
@@ -58,5 +59,24 @@ object ContextualLogger {
       override def scope[A](context: Context)(run: F[A]): F[A] = run
 
       override def log(events: Long => List[Event]): F[Unit] = F.unit
+    }
+
+  override def filter[F[_]](
+      logger: ContextualLogger[F]
+  )(filter: Event => Boolean): ContextualLogger[F] =
+    new ContextualLogger[F] {
+      override def log(context: Context, events: Long => List[Event]): F[Unit] =
+        logger.log(context, timestamp => events(timestamp).filter(filter))
+
+      override val context: F[Context] = logger.context
+
+      override def locally[A](f: Context => Context)(run: F[A]): F[A] =
+        logger.locally(f)(run)
+
+      override def scope[A](context: Context)(run: F[A]): F[A] =
+        logger.scope(context)(run)
+
+      override def log(events: Long => List[Event]): F[Unit] =
+        logger.log(timestamp => events(timestamp).filter(filter))
     }
 }
