@@ -3,8 +3,8 @@ package io.taig.flog.algebra
 import cats.{Applicative, FlatMap}
 import cats.implicits._
 import cats.mtl.ApplicativeLocal
-import io.taig.flog.data.{Context, Event}
-import io.taig.flog.internal.Filters
+import io.taig.flog.data.{Context, Event, Scope}
+import io.taig.flog.internal.Builders
 import io.taig.flog.util.Circe
 
 abstract class ContextualLogger[F[_]] extends Logger[F] {
@@ -17,7 +17,7 @@ abstract class ContextualLogger[F[_]] extends Logger[F] {
   def scope[A](context: Context)(run: F[A]): F[A]
 }
 
-object ContextualLogger extends Filters[ContextualLogger] {
+object ContextualLogger extends Builders[ContextualLogger] {
   def apply[F[_]: FlatMap](
       logger: Logger[F]
   )(implicit F: ApplicativeLocal[F, Context]): ContextualLogger[F] =
@@ -47,6 +47,28 @@ object ContextualLogger extends Filters[ContextualLogger] {
         F.scope(context)(run)
     }
 
+  def build[F[_]](
+      logger: ContextualLogger[F]
+  )(f: List[Event] => List[Event]): ContextualLogger[F] =
+    new ContextualLogger[F] {
+      def apply(events: Long => List[Event]): Long => List[Event] =
+        timestamp => f(events(timestamp))
+
+      override def log(context: Context, events: Long => List[Event]): F[Unit] =
+        logger.log(context, apply(events))
+
+      override val context: F[Context] = logger.context
+
+      override def locally[A](f: Context => Context)(run: F[A]): F[A] =
+        logger.locally(f)(run)
+
+      override def scope[A](context: Context)(run: F[A]): F[A] =
+        logger.scope(context)(run)
+
+      override def log(events: Long => List[Event]): F[Unit] =
+        logger.log(apply(events))
+    }
+
   def noop[F[_]](implicit F: Applicative[F]): ContextualLogger[F] =
     new ContextualLogger[F] {
       override def log(context: Context, events: Long => List[Event]): F[Unit] =
@@ -64,19 +86,11 @@ object ContextualLogger extends Filters[ContextualLogger] {
   override def filter[F[_]](
       logger: ContextualLogger[F]
   )(filter: Event => Boolean): ContextualLogger[F] =
-    new ContextualLogger[F] {
-      override def log(context: Context, events: Long => List[Event]): F[Unit] =
-        logger.log(context, timestamp => events(timestamp).filter(filter))
+    build(logger)(_.filter(filter))
 
-      override val context: F[Context] = logger.context
-
-      override def locally[A](f: Context => Context)(run: F[A]): F[A] =
-        logger.locally(f)(run)
-
-      override def scope[A](context: Context)(run: F[A]): F[A] =
-        logger.scope(context)(run)
-
-      override def log(events: Long => List[Event]): F[Unit] =
-        logger.log(timestamp => events(timestamp).filter(filter))
-    }
+  /** Prefix all events of this logger with the given `Scope` */
+  override def prefix[F[_]](
+      logger: ContextualLogger[F]
+  )(scope: Scope): ContextualLogger[F] =
+    build(logger)(_.map(_.prefix(scope)))
 }
