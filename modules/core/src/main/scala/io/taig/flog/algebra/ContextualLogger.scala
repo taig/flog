@@ -84,13 +84,13 @@ object ContextualLogger extends Builders[ContextualLogger] {
     }
 
   override def filter[F[_]](
-      logger: ContextualLogger[F]
-  )(filter: Event => Boolean): ContextualLogger[F] =
+      filter: Event => Boolean
+  )(logger: ContextualLogger[F]): ContextualLogger[F] =
     build(logger)(_.filter(filter))
 
   /** Prefix all events of this logger with the given `Scope` */
   override def prefix[F[_]](
-      logger: ContextualLogger[F]
-  )(scope: Scope): ContextualLogger[F] =
+      scope: Scope
+  )(logger: ContextualLogger[F]): ContextualLogger[F] =
     build(logger)(_.map(_.prefix(scope)))
 }

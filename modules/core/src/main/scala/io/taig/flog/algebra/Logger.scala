@@ -180,10 +180,10 @@ object Logger extends Builders[Logger] {
   def noop[F[_]](implicit F: Applicative[F]): Logger[F] = _ => F.unit
 
   override def filter[F[_]](
-      logger: Logger[F]
-  )(filter: Event => Boolean): Logger[F] =
+      filter: Event => Boolean
+  )(logger: Logger[F]): Logger[F] =
     events => logger.log(events(_).filter(filter))
 
-  override def prefix[F[_]](logger: Logger[F])(scope: Scope): Logger[F] =
+  override def prefix[F[_]](scope: Scope)(logger: Logger[F]): Logger[F] =
     events => logger.log(events.apply(_).map(_.prefix(scope)))
 }
