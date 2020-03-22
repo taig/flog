@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.1
+
+_2020-03-22_
+
+ * Change Builders parameter order to improve function composition
+ * Logger.stdOut to return an F rather than a Resource
+
 ## 0.4.0
 
 _2020-03-22_
