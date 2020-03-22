@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0
+
+_2020-03-22_
+
+ * Add support for filters (#3)
+ * Add a slf4j backend (#3)
+ * Upgrade to fs2 2.3.0
+
 ## 0.3.2
 
 _2020-03-19_
