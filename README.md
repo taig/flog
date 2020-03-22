@@ -13,6 +13,7 @@ libraryDependencies ++=
   "io.taig" %% "flog-interop-monix" % "x.x.x" ::
   "io.taig" %% "flog-sheets" % "x.x.x" ::
   "io.taig" %% "flog-stackdriver" % "x.x.x" ::
+  "io.taig" %% "flog-slf4j" % "x.x.x" ::
   Nil
 ```
 
