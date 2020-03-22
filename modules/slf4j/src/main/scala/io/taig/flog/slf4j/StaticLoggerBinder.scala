@@ -12,7 +12,7 @@ object StaticLoggerBinder extends StaticLoggerBinder {
       .getFactory()
       .getOrElse(
         throw new IllegalStateException(
-          "Logger factory not initialized yet. Hash FlogSlf4jBinder.initialized been called?"
+          "Logger factory not initialized yet. Has FlogSlf4jBinder.initialized been called?"
         )
       )
 
