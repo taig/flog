@@ -12,7 +12,7 @@ val Fs2Version = "2.3.0"
 val MonixVersion = "3.1.0"
 val ScalaCollectionCompatVersion = "2.1.4"
 val ScalatestVersion = "3.1.1"
-val Slf4jVersion = "1.8.0-beta4"
+val Slf4jVersion = "1.7.30"
 val ZioVersion = "1.0.0-RC18-2"
 val ZioInteropCatsVersion = "2.0.0.0-RC12"
 
