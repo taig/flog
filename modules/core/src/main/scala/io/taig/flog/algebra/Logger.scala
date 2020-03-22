@@ -160,4 +160,8 @@ object Logger extends Filters[Logger] {
       logger: Logger[F]
   )(filter: Event => Boolean): Logger[F] =
     events => logger.log(events(_).filter(filter))
+
+  /** Prefix all events of this logger with the given `Scope` */
+  def prefix[F[_]](logger: Logger[F])(scope: Scope): Logger[F] =
+    events => logger.log(events.apply(_).map(_.prefix(scope)))
 }
