@@ -19,8 +19,9 @@ object StackdriverLogger {
       logging: Logging,
       name: String,
       resource: MonitoredResource
-  )(implicit F: Sync[F]): Logger[F] = Logger { event =>
-    F.delay(logging.write(List(entry(event, name, resource)).asJava))
+  )(implicit F: Sync[F]): Logger[F] = Logger { events =>
+    val entries = events.map(entry(_, name, resource))
+    F.delay(logging.write(entries.asJava))
   }
 
   // https://cloud.google.com/logging/docs/api/v2/resource-list

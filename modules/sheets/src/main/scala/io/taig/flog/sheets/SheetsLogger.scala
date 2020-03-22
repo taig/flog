@@ -15,8 +15,9 @@ object SheetsLogger {
       credentials: F[InputStream]
   )(id: String, range: String, schema: List[String]): F[Logger[F]] =
     Google.sheets[F](credentials).map { sheets =>
-      Logger { event =>
-        Google.append(sheets, id, range)(List(row(schema, event))).void
+      Logger { events =>
+        val rows = events.map(row(schema, _))
+        Google.append(sheets, id, range)(rows).void
       }
     }
 

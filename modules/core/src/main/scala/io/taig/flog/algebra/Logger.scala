@@ -70,11 +70,15 @@ object Logger extends Builders[Logger] {
     * Use `Logger.apply[F]` to get a timestamp that will automatically use
     * the current time from `Clock[F]`.
     */
-  def raw[F[_]: Monad](
+  def raw[F[_]](
       timestamp: F[Long],
-      write: Event => F[Unit]
-  ): Logger[F] =
-    events => timestamp.flatMap(timestamp => events(timestamp).traverse_(write))
+      write: List[Event] => F[Unit]
+  )(implicit F: Monad[F]): Logger[F] =
+    f =>
+      timestamp.flatMap { timestamp =>
+        val events = f(timestamp)
+        F.whenA(events.nonEmpty)(write(events))
+      }
 
   /** Create a basic `Logger` that executes the given `write` function when
     * an `Event` is received
@@ -88,37 +92,56 @@ object Logger extends Builders[Logger] {
     * instance of `Clock[F]`.
     */
   def apply[F[_]: Monad](
-      write: Event => F[Unit]
+      write: List[Event] => F[Unit]
   )(implicit clock: Clock[F]): Logger[F] =
     raw[F](clock.realTime(TimeUnit.MILLISECONDS), write)
 
   def noTimestamp[F[_]: Applicative](write: Event => F[Unit]): Logger[F] =
     _.apply(-1).traverse_(write)
 
+  def unsafeOutput[F[_]: Clock](
+      target: OutputStream,
+      buffer: Int
+  )(implicit F: Sync[F]): F[Logger[F]] = {
+    F.delay(new BufferedWriter(new OutputStreamWriter(target), buffer)).map {
+      writer =>
+        Logger[F] { events =>
+          F.delay {
+            events.foreach { event =>
+              writer.write(Printer.event(event).show)
+            }
+
+            writer.flush()
+          }
+        }
+    }
+  }
+
   def output[F[_]: Clock](
       target: OutputStream,
-      buffer: Int,
-      close: Boolean = true
+      buffer: Int
   )(implicit F: Sync[F]): Resource[F, Logger[F]] = {
     val acquire =
       F.delay(new BufferedWriter(new OutputStreamWriter(target), buffer))
-    val release = (target: BufferedWriter) =>
-      if (close) F.delay(target.close()) else F.unit
+    val release = (target: BufferedWriter) => F.delay(target.close())
 
     Resource.make(acquire)(release).map { writer =>
-      Logger[F] { event =>
+      Logger[F] { events =>
         F.delay {
-          writer.write(Printer.event(event).show)
+          events.foreach { event =>
+            writer.write(Printer.event(event).show)
+          }
+
           writer.flush()
         }
       }
     }
   }
 
-  def stdOut[F[_]: Concurrent: Clock](buffer: Int): Resource[F, Logger[F]] =
-    output(System.out, buffer, close = false)
+  def stdOut[F[_]: Concurrent: Clock](buffer: Int): F[Logger[F]] =
+    unsafeOutput(System.out, buffer)
 
-  def stdOut[F[_]: Concurrent: Clock]: Resource[F, Logger[F]] =
+  def stdOut[F[_]: Concurrent: Clock]: F[Logger[F]] =
     stdOut[F](buffer = 1024)
 
   def queued[F[_]: Concurrent](
@@ -126,7 +149,7 @@ object Logger extends Builders[Logger] {
       logger: Logger[F]
   ): Resource[F, Logger[F]] =
     Resource.liftF(Queue.unbounded[F, Event]).flatMap { queue =>
-      val enqueue = raw[F](timestamp, queue.enqueue1)
+      val enqueue = raw[F](timestamp, _.traverse_(queue.enqueue1))
       val process = queue.dequeue.chunks.evalMap { events =>
         logger.log(_ => events.toList)
       }
