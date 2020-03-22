@@ -10,10 +10,11 @@ import fs2.Stream
 import fs2.concurrent.Queue
 import io.circe.JsonObject
 import io.taig.flog.data.{Event, Level, Scope}
+import io.taig.flog.internal.Builders
 import io.taig.flog.util.Printer
 
 abstract class Logger[F[_]] {
-  def log(event: Long => Event): F[Unit]
+  def log(events: Long => List[Event]): F[Unit]
 
   final def mapK[G[_]](fk: F ~> G): Logger[G] = event => fk(log(event))
 
@@ -23,8 +24,9 @@ abstract class Logger[F[_]] {
       message: String = "",
       payload: => JsonObject = JsonObject.empty,
       throwable: Option[Throwable] = None
-  ): F[Unit] =
-    log(Event(_, level, scope, message, payload, throwable))
+  ): F[Unit] = log { timestamp =>
+    List(Event(timestamp, level, scope, message, payload, throwable))
+  }
 
   final def debug(
       scope: Scope = Scope.Root,
@@ -55,7 +57,7 @@ abstract class Logger[F[_]] {
   ): F[Unit] = apply(Level.Warning, scope, message, payload, throwable)
 }
 
-object Logger {
+object Logger extends Builders[Logger] {
 
   /** Create a basic `Logger` that executes the given `write` function when
     * an `Event` is received
@@ -68,11 +70,11 @@ object Logger {
     * Use `Logger.apply[F]` to get a timestamp that will automatically use
     * the current time from `Clock[F]`.
     */
-  def raw[F[_]: FlatMap](
+  def raw[F[_]: Monad](
       timestamp: F[Long],
       write: Event => F[Unit]
   ): Logger[F] =
-    event => timestamp.flatMap(timestamp => write(event(timestamp)))
+    events => timestamp.flatMap(timestamp => events(timestamp).traverse_(write))
 
   /** Create a basic `Logger` that executes the given `write` function when
     * an `Event` is received
@@ -85,13 +87,13 @@ object Logger {
     * Use `Logger.raw[F]` to provide a custom timestamp that does not require an
     * instance of `Clock[F]`.
     */
-  def apply[F[_]: FlatMap](
+  def apply[F[_]: Monad](
       write: Event => F[Unit]
   )(implicit clock: Clock[F]): Logger[F] =
     raw[F](clock.realTime(TimeUnit.MILLISECONDS), write)
 
-  def noTimestamp[F[_]](log: Event => F[Unit]): Logger[F] =
-    event => log(event(-1))
+  def noTimestamp[F[_]: Applicative](write: Event => F[Unit]): Logger[F] =
+    _.apply(-1).traverse_(write)
 
   def output[F[_]: Clock](
       target: OutputStream,
@@ -125,7 +127,9 @@ object Logger {
   ): Resource[F, Logger[F]] =
     Resource.liftF(Queue.unbounded[F, Event]).flatMap { queue =>
       val enqueue = raw[F](timestamp, queue.enqueue1)
-      val process = queue.dequeue.evalMap(event => logger.log(_ => event))
+      val process = queue.dequeue.chunks.evalMap { events =>
+        logger.log(_ => events.toList)
+      }
       (Stream.emit(enqueue) concurrently process).compile.resource.lastOrError
     }
 
@@ -134,9 +138,29 @@ object Logger {
   )(implicit clock: Clock[F]): Resource[F, Logger[F]] =
     queued[F](clock.realTime(TimeUnit.MILLISECONDS), logger)
 
-  def broadcast[F[_]: Monad: Clock](loggers: Logger[F]*): Logger[F] =
+  def broadcast[F[_]: Monad](
+      loggers: List[Logger[F]]
+  )(implicit clock: Clock[F]): Logger[F] =
     if (loggers.isEmpty) noop[F]
-    else Logger[F](event => loggers.toList.traverse_(_.log(_ => event)))
+    else {
+      val timestamp = clock.realTime(TimeUnit.MILLISECONDS)
+
+      new Logger[F] {
+        override def log(events: Long => List[Event]): F[Unit] =
+          timestamp.flatMap { timestamp =>
+            val broadcastEvents = events(timestamp)
+            loggers.traverse_(_.log(_ => broadcastEvents))
+          }
+      }
+    }
 
   def noop[F[_]](implicit F: Applicative[F]): Logger[F] = _ => F.unit
+
+  override def filter[F[_]](
+      logger: Logger[F]
+  )(filter: Event => Boolean): Logger[F] =
+    events => logger.log(events(_).filter(filter))
+
+  override def prefix[F[_]](logger: Logger[F])(scope: Scope): Logger[F] =
+    events => logger.log(events.apply(_).map(_.prefix(scope)))
 }

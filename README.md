@@ -125,3 +125,7 @@ filter {
   }
 }
 ```
+
+## Slf4j
+
+_Flog_ comes with its own slf4j backend in the `flog-slf4j` module. In order to enable it call `FlogSlf4jBinder.initialize` as early in your application initialization as possible.

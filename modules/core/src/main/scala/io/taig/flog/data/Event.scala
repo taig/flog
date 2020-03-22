@@ -12,7 +12,9 @@ final case class Event(
     message: String,
     payload: JsonObject,
     throwable: Option[Throwable]
-)
+) {
+  def prefix(scope: Scope): Event = copy(scope = scope ++ this.scope)
+}
 
 object Event {
   implicit val encoder: Encoder.AsObject[Event] =
