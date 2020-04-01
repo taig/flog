@@ -8,8 +8,7 @@ import io.taig.flog.algebra.Logger
 import io.taig.flog.data.Level
 import org.slf4j.helpers.{FormattingTuple, MarkerIgnoringBase, MessageFormatter}
 
-final class FlogSlf4jLogger[F[_]: Effect](logger: Logger[F])
-    extends MarkerIgnoringBase {
+final class FlogSlf4jLogger[F[_]: Effect](logger: Logger[F]) extends MarkerIgnoringBase {
   def log(level: Level, format: String, args: Array[AnyRef]): Unit =
     log(level, MessageFormatter.arrayFormat(format, args))
 

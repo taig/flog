@@ -103,17 +103,16 @@ object Logger extends Builders[Logger] {
       target: OutputStream,
       buffer: Int
   )(implicit F: Sync[F]): F[Logger[F]] = {
-    F.delay(new BufferedWriter(new OutputStreamWriter(target), buffer)).map {
-      writer =>
-        Logger[F] { events =>
-          F.delay {
-            events.foreach { event =>
-              writer.write(Printer.event(event).show)
-            }
-
-            writer.flush()
+    F.delay(new BufferedWriter(new OutputStreamWriter(target), buffer)).map { writer =>
+      Logger[F] { events =>
+        F.delay {
+          events.foreach { event =>
+            writer.write(Printer.event(event).show)
           }
+
+          writer.flush()
         }
+      }
     }
   }
 

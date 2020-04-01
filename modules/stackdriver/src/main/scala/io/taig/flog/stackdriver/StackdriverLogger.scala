@@ -15,19 +15,14 @@ import io.taig.flog.util.Printer
 import scala.jdk.CollectionConverters._
 
 object StackdriverLogger {
-  def apply[F[_]: Clock](
-      logging: Logging,
-      name: String,
-      resource: MonitoredResource
-  )(implicit F: Sync[F]): Logger[F] = Logger { events =>
-    val entries = events.map(entry(_, name, resource))
-    F.delay(logging.write(entries.asJava))
-  }
+  def apply[F[_]: Clock](logging: Logging, name: String, resource: MonitoredResource)(implicit F: Sync[F]): Logger[F] =
+    Logger { events =>
+      val entries = events.map(entry(_, name, resource))
+      F.delay(logging.write(entries.asJava))
+    }
 
   // https://cloud.google.com/logging/docs/api/v2/resource-list
-  def default[F[_]: Clock](name: String, resource: MonitoredResource)(
-      implicit F: Sync[F]
-  ): Resource[F, Logger[F]] = {
+  def default[F[_]: Clock](name: String, resource: MonitoredResource)(implicit F: Sync[F]): Resource[F, Logger[F]] = {
     val acquire = F.delay(LoggingOptions.getDefaultInstance.getService)
     val release = (logging: Logging) => F.delay(logging.close())
     Resource.make(acquire)(release).map { logging =>
@@ -35,17 +30,10 @@ object StackdriverLogger {
     }
   }
 
-  def default[F[_]: Sync: Clock](
-      name: String,
-      tpe: String = "global"
-  ): Resource[F, Logger[F]] =
+  def default[F[_]: Sync: Clock](name: String, tpe: String = "global"): Resource[F, Logger[F]] =
     default(name, MonitoredResource.newBuilder(tpe).build())
 
-  def entry(
-      event: Event,
-      name: String,
-      resource: MonitoredResource
-  ): LogEntry =
+  def entry(event: Event, name: String, resource: MonitoredResource): LogEntry =
     LogEntry
       .newBuilder(payload(event))
       .setSeverity(severity(event))
