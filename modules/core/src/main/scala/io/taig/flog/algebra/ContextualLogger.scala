@@ -3,6 +3,7 @@ package io.taig.flog.algebra
 import cats.{Applicative, FlatMap}
 import cats.implicits._
 import cats.mtl.ApplicativeLocal
+import io.circe.Json
 import io.taig.flog.data.{Context, Event, Scope}
 import io.taig.flog.internal.Builders
 
@@ -73,4 +74,7 @@ object ContextualLogger extends Builders[ContextualLogger] {
   /** Prefix all events of this logger with the given `Scope` */
   override def prefix[F[_]](scope: Scope)(logger: ContextualLogger[F]): ContextualLogger[F] =
     build(logger)(_.map(_.prefix(scope)))
+
+  override def preset[F[_]](payload: Json)(logger: ContextualLogger[F]): ContextualLogger[F] =
+    build(logger)(_.map(_.preset(payload)))
 }

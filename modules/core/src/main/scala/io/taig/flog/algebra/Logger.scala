@@ -220,4 +220,7 @@ object Logger extends Builders[Logger] {
 
   override def prefix[F[_]](scope: Scope)(logger: Logger[F]): Logger[F] =
     events => logger.log(events.apply(_).map(_.prefix(scope)))
+
+  override def preset[F[_]](payload: Json)(logger: Logger[F]): Logger[F] =
+    events => logger.log(events.apply(_).map(_.preset(payload)))
 }

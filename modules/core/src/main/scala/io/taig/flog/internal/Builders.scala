@@ -1,6 +1,7 @@
 package io.taig.flog.internal
 
 import cats.implicits._
+import io.circe.Json
 import io.taig.flog.data.{Event, Level, Scope}
 
 trait Builders[L[A[_]]] {
@@ -11,4 +12,6 @@ trait Builders[L[A[_]]] {
 
   /** Prefix all events of this logger with the given `Scope` */
   def prefix[F[_]](scope: Scope)(logger: L[F]): L[F]
+
+  def preset[F[_]](payload: Json)(logger: L[F]): L[F]
 }
