@@ -5,7 +5,6 @@ import java.text.SimpleDateFormat
 import java.util.TimeZone
 
 import cats.implicits._
-import io.circe.Json
 import io.taig.flog.data.Event
 
 object Printer {
@@ -36,8 +35,7 @@ object Printer {
       .append("] ")
       .append(event.message)
 
-    if (event.payload.nonEmpty)
-      builder.append('\n').append(Json.fromJsonObject(event.payload).spaces2)
+    if (!event.payload.isNull) builder.append('\n').append(event.payload.spaces2)
 
     event.throwable.map(Printer.throwable).foreach { value =>
       builder.append('\n').append(value)

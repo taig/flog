@@ -1,6 +1,6 @@
 package io.taig.flog.data
 
-import io.circe.{Encoder, JsonObject}
+import io.circe.{Encoder, Json, JsonObject}
 import io.circe.syntax._
 import cats.implicits._
 import io.taig.flog.util.Printer
@@ -10,7 +10,7 @@ final case class Event(
     level: Level,
     scope: Scope,
     message: String,
-    payload: JsonObject,
+    payload: Json,
     throwable: Option[Throwable]
 ) {
   def prefix(scope: Scope): Event = copy(scope = scope ++ this.scope)
@@ -24,7 +24,7 @@ object Event {
         "level" := event.level.show,
         "scope" := event.scope.show,
         "message" := Some(event.message).filter(_.nonEmpty),
-        "payload" := Some(event.payload).filter(_.nonEmpty),
+        "payload" := event.payload,
         "stacktrace" := event.throwable.map(Printer.throwable)
       )
     }

@@ -1,15 +1,10 @@
 package io.taig.flog.util
 
-import io.circe.{Json, JsonObject}
-
 import scala.collection.immutable.ListMap
 
-object Circe {
-  def combine(x: JsonObject, y: JsonObject): JsonObject =
-    if (x.isEmpty) y
-    else if (y.isEmpty) x
-    else JsonObject.fromMap(x.toMap ++ y.toMap)
+import io.circe.Json
 
+object Circe {
   final def flatten(json: Json): ListMap[String, Json] =
     flatten(json, key = "")
 

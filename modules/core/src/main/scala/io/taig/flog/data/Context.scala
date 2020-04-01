@@ -2,20 +2,17 @@ package io.taig.flog.data
 
 import java.util.UUID
 
-import io.circe.JsonObject
+import io.circe.Json
 import io.circe.syntax._
-import io.taig.flog.util.Circe
 
-final case class Context(prefix: Scope, payload: JsonObject) { self =>
-  def append(prefix: Scope): Context =
-    copy(prefix = self.prefix ++ prefix)
+final case class Context(prefix: Scope, payload: Json) { self =>
+  def append(prefix: Scope): Context = copy(prefix = self.prefix ++ prefix)
 
-  def combine(payload: JsonObject): Context =
-    copy(payload = Circe.combine(self.payload, payload))
+  def combine(payload: Json): Context = copy(payload = self.payload deepMerge payload)
 
-  def trace(uuid: UUID): Context = combine(JsonObject("trace" := uuid))
+  def trace(uuid: UUID): Context = combine(Json.obj("trace" := uuid))
 }
 
 object Context {
-  val Empty: Context = Context(Scope.Root, JsonObject.empty)
+  val Empty: Context = Context(Scope.Root, Json.Null)
 }

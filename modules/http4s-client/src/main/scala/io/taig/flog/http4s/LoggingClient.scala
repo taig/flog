@@ -5,55 +5,45 @@ import cats.effect.concurrent.Ref
 import cats.effect.{Concurrent, Resource, Sync}
 import cats.implicits._
 import fs2.{Chunk, Stream}
+import io.circe.Json
 import io.circe.parser._
 import io.circe.syntax._
-import io.circe.{Json, JsonObject}
 import io.taig.flog.algebra.Logger
 import io.taig.flog.data.Scope
-import org.http4s.client.Client
 import org.http4s._
+import org.http4s.client.Client
 
 object LoggingClient {
-  val RequestScope = Scope.Root / "client" / "request"
+  val RequestScope: Scope = Scope.Root / "client" / "request"
 
-  val ResponseScope = Scope.Root / "client" / "response"
+  val ResponseScope: Scope = Scope.Root / "client" / "response"
 
-  def apply[F[_]: Concurrent](
-      client: Client[F],
-      logger: Logger[F],
-      logBody: Boolean = false
-  ): Client[F] = response(request(client, logger, logBody), logger, logBody)
+  def apply[F[_]: Concurrent](client: Client[F], logger: Logger[F], logBody: Boolean = false): Client[F] =
+    response(request(client, logger, logBody), logger, logBody)
 
-  def request[F[_]: Concurrent](
-      client: Client[F],
-      logger: Logger[F],
-      logBody: Boolean
-  ): Client[F] = Client[F] { request =>
-    Resource.suspend {
-      Ref[F].of(Vector.empty[Chunk[Byte]]).map { bytes =>
-        val newBody = Stream
-          .eval(bytes.get)
-          .flatMap(Stream.emits(_).covary[F])
-          .flatMap(Stream.chunk(_).covary[F])
+  def request[F[_]: Concurrent](client: Client[F], logger: Logger[F], logBody: Boolean): Client[F] = Client[F] {
+    request =>
+      Resource.suspend {
+        Ref[F].of(Vector.empty[Chunk[Byte]]).map { bytes =>
+          val newBody = Stream
+            .eval(bytes.get)
+            .flatMap(Stream.emits(_).covary[F])
+            .flatMap(Stream.chunk(_).covary[F])
 
-        val changedRequest = request.withBodyStream(
-          request.body
-            .observe(_.chunks.evalMap(chunk => bytes.update(_ :+ chunk)))
-            .onFinalizeWeak(
-              log(logger)(request.withBodyStream(newBody), logBody)
-            )
-        )
+          val changedRequest = request.withBodyStream(
+            request.body
+              .observe(_.chunks.evalMap(chunk => bytes.update(_ :+ chunk)))
+              .onFinalizeWeak(
+                log(logger)(request.withBodyStream(newBody), logBody)
+              )
+          )
 
-        client.run(changedRequest)
+          client.run(changedRequest)
+        }
       }
-    }
   }
 
-  def response[F[_]: Concurrent](
-      client: Client[F],
-      logger: Logger[F],
-      logBody: Boolean
-  ): Client[F] = Client { req =>
+  def response[F[_]: Concurrent](client: Client[F], logger: Logger[F], logBody: Boolean): Client[F] = Client { req =>
     client.run(req).flatMap { response =>
       Resource.suspend {
         Ref[F].of(Vector.empty[Chunk[Byte]]).map { bytes =>
@@ -76,9 +66,7 @@ object LoggingClient {
     }
   }
 
-  private def log[F[_]: Sync](
-      logger: Logger[F]
-  )(message: Message[F], logBody: Boolean): F[Unit] = {
+  private def log[F[_]: Sync](logger: Logger[F])(message: Message[F], logBody: Boolean): F[Unit] = {
     val body = if (logBody) {
       val charset = message.charset.getOrElse(Charset.`UTF-8`)
       val isBinary = message.contentType.exists(_.mediaType.binary)
@@ -109,12 +97,9 @@ object LoggingClient {
     }
   }
 
-  private def encode[F[_]](
-      request: Request[F],
-      body: Option[Json]
-  ): JsonObject =
-    JsonObject(
-      "request" := JsonObject(
+  private def encode[F[_]](request: Request[F], body: Option[Json]): Json =
+    Json.obj(
+      "request" := Json.obj(
         "method" := request.method.renderString,
         "uri" := request.uri.renderString,
         "headers" := request.headers.toList.map(_.renderString),
@@ -122,12 +107,9 @@ object LoggingClient {
       )
     )
 
-  private def encode[F[_]](
-      response: Response[F],
-      body: Option[Json]
-  ): JsonObject =
-    JsonObject(
-      "response" := JsonObject(
+  private def encode[F[_]](response: Response[F], body: Option[Json]): Json =
+    Json.obj(
+      "response" := Json.obj(
         "status" := response.status.renderString,
         "headers" := response.headers.toList.map(_.renderString),
         "body" := body

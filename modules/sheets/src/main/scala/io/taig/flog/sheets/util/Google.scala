@@ -29,9 +29,7 @@ object Google {
         new FileNotFoundException(message).raiseError[F, InputStream]
     }
 
-  def handle[F[_]](
-      stream: F[InputStream]
-  )(implicit F: Sync[F]): Resource[F, InputStream] =
+  def handle[F[_]](stream: F[InputStream])(implicit F: Sync[F]): Resource[F, InputStream] =
     Resource.make(stream)(resource => F.delay(resource.close()))
 
   def credential[F[_]](
