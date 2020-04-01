@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0
+
+_2020-04-01_
+
+ * Use simple `Json` values for payloads instead of `JsonObject`
+ * Upgrade to google-cloud-logging 1.101.0
+ * Upgrade to sbt-houserules 0.2.1
+ * Upgrade to sbt 1.3.9
+
 ## 0.4.1
 
 _2020-03-22_
