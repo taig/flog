@@ -3,7 +3,7 @@ package io.taig.flog.data
 import io.circe.JsonObject
 import io.circe.syntax._
 import io.taig.flog.dsl._
-import io.taig.testf.{AutoTest, IOAutoTestApp}
+import io.taig.testf._
 
 @AutoTest
 object EventTest extends IOAutoTestApp {

@@ -1,6 +1,6 @@
 package io.taig.flog.data
 
-import io.taig.testf.{AutoTest, IOAutoTestApp}
+import io.taig.testf._
 import io.taig.flog.dsl._
 
 @AutoTest
