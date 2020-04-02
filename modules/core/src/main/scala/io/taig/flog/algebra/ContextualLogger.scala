@@ -1,10 +1,9 @@
 package io.taig.flog.algebra
 
-import cats.{Applicative, FlatMap}
 import cats.implicits._
 import cats.mtl.ApplicativeLocal
-import io.circe.Json
-import io.taig.flog.data.{Context, Event, Scope}
+import cats.{Applicative, FlatMap}
+import io.taig.flog.data.{Context, Event}
 import io.taig.flog.internal.Builders
 
 abstract class ContextualLogger[F[_]] extends Logger[F] {
@@ -27,7 +26,7 @@ object ContextualLogger extends Builders[ContextualLogger] {
       final override def log(context: Context, events: Long => List[Event]): F[Unit] =
         logger.log { timestamp =>
           events(timestamp).map { event =>
-            event.copy(scope = context.prefix ++ event.scope, payload = context.payload deepMerge event.payload)
+            event.copy(scope = context.prefix ++ event.scope, payload = context.presets deepMerge event.payload)
           }
         }
 
@@ -71,10 +70,6 @@ object ContextualLogger extends Builders[ContextualLogger] {
   override def filter[F[_]](filter: Event => Boolean)(logger: ContextualLogger[F]): ContextualLogger[F] =
     build(logger)(_.filter(filter))
 
-  /** Prefix all events of this logger with the given `Scope` */
-  override def prefix[F[_]](scope: Scope)(logger: ContextualLogger[F]): ContextualLogger[F] =
-    build(logger)(_.map(_.prefix(scope)))
-
-  override def preset[F[_]](payload: Json)(logger: ContextualLogger[F]): ContextualLogger[F] =
-    build(logger)(_.map(_.preset(payload)))
+  override def defaults[F[_]](context: Context)(logger: ContextualLogger[F]): ContextualLogger[F] =
+    build(logger)(_.map(_.defaults(context)))
 }

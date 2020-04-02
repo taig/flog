@@ -48,7 +48,7 @@ class LoggerTest extends AsyncWordSpec with Matchers {
       logger
         .flatMap {
           case (logger, queue) =>
-            Logger.preset(Json.obj("foo" := "bar"))(logger).info(Json.obj("baz" := "qux")) *>
+            Logger.presets(Json.obj("foo" := "bar"))(logger).info(Json.obj("baz" := "qux")) *>
               queue.dequeue1
         }
         .map(_.payload shouldBe expected)
@@ -62,7 +62,7 @@ class LoggerTest extends AsyncWordSpec with Matchers {
         .flatMap {
           case (logger, queue) =>
             Logger
-              .preset(Json.obj("foo" := "bar", "quux" := "quuz"))(logger)
+              .presets(Json.obj("foo" := "bar", "quux" := "quuz"))(logger)
               .info(Json.obj("foo" := "baz")) *>
               queue.dequeue1
         }

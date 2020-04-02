@@ -13,9 +13,12 @@ final case class Event(
     payload: Json,
     throwable: Option[Throwable]
 ) {
+  def defaults(context: Context): Event =
+    prefix(context.prefix).presets(context.presets)
+
   def prefix(scope: Scope): Event = copy(scope = scope ++ this.scope)
 
-  def preset(payload: Json): Event = copy(payload = payload deepMerge this.payload)
+  def presets(payload: Json): Event = copy(payload = payload deepMerge this.payload)
 }
 
 object Event {

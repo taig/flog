@@ -9,7 +9,7 @@ import cats.implicits._
 import fs2.Stream
 import fs2.concurrent.Queue
 import io.circe.Json
-import io.taig.flog.data.{Event, Level, Scope}
+import io.taig.flog.data.{Context, Event, Level, Scope}
 import io.taig.flog.internal.Builders
 import io.taig.flog.util.Printer
 
@@ -218,9 +218,6 @@ object Logger extends Builders[Logger] {
   override def filter[F[_]](filter: Event => Boolean)(logger: Logger[F]): Logger[F] =
     events => logger.log(events(_).filter(filter))
 
-  override def prefix[F[_]](scope: Scope)(logger: Logger[F]): Logger[F] =
-    events => logger.log(events.apply(_).map(_.prefix(scope)))
-
-  override def preset[F[_]](payload: Json)(logger: Logger[F]): Logger[F] =
-    events => logger.log(events.apply(_).map(_.preset(payload)))
+  override def defaults[F[_]](context: Context)(logger: Logger[F]): Logger[F] =
+    events => logger.log(events.apply(_).map(_.defaults(context)))
 }
