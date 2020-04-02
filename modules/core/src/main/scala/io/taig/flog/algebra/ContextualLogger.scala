@@ -17,17 +17,13 @@ abstract class ContextualLogger[F[_]] extends Logger[F] {
 }
 
 object ContextualLogger extends Builders[ContextualLogger] {
-  def apply[F[_]: FlatMap](
-      logger: Logger[F]
-  )(implicit F: ApplicativeLocal[F, Context]): ContextualLogger[F] =
+  def apply[F[_]: FlatMap](logger: Logger[F])(implicit F: ApplicativeLocal[F, Context]): ContextualLogger[F] =
     new ContextualLogger[F] {
       override def log(events: Long => List[Event]): F[Unit] = context.flatMap(log(_, events))
 
       final override def log(context: Context, events: Long => List[Event]): F[Unit] =
         logger.log { timestamp =>
-          events(timestamp).map { event =>
-            event.copy(scope = context.prefix ++ event.scope, payload = context.presets deepMerge event.payload)
-          }
+          events(timestamp).map(_.defaults(context))
         }
 
       final override val context: F[Context] = F.ask
@@ -37,9 +33,7 @@ object ContextualLogger extends Builders[ContextualLogger] {
       final override def scope[A](context: Context)(run: F[A]): F[A] = F.scope(context)(run)
     }
 
-  def build[F[_]](
-      logger: ContextualLogger[F]
-  )(f: List[Event] => List[Event]): ContextualLogger[F] =
+  def build[F[_]](logger: ContextualLogger[F])(f: List[Event] => List[Event]): ContextualLogger[F] =
     new ContextualLogger[F] {
       def apply(events: Long => List[Event]): Long => List[Event] = timestamp => f(events(timestamp))
 
