@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.1
+
+_2020-04-02_
+
+ `0.6.0` could not be released due to a misconfiguration, use ` 0.6.1` instead.
+ 
+  * Upgrade to scala 2.12.11
+  * Fix tests compile error on Scala 2.12
+  * Upgrade to http4s 0.21.3
+
 ## 0.6.0
 
 _2020-04-02_
