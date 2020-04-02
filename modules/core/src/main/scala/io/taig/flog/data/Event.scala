@@ -1,8 +1,8 @@
 package io.taig.flog.data
 
-import io.circe.{Encoder, Json, JsonObject}
-import io.circe.syntax._
 import cats.implicits._
+import io.circe.syntax._
+import io.circe.{Encoder, JsonObject}
 import io.taig.flog.util.Printer
 
 final case class Event(
@@ -10,15 +10,14 @@ final case class Event(
     level: Level,
     scope: Scope,
     message: String,
-    payload: Json,
+    payload: JsonObject,
     throwable: Option[Throwable]
 ) {
-  def defaults(context: Context): Event =
-    prefix(context.prefix).presets(context.presets)
+  def defaults(context: Context): Event = prefix(context.prefix).presets(context.presets)
 
   def prefix(scope: Scope): Event = copy(scope = scope ++ this.scope)
 
-  def presets(payload: Json): Event = copy(payload = payload deepMerge this.payload)
+  def presets(payload: JsonObject): Event = copy(payload = payload deepMerge this.payload)
 }
 
 object Event {

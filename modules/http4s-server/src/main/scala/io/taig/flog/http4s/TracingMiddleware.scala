@@ -4,7 +4,7 @@ import java.util.UUID
 
 import cats.effect.Sync
 import cats.implicits._
-import io.circe.Json
+import io.circe.{Json, JsonObject}
 import io.circe.syntax._
 import io.taig.flog.algebra.ContextualLogger
 import io.taig.flog.data.Scope
@@ -29,7 +29,7 @@ object TracingMiddleware {
   }
 
   private def encode[F[_]](request: Request[F]) =
-    Json.obj(
+    JsonObject(
       "request" := Json.obj(
         "method" := request.method.renderString,
         "uri" := request.uri.renderString,
@@ -38,7 +38,7 @@ object TracingMiddleware {
     )
 
   private def encode[F[_]](response: Response[F]) =
-    Json.obj(
+    JsonObject(
       "response" := Json.obj(
         "status" := response.status.renderString,
         "headers" := response.headers.toList.map(_.renderString)

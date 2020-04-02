@@ -5,9 +5,9 @@ import cats.effect.concurrent.Ref
 import cats.effect.{Concurrent, Resource, Sync}
 import cats.implicits._
 import fs2.{Chunk, Stream}
-import io.circe.Json
 import io.circe.parser._
 import io.circe.syntax._
+import io.circe.{Json, JsonObject}
 import io.taig.flog.algebra.Logger
 import io.taig.flog.data.Scope
 import org.http4s._
@@ -97,8 +97,8 @@ object LoggingClient {
     }
   }
 
-  private def encode[F[_]](request: Request[F], body: Option[Json]): Json =
-    Json.obj(
+  private def encode[F[_]](request: Request[F], body: Option[Json]) =
+    JsonObject(
       "request" := Json.obj(
         "method" := request.method.renderString,
         "uri" := request.uri.renderString,
@@ -107,8 +107,8 @@ object LoggingClient {
       )
     )
 
-  private def encode[F[_]](response: Response[F], body: Option[Json]): Json =
-    Json.obj(
+  private def encode[F[_]](response: Response[F], body: Option[Json]) =
+    JsonObject(
       "response" := Json.obj(
         "status" := response.status.renderString,
         "headers" := response.headers.toList.map(_.renderString),
