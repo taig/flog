@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.0
+
+_2020-04-02_
+
+ * Increase Logging API surface to simplify usage
+ * Revert switching from `JsonObject` to `Json`
+ * Migrate tests to testf
+ * Introduce `Builder.defaults to` consistently implement `prefix` & `preset`
+ * Use `Event.defaults` in `ContextualLogger.apply`
+ * Add `Logger.presets` and extend test suite
+ * Upgrade to http4s 0.21.2
+
 ## 0.5.0
 
 _2020-04-01_
