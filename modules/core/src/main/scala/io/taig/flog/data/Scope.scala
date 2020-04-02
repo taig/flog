@@ -36,6 +36,8 @@ object Scope {
     override def combine(x: Scope, y: Scope): Scope = x ++ y
   }
 
+  implicit val eq: Eq[Scope] = Eq.by(_.segments)
+
   implicit val show: Show[Scope] = {
     case Scope(Nil)      => "/"
     case Scope(segments) => segments.mkString(" / ")

@@ -1,18 +1,16 @@
 package io.taig.flog.data
 
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
+import io.taig.testf.{AutoTest, IOAutoTestApp}
+import io.taig.flog.dsl._
 
-final class ScopeTest extends AnyWordSpec with Matchers {
-  "fromClassName" should {
-    "support classes" in {
-      Scope.fromClassName[Scope] shouldBe
-        Scope.Root / "io" / "taig" / "flog" / "data" / "Scope"
+@AutoTest
+object ScopeTest extends IOAutoTestApp {
+  test("fromClassName")(
+    test("class") {
+      isEqual(Scope.Root / "io" / "taig" / "flog" / "data" / "Scope")(Scope.fromClassName[Scope])
+    },
+    test("object") {
+      isEqual(Scope.Root / "io" / "taig" / "flog" / "data" / "Scope")(Scope.fromClassName[Scope.type])
     }
-
-    "support objects" in {
-      Scope.fromClassName[Scope.type] shouldBe
-        Scope.Root / "io" / "taig" / "flog" / "data" / "Scope"
-    }
-  }
+  )
 }

@@ -13,8 +13,11 @@ val MonixVersion = "3.1.0"
 val ScalaCollectionCompatVersion = "2.1.4"
 val ScalatestVersion = "3.1.1"
 val Slf4jVersion = "1.7.30"
+val TestfVersion = "0.1.2"
 val ZioVersion = "1.0.0-RC18-2"
 val ZioInteropCatsVersion = "2.0.0.0-RC12"
+
+ThisBuild / testFrameworks += new TestFramework("io.taig.testf.runner.TestF")
 
 lazy val flog = project
   .in(file("."))
@@ -44,7 +47,8 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
         "io.circe" %%% "circe-core" % CirceVersion ::
         "org.typelevel" %%% "cats-effect" % CatsEffectVersion ::
         "org.typelevel" %%% "cats-mtl-core" % CatsMtlVersion ::
-        "org.scalatest" %%% "scalatest" % ScalatestVersion % "test" ::
+        "io.taig" %%% "testf-auto" % TestfVersion % "test" ::
+        "io.taig" %%% "testf-runner-sbt" % TestfVersion % "test" ::
         Nil
   )
 
