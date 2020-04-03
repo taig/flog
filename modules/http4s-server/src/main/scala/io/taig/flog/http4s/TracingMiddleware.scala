@@ -6,7 +6,7 @@ import cats.effect.Sync
 import cats.implicits._
 import io.circe.{Json, JsonObject}
 import io.circe.syntax._
-import io.taig.flog.algebra.ContextualLogger
+import io.taig.flog.ContextualLogger
 import io.taig.flog.data.Scope
 import org.http4s.{HttpApp, Request, Response}
 

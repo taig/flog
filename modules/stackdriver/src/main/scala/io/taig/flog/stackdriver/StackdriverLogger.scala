@@ -7,12 +7,12 @@ import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.{Option => _, _}
 import io.circe.JsonObject
 import io.circe.syntax._
-import io.taig.flog.algebra.Logger
 import io.taig.flog.data.{Event, Level}
 import io.taig.flog.stackdriver.interal.Circe
 import io.taig.flog.util.Printer
-
 import scala.jdk.CollectionConverters._
+
+import io.taig.flog.Logger
 
 object StackdriverLogger {
   def apply[F[_]: Clock](logging: Logging, name: String, resource: MonitoredResource)(implicit F: Sync[F]): Logger[F] =

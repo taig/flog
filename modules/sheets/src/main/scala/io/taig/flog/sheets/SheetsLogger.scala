@@ -5,7 +5,7 @@ import java.io.InputStream
 import cats.effect.{Clock, Sync}
 import cats.implicits._
 import io.circe.Json
-import io.taig.flog.algebra.Logger
+import io.taig.flog.Logger
 import io.taig.flog.data.Event
 import io.taig.flog.sheets.util.Google
 import io.taig.flog.util.{Circe, Printer}

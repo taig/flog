@@ -1,4 +1,4 @@
-package io.taig.flog.algebra
+package io.taig.flog
 
 import java.io.{BufferedWriter, OutputStream, OutputStreamWriter}
 import java.util.concurrent.TimeUnit

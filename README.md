@@ -36,7 +36,7 @@ import cats.effect.ExitCode
 import cats.implicits._
 import io.circe.JsonObject
 import io.circe.syntax._
-import io.taig.flog.algebra.Logger
+import io.taig.flog.Logger
 import io.taig.flog.data.Scope
 import io.taig.flog.interop.monix._
 import monix.eval._

@@ -4,7 +4,7 @@ import java.util.Objects
 
 import cats.effect.Effect
 import cats.effect.implicits._
-import io.taig.flog.algebra.Logger
+import io.taig.flog.Logger
 import io.taig.flog.data.Level
 import org.slf4j.helpers.{FormattingTuple, MarkerIgnoringBase, MessageFormatter}
 

@@ -3,7 +3,7 @@ package io.taig.flog.interop
 import _root_.monix.eval.{Task, TaskLocal}
 import cats.Applicative
 import cats.mtl.ApplicativeLocal
-import io.taig.flog.algebra.{ContextualLogger, Logger}
+import io.taig.flog.{ContextualLogger, Logger}
 import io.taig.flog.data.Context
 
 object monix {

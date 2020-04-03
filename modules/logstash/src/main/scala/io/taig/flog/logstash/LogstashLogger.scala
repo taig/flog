@@ -8,13 +8,10 @@ import cats.effect._
 import cats.implicits._
 import io.circe.Printer
 import io.circe.syntax._
-import io.taig.flog.algebra.Logger
+import io.taig.flog.Logger
 import io.taig.flog.data.Event
 
-final class LogstashLogger[F[_]: ContextShift](
-    channel: DataOutputStream,
-    blocker: Blocker
-)(
+final class LogstashLogger[F[_]: ContextShift](channel: DataOutputStream, blocker: Blocker)(
     implicit F: Sync[F],
     clock: Clock[F]
 ) extends Logger[F] {
@@ -23,10 +20,7 @@ final class LogstashLogger[F[_]: ContextShift](
   val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
 
   def write(events: List[Event]): F[Unit] = F.delay {
-    events.foreach { event =>
-      channel.writeBytes(printer.print(event.asJson) + '\n')
-    }
-
+    events.foreach(event => channel.writeBytes(printer.print(event.asJson) + '\n'))
     channel.flush()
   }
 
@@ -35,11 +29,7 @@ final class LogstashLogger[F[_]: ContextShift](
 }
 
 object LogstashLogger {
-  def apply[F[_]: ContextShift: Clock](
-      host: String,
-      port: Int,
-      blocker: Blocker
-  )(
+  def apply[F[_]: ContextShift: Clock](host: String, port: Int, blocker: Blocker)(
       implicit F: Sync[F]
   ): Resource[F, Logger[F]] = {
     val acquire = F.delay(new Socket(host, port))

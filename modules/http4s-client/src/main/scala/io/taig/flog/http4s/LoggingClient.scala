@@ -8,7 +8,7 @@ import fs2.{Chunk, Stream}
 import io.circe.parser._
 import io.circe.syntax._
 import io.circe.{Json, JsonObject}
-import io.taig.flog.algebra.Logger
+import io.taig.flog.Logger
 import io.taig.flog.data.Scope
 import org.http4s._
 import org.http4s.client.Client

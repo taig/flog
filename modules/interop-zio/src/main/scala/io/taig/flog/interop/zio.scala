@@ -4,7 +4,7 @@ import _root_.zio.{FiberRef, Task}
 import _root_.zio.interop.catz._
 import cats.Applicative
 import cats.mtl.ApplicativeLocal
-import io.taig.flog.algebra.{ContextualLogger, Logger}
+import io.taig.flog.{ContextualLogger, Logger}
 import io.taig.flog.data.Context
 
 object zio {

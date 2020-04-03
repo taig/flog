@@ -1,4 +1,4 @@
-package io.taig.flog.algebra
+package io.taig.flog
 
 import cats.implicits._
 import cats.mtl.ApplicativeLocal
