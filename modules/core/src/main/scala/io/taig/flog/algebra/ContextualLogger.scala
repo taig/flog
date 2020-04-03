@@ -2,12 +2,26 @@ package io.taig.flog.algebra
 
 import cats.implicits._
 import cats.mtl.ApplicativeLocal
-import cats.{Applicative, FlatMap}
+import cats.{~>, Applicative, FlatMap}
 import io.taig.flog.data.{Context, Event}
 import io.taig.flog.internal.Builders
 
-abstract class ContextualLogger[F[_]] extends Logger[F] {
+abstract class ContextualLogger[F[_]] extends Logger[F] { self =>
   def log(context: Context, events: Long => List[Event]): F[Unit]
+
+  final def imapK[G[_]](fk: F ~> G)(gk: G ~> F): ContextualLogger[G] =
+    new ContextualLogger[G] {
+      override def log(context: Context, events: Long => List[Event]): G[Unit] = fk(self.log(context, events))
+
+      override val context: G[Context] = fk(self.context)
+
+      override def locally[A](f: Context => Context)(run: G[A]): G[A] =
+        fk(self.locally(f)(gk(run)))
+
+      override def scope[A](context: Context)(run: G[A]): G[A] = fk(self.scope(context)(gk(run)))
+
+      override def log(events: Long => List[Event]): G[Unit] = fk(self.log(events))
+    }
 
   def context: F[Context]
 
