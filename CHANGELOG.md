@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.3
+
+_2020-04-09_
+
+`0.6.2` could not be released due to a misconfiguration, use ` 0.6.3` instead.
+
 ## 0.6.2
 
 _2020-04-09_
