@@ -18,17 +18,22 @@ object StackdriverLogger {
   def apply[F[_]: Clock](logging: Logging, name: String, resource: MonitoredResource)(implicit F: Sync[F]): Logger[F] =
     Logger { events =>
       val entries = events.map(entry(_, name, resource))
+
       F.delay(logging.write(entries.asJava))
+        .handleErrorWith { throwable =>
+          val entries = Iterable.single(failureEntry(name, resource, throwable)).asJava
+          F.delay(logging.write(entries))
+        }
+        .handleErrorWith { throwable =>
+          F.delay(throwable.printStackTrace(System.err))
+        }
     }
 
   // https://cloud.google.com/logging/docs/api/v2/resource-list
-  def default[F[_]: Clock](name: String, resource: MonitoredResource)(implicit F: Sync[F]): Resource[F, Logger[F]] = {
-    val acquire = F.delay(LoggingOptions.getDefaultInstance.getService)
-    val release = (logging: Logging) => F.delay(logging.close())
-    Resource.make(acquire)(release).map { logging =>
+  def default[F[_]: Clock](name: String, resource: MonitoredResource)(implicit F: Sync[F]): Resource[F, Logger[F]] =
+    Resource.fromAutoCloseable(F.delay(LoggingOptions.getDefaultInstance.getService)).map { logging =>
       StackdriverLogger[F](logging, name, resource)
     }
-  }
 
   def default[F[_]: Sync: Clock](name: String, tpe: String = "global"): Resource[F, Logger[F]] =
     default(name, MonitoredResource.newBuilder(tpe).build())
@@ -41,6 +46,20 @@ object StackdriverLogger {
       .setLogName(name)
       .setTimestamp(event.timestamp)
       .build()
+
+  def failureEntry(name: String, resource: MonitoredResource, throwable: Throwable): LogEntry = {
+    val payload = Map(
+      "message" -> "Failed to submit events",
+      "stacktrace" -> Printer.throwable(throwable)
+    ).asJava
+
+    LogEntry
+      .newBuilder(JsonPayload.of(payload))
+      .setSeverity(Severity.ERROR)
+      .setResource(resource)
+      .setLogName(name)
+      .build()
+  }
 
   def payload(event: Event): JsonPayload = {
     val json = JsonObject(
