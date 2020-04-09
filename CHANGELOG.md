@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.2
+
+_2020-04-09_
+
+ * Add defensive error handling for `StackdriverLogger` failures
+ * Return Slf4j `NOPLoggerFactory` instead of throwing an exception when not initialized
+ * Move `Logger` & `ContextualLogger` to `io.taif.flog`
+ * Add `ContextualLogger.imapK`
+ * Upgrade to google-cloud-logging 1.101.1
+
 ## 0.6.1
 
 _2020-04-02_
