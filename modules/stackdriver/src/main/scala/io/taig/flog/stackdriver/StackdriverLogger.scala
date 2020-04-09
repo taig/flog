@@ -1,5 +1,7 @@
 package io.taig.flog.stackdriver
 
+import java.util
+
 import cats.effect.{Clock, Resource, Sync}
 import cats.implicits._
 import com.google.cloud.MonitoredResource
@@ -21,7 +23,7 @@ object StackdriverLogger {
 
       F.delay(logging.write(entries.asJava))
         .handleErrorWith { throwable =>
-          val entries = Iterable.single(failureEntry(name, resource, throwable)).asJava
+          val entries = util.Arrays.asList(failureEntry(name, resource, throwable))
           F.delay(logging.write(entries))
         }
         .handleErrorWith { throwable =>
