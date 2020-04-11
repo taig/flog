@@ -17,16 +17,18 @@ object TracingMiddleware {
 
   def apply[F[_]](
       logger: ContextualLogger[F]
-  )(service: HttpApp[F])(implicit F: Sync[F]): HttpApp[F] = HttpApp[F] { request =>
-    val run = for {
-      _ <- logger.info(RequestScope, payload = encode(request))
-      response <- service.run(request)
-      _ <- logger.info(ResponseScope, payload = encode(response))
-    } yield response
+  )(service: HttpApp[F], filter: Request[F] => Boolean = (_: Request[F]) => true)(implicit F: Sync[F]): HttpApp[F] =
+    HttpApp[F] { request =>
+      if (filter(request)) {
+        val run = for {
+          _ <- logger.info(RequestScope, payload = encode(request))
+          response <- service.run(request)
+          _ <- logger.info(ResponseScope, payload = encode(response))
+        } yield response
 
-    F.delay(UUID.randomUUID())
-      .flatMap(uuid => logger.locally(_.trace(uuid))(run))
-  }
+        F.delay(UUID.randomUUID()).flatMap(uuid => logger.locally(_.trace(uuid))(run))
+      } else service.run(request)
+    }
 
   private def encode[F[_]](request: Request[F]) =
     JsonObject(
