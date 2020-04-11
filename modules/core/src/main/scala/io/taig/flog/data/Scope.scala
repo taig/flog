@@ -13,8 +13,7 @@ final case class Scope(segments: List[String]) extends AnyVal {
 
   def ++(scope: Scope): Scope = Scope(segments ++ scope.segments)
 
-  def contains(scope: Scope): Boolean =
-    this.show contains scope.show
+  def contains(scope: Scope): Boolean = this.show contains scope.show
 }
 
 object Scope {
@@ -28,6 +27,12 @@ object Scope {
     val name = classTag[A].runtimeClass.getName
     val normalized = if (name.endsWith("$")) name.init else name
     Scope(normalized.split('.').toList)
+  }
+
+  def fromClassSimpleName[A: ClassTag]: Scope = {
+    val name = classTag[A].runtimeClass.getSimpleName
+    val normalized = if (name.endsWith("$")) name.init else name
+    Scope.of(normalized)
   }
 
   implicit val monoid: Monoid[Scope] = new Monoid[Scope] {
