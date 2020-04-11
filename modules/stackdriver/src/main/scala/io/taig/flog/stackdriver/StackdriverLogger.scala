@@ -17,13 +17,13 @@ import io.taig.flog.stackdriver.interal.Circe
 import io.taig.flog.util.Printer
 
 object StackdriverLogger {
-  def apply[F[_]: Clock](logging: Logging, resource: MonitoredResource)(implicit F: Sync[F]): Logger[F] =
+  def apply[F[_]: Clock](name: String, logging: Logging, resource: MonitoredResource)(implicit F: Sync[F]): Logger[F] =
     Logger { events =>
       events
-        .traverse(entry(_, resource))
+        .traverse(entry(name, _, resource))
         .flatMap(entries => F.delay(logging.write(entries.asJava)))
         .handleErrorWith { throwable =>
-          failureEntry(resource, throwable)
+          failureEntry(name, resource, throwable)
             .map(Collections.singleton[LogEntry])
             .flatMap(entries => F.delay(logging.write(entries)))
         }
@@ -33,18 +33,18 @@ object StackdriverLogger {
     }
 
   // https://cloud.google.com/logging/docs/api/v2/resource-list
-  def default[F[_]: Clock](resource: MonitoredResource)(implicit F: Sync[F]): Resource[F, Logger[F]] =
+  def default[F[_]: Clock](name: String, resource: MonitoredResource)(implicit F: Sync[F]): Resource[F, Logger[F]] =
     Resource
       .fromAutoCloseable[F, Logging](F.delay(LoggingOptions.getDefaultInstance.getService))
-      .map(StackdriverLogger[F](_, resource))
+      .map(StackdriverLogger[F](name, _, resource))
 
   private def id[F[_]](implicit F: Sync[F]): F[String] = F.delay(UUID.randomUUID().show)
 
-  private def entry[F[_]: Sync](event: Event, resource: MonitoredResource): F[LogEntry] =
+  private def entry[F[_]: Sync](name: String, event: Event, resource: MonitoredResource): F[LogEntry] =
     id[F].map { id =>
       LogEntry
         .newBuilder(payload(event))
-        .setLogName(event.scope.segments.mkString("."))
+        .setLogName((name +: event.scope.segments).mkString("."))
         .setInsertId(id)
         .setSeverity(severity(event.level))
         .setResource(resource)
@@ -52,7 +52,7 @@ object StackdriverLogger {
         .build()
     }
 
-  private def failureEntry[F[_]: Sync](resource: MonitoredResource, throwable: Throwable): F[LogEntry] =
+  private def failureEntry[F[_]: Sync](name: String, resource: MonitoredResource, throwable: Throwable): F[LogEntry] =
     id[F].map { id =>
       val payload = Map(
         "message" -> "Failed to submit events",
@@ -61,6 +61,7 @@ object StackdriverLogger {
 
       LogEntry
         .newBuilder(JsonPayload.of(payload))
+        .setLogName(name)
         .setInsertId(id)
         .setSeverity(Severity.ERROR)
         .setResource(resource)
