@@ -37,9 +37,6 @@ object StackdriverLogger {
       StackdriverLogger[F](logging, name, resource)
     }
 
-  def default[F[_]: Sync: Clock](name: String, tpe: String = "global"): Resource[F, Logger[F]] =
-    default(name, MonitoredResource.newBuilder(tpe).build())
-
   def entry(event: Event, name: String, resource: MonitoredResource): LogEntry =
     LogEntry
       .newBuilder(payload(event))
