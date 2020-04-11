@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.4
+
+_2020-04-11_
+
+ * Rename `Scope.fromClassName` to `Scope.fromName`
+ * Add `Scope.fromSimpleName`
+ * Always attach an `insertId` to Stackdriver LogEntries
+ * Filter out Stackdriver payload `null` values
+ * Use `Scope` as Stackdriver logger name
+ * Remove Stackdriver global default builder
+
 ## 0.6.3
 
 _2020-04-09_
