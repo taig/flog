@@ -2,6 +2,8 @@ package io.taig.flog.stackdriver
 
 import java.util.Collections
 
+import scala.jdk.CollectionConverters._
+
 import cats.effect.{Clock, Resource, Sync}
 import cats.implicits._
 import com.google.cloud.MonitoredResource
@@ -9,12 +11,10 @@ import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.{Option => _, _}
 import io.circe.JsonObject
 import io.circe.syntax._
+import io.taig.flog.Logger
 import io.taig.flog.data.{Event, Level}
 import io.taig.flog.stackdriver.interal.Circe
 import io.taig.flog.util.Printer
-import scala.jdk.CollectionConverters._
-
-import io.taig.flog.Logger
 
 object StackdriverLogger {
   def apply[F[_]: Clock](logging: Logging, resource: MonitoredResource)(implicit F: Sync[F]): Logger[F] =
@@ -37,7 +37,7 @@ object StackdriverLogger {
       .fromAutoCloseable[F, Logging](F.delay(LoggingOptions.getDefaultInstance.getService))
       .map(StackdriverLogger[F](_, resource))
 
-  def entry(event: Event, resource: MonitoredResource): LogEntry =
+  def entry[F[_]](event: Event, resource: MonitoredResource): LogEntry =
     LogEntry
       .newBuilder(payload(event))
       .setLogName(event.scope.segments.mkString("."))

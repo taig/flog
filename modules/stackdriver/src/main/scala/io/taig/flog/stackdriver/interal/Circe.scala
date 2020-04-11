@@ -9,10 +9,10 @@ import scala.jdk.CollectionConverters._
 
 object Circe {
   final def toJavaMap(json: JsonObject): util.Map[String, Object] =
-    json.toMap.fmap(toAny).asJava
+    json.filter { case (_, value) => !value.isNull }.toMap.fmap(toAny).asJava
 
   final def toAny(json: Json): Object = json.fold(
-    jsonNull = null,
+    jsonNull = Json.Null,
     jsonBoolean = Boolean.box,
     jsonNumber = number => Double.box(number.toDouble),
     jsonString = identity,
