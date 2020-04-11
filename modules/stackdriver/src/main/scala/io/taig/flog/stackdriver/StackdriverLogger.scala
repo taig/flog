@@ -1,6 +1,6 @@
 package io.taig.flog.stackdriver
 
-import java.util
+import java.util.Collections
 
 import cats.effect.{Clock, Resource, Sync}
 import cats.implicits._
@@ -17,13 +17,13 @@ import scala.jdk.CollectionConverters._
 import io.taig.flog.Logger
 
 object StackdriverLogger {
-  def apply[F[_]: Clock](logging: Logging, name: String, resource: MonitoredResource)(implicit F: Sync[F]): Logger[F] =
+  def apply[F[_]: Clock](logging: Logging, resource: MonitoredResource)(implicit F: Sync[F]): Logger[F] =
     Logger { events =>
-      val entries = events.map(entry(_, name, resource))
+      val entries = events.map(entry(_, resource))
 
       F.delay(logging.write(entries.asJava))
         .handleErrorWith { throwable =>
-          val entries = util.Arrays.asList(failureEntry(name, resource, throwable))
+          val entries = Collections.singleton(failureEntry(resource, throwable))
           F.delay(logging.write(entries))
         }
         .handleErrorWith { throwable =>
@@ -32,21 +32,21 @@ object StackdriverLogger {
     }
 
   // https://cloud.google.com/logging/docs/api/v2/resource-list
-  def default[F[_]: Clock](name: String, resource: MonitoredResource)(implicit F: Sync[F]): Resource[F, Logger[F]] =
-    Resource.fromAutoCloseable(F.delay(LoggingOptions.getDefaultInstance.getService)).map { logging =>
-      StackdriverLogger[F](logging, name, resource)
-    }
+  def default[F[_]: Clock](resource: MonitoredResource)(implicit F: Sync[F]): Resource[F, Logger[F]] =
+    Resource
+      .fromAutoCloseable[F, Logging](F.delay(LoggingOptions.getDefaultInstance.getService))
+      .map(StackdriverLogger[F](_, resource))
 
-  def entry(event: Event, name: String, resource: MonitoredResource): LogEntry =
+  def entry(event: Event, resource: MonitoredResource): LogEntry =
     LogEntry
       .newBuilder(payload(event))
+      .setLogName(event.scope.segments.mkString("."))
       .setSeverity(severity(event))
       .setResource(resource)
-      .setLogName(name)
       .setTimestamp(event.timestamp)
       .build()
 
-  def failureEntry(name: String, resource: MonitoredResource, throwable: Throwable): LogEntry = {
+  def failureEntry(resource: MonitoredResource, throwable: Throwable): LogEntry = {
     val payload = Map(
       "message" -> "Failed to submit events",
       "stacktrace" -> Printer.throwable(throwable)
@@ -56,13 +56,11 @@ object StackdriverLogger {
       .newBuilder(JsonPayload.of(payload))
       .setSeverity(Severity.ERROR)
       .setResource(resource)
-      .setLogName(name)
       .build()
   }
 
   def payload(event: Event): JsonPayload = {
     val json = JsonObject(
-      "scope" -> event.scope.show.asJson,
       "message" -> Option(event.message).filter(_.nonEmpty).asJson,
       "payload" -> event.payload.asJson,
       "stacktrace" -> event.throwable.map(Printer.throwable).asJson
