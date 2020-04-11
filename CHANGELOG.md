@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.5
+
+_2020-04-11_
+
+ * Stackdriver requires a name as the logger name may not be empty
+ 
 ## 0.6.4
 
 _2020-04-11_
