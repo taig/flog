@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.6
+
+_2020-04-11_
+
+ * Add `filter` parameter to `TracingMiddleware`
+ * Remove ability to log request / response bodies
+ 
 ## 0.6.5
 
 _2020-04-11_
