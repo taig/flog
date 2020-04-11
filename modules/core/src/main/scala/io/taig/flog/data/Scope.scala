@@ -23,13 +23,13 @@ object Scope {
 
   def of(segments: String*): Scope = Scope(segments.toList)
 
-  def fromClassName[A: ClassTag]: Scope = {
+  def fromName[A: ClassTag]: Scope = {
     val name = classTag[A].runtimeClass.getName
     val normalized = if (name.endsWith("$")) name.init else name
     Scope(normalized.split('.').toList)
   }
 
-  def fromClassSimpleName[A: ClassTag]: Scope = {
+  def fromSimpleName[A: ClassTag]: Scope = {
     val name = classTag[A].runtimeClass.getSimpleName
     val normalized = if (name.endsWith("$")) name.init else name
     Scope.of(normalized)
