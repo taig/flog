@@ -2,7 +2,7 @@ package io.taig.flog.slf4j
 
 import java.util.Objects
 
-import cats.effect.Effect
+import cats.effect.{Effect, IO}
 import cats.effect.implicits._
 import io.taig.flog.Logger
 import io.taig.flog.data.Level
@@ -22,7 +22,7 @@ final class FlogSlf4jLogger[F[_]: Effect](logger: Logger[F]) extends MarkerIgnor
         message = Objects.toString(message, ""),
         throwable = Option(throwable)
       )
-      .toIO
+      .runAsync(_ => IO.unit)
       .unsafeRunSync()
 
   def log(level: Level, result: FormattingTuple): Unit = {
@@ -30,7 +30,7 @@ final class FlogSlf4jLogger[F[_]: Effect](logger: Logger[F]) extends MarkerIgnor
     val throwable = Option(result.getThrowable)
     logger
       .apply(level, message = message, throwable = throwable)
-      .toIO
+      .runAsync(_ => IO.unit)
       .unsafeRunSync()
   }
 
