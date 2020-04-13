@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.7
+
+_2020-04-13_
+
+ * Add `ContextualLogger.liftNoop`
+ * Use `.runAsync().unsafeRunSync()` in favor of `.toIO.unsafeRunSync()`
+
 ## 0.6.6
 
 _2020-04-11_
