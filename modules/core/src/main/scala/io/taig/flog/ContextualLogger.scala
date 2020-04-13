@@ -80,4 +80,16 @@ object ContextualLogger extends Builders[ContextualLogger] {
 
   override def defaults[F[_]](context: Context)(logger: ContextualLogger[F]): ContextualLogger[F] =
     build(logger)(_.map(_.defaults(context)))
+
+  def liftNoop[F[_]: Applicative](logger: Logger[F]): ContextualLogger[F] = new ContextualLogger[F] {
+    override def log(context: Context, events: Long => List[Event]): F[Unit] = logger.log(events)
+
+    override val context: F[Context] = Context.Empty.pure[F]
+
+    override def locally[A](f: Context => Context)(run: F[A]): F[A] = run
+
+    override def scope[A](context: Context)(run: F[A]): F[A] = run
+
+    override def log(events: Long => List[Event]): F[Unit] = logger.log(events)
+  }
 }
