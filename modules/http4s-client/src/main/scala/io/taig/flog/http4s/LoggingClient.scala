@@ -1,7 +1,6 @@
 package io.taig.flog.http4s
 
 import cats.effect.{Concurrent, Resource}
-import cats.implicits._
 import io.circe.syntax._
 import io.circe.{Json, JsonObject}
 import io.taig.flog.Logger
@@ -10,19 +9,15 @@ import org.http4s._
 import org.http4s.client.Client
 
 object LoggingClient {
-  val RequestScope: Scope = Scope.Root / "client" / "request"
+  def apply[F[_]: Concurrent](logger: Logger[F])(client: Client[F]): Client[F] =
+    create(Logger.prefix(Scope.Root / "client")(logger), client)
 
-  val ResponseScope: Scope = Scope.Root / "client" / "response"
-
-  def apply[F[_]: Concurrent](client: Client[F], logger: Logger[F]): Client[F] =
-    response(request(client, logger), logger)
-
-  def request[F[_]: Concurrent](client: Client[F], logger: Logger[F]): Client[F] = Client[F] { request =>
-    Resource.liftF(logger.info(RequestScope, encode(request))) *> client.run(request)
-  }
-
-  def response[F[_]: Concurrent](client: Client[F], logger: Logger[F]): Client[F] = Client { request =>
-    client.run(request).evalTap(response => logger.info(ResponseScope, encode(response)))
+  private def create[F[_]: Concurrent](logger: Logger[F], client: Client[F]): Client[F] = Client[F] { request =>
+    for {
+      _ <- Resource.liftF(logger.info("Request", encode(request)))
+      response <- client.run(request)
+      _ <- Resource.liftF(logger.info("Response", encode(response)))
+    } yield response
   }
 
   private def encode[F[_]](request: Request[F]) =

@@ -1,6 +1,6 @@
 package io.taig.flog.http4s
 
-import cats.effect.{ExitCase, Sync}
+import cats.effect.Sync
 import cats.effect.implicits._
 import cats.implicits._
 import io.circe.syntax._
@@ -24,11 +24,7 @@ object LoggingMiddleware {
           _ <- logger.info("Request", encode(request))
           response <- service.run(request)
           _ <- logger.info("Response", encode(response))
-        } yield response).guaranteeCase {
-          case ExitCase.Completed => F.unit
-          case ExitCase.Canceled  => logger.info("Request cancelled", encode(request))
-          case ExitCase.Error(_)  => F.unit
-        }
+        } yield response).onCancel(logger.info("Request cancelled", encode(request)))
       else service.run(request)
     }
 
