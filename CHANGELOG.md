@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.8
+
+_2020-04-15_
+
+ * Split `LoggingMiddleware` into `Logging`- and `TracingMiddleware`
+ * Log request body when the request is canceled
+ * Adjust `Client` logging structure to `Server` logging
+ * Upgrade to sbt 1.3.10
+
 ## 0.6.7
 
 _2020-04-13_
