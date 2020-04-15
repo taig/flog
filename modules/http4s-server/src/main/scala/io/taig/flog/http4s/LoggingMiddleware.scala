@@ -15,17 +15,19 @@ object LoggingMiddleware {
   def apply[F[_]: Sync](logger: Logger[F])(app: HttpApp[F], filter: Request[F] => Boolean = LogAll): HttpApp[F] =
     create(Logger.prefix(Scope.Root / "server")(logger), app, filter)
 
-  private def create[F[_]](logger: Logger[F], service: HttpApp[F], filter: Request[F] => Boolean)(implicit F: Sync[F]): HttpApp[F] =
+  private def create[F[_]](logger: Logger[F], service: HttpApp[F], filter: Request[F] => Boolean)(
+      implicit F: Sync[F]
+  ): HttpApp[F] =
     HttpApp[F] { request =>
       if (filter(request))
         (for {
-          _ <- logger.info("Request", payload = encode(request))
+          _ <- logger.info("Request", encode(request))
           response <- service.run(request)
-          _ <- logger.info("Response", payload = encode(response))
+          _ <- logger.info("Response", encode(response))
         } yield response).guaranteeCase {
           case ExitCase.Completed => F.unit
-          case ExitCase.Canceled => logger.info("Request cancelled")
-          case ExitCase.Error(_) => F.unit
+          case ExitCase.Canceled  => logger.info("Request cancelled", encode(request))
+          case ExitCase.Error(_)  => F.unit
         }
       else service.run(request)
     }
