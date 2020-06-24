@@ -13,9 +13,9 @@ val MonixVersion = "3.2.2"
 val ScalaCollectionCompatVersion = "2.1.6"
 val ScalatestVersion = "3.1.1"
 val Slf4jVersion = "1.7.30"
-val TestfVersion = "0.1.2"
-val ZioVersion = "1.0.0-RC18-2"
-val ZioInteropCatsVersion = "2.0.0.0-RC12"
+val TestfVersion = "0.1.5"
+val ZioVersion = "1.0.0-RC21"
+val ZioInteropCatsVersion = "2.1.3.0-RC16"
 
 ThisBuild / testFrameworks += new TestFramework("io.taig.testf.runner.TestF")
 
