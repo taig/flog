@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.6.9
+
+_2020-06-24_
+
+ * Upgrade to sbt-houserules 0.2.2
+ * Upgrade to sbt-scalajs 1.1.0
+ * Upgrade to cats-effect 2.1.3
+ * Upgrade to scala-collection-compat 2.1.6
+ * Upgrade to fs2 2.4.2
+ * Upgrade to http4s 0.21.4
+ * Upgrade to google-cloud-logging 1.101.2
+ * Upgrade to monix 3.2.2
+ * Upgrade to scala 2.13.2
+ * Upgrade to sbt 1.3.12
+
 ## 0.6.8
 
 _2020-04-15_
