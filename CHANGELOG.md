@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.10
+
+_2020-06-29_
+
+ * Add `StackdriverLogger.fromOptions` builder
+ * Upgrade to http4s 0.21.6
+ * Upgrade to scala 2.13.3
+ * Upgrade to sbt-houserules 0.2.3
+
 ## 0.6.9
 
 _2020-06-24_
