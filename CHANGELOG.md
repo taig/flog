@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.11
+
+_2020-06-29_
+
+ * Downgrade to google-cloud-logging 1.101.1, as version 1.101.2 appears to be flawed
+
 ## 0.6.10
 
 _2020-06-29_
