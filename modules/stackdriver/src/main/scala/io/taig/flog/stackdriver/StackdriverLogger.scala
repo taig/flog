@@ -32,11 +32,16 @@ object StackdriverLogger {
         }
     }
 
+  def fromOptions[F[_]: Clock](name: String, resource: MonitoredResource, options: LoggingOptions)(
+      implicit F: Sync[F]
+  ): Resource[F, Logger[F]] =
+    Resource
+      .fromAutoCloseable[F, Logging](F.delay(options.getService))
+      .map(StackdriverLogger[F](name, _, resource))
+
   // https://cloud.google.com/logging/docs/api/v2/resource-list
   def default[F[_]: Clock](name: String, resource: MonitoredResource)(implicit F: Sync[F]): Resource[F, Logger[F]] =
-    Resource
-      .fromAutoCloseable[F, Logging](F.delay(LoggingOptions.getDefaultInstance.getService))
-      .map(StackdriverLogger[F](name, _, resource))
+    fromOptions(name, resource, LoggingOptions.getDefaultInstance)
 
   private def id[F[_]](implicit F: Sync[F]): F[String] = F.delay(UUID.randomUUID().show)
 
