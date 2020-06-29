@@ -27,9 +27,7 @@ object StackdriverLogger {
             .map(Collections.singleton[LogEntry])
             .flatMap(entries => F.delay(logging.write(entries)))
         }
-        .handleErrorWith { throwable =>
-          F.delay(throwable.printStackTrace(System.err))
-        }
+        .handleErrorWith { throwable => F.delay(throwable.printStackTrace(System.err)) }
     }
 
   def fromOptions[F[_]: Clock](name: String, resource: MonitoredResource, options: LoggingOptions)(

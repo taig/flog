@@ -24,9 +24,7 @@ abstract class Logger[F[_]] {
       message: String = "",
       payload: => JsonObject = JsonObject.empty,
       throwable: Option[Throwable] = None
-  ): F[Unit] = log { timestamp =>
-    List(Event(timestamp, level, scope, message, payload, throwable))
-  }
+  ): F[Unit] = log { timestamp => List(Event(timestamp, level, scope, message, payload, throwable)) }
 
   final def debug(
       scope: Scope,
@@ -159,9 +157,7 @@ object Logger extends Builders[Logger] {
     F.delay(new BufferedWriter(new OutputStreamWriter(target), buffer)).map { writer =>
       Logger[F] { events =>
         F.delay {
-          events.foreach { event =>
-            writer.write(Printer.event(event).show)
-          }
+          events.foreach { event => writer.write(Printer.event(event).show) }
 
           writer.flush()
         }
@@ -175,9 +171,7 @@ object Logger extends Builders[Logger] {
     Resource.make(acquire)(release).map { writer =>
       Logger[F] { events =>
         F.delay {
-          events.foreach { event =>
-            writer.write(Printer.event(event).show)
-          }
+          events.foreach { event => writer.write(Printer.event(event).show) }
 
           writer.flush()
         }
@@ -192,9 +186,7 @@ object Logger extends Builders[Logger] {
   def queued[F[_]: Concurrent](timestamp: F[Long], logger: Logger[F]): Resource[F, Logger[F]] =
     Resource.liftF(Queue.unbounded[F, Event]).flatMap { queue =>
       val enqueue = raw[F](timestamp, _.traverse_(queue.enqueue1))
-      val process = queue.dequeue.chunks.evalMap { events =>
-        logger.log(_ => events.toList)
-      }
+      val process = queue.dequeue.chunks.evalMap { events => logger.log(_ => events.toList) }
       (Stream.emit(enqueue) concurrently process).compile.resource.lastOrError
     }
 

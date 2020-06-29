@@ -39,9 +39,7 @@ object Printer {
     if (!event.payload.isEmpty)
       builder.append('\n').append(Json.fromJsonObject(event.payload).spaces2)
 
-    event.throwable.map(Printer.throwable).foreach { value =>
-      builder.append('\n').append(value)
-    }
+    event.throwable.map(Printer.throwable).foreach { value => builder.append('\n').append(value) }
 
     builder.append('\n').toString
   }

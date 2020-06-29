@@ -36,9 +36,7 @@ object ContextualLogger extends Builders[ContextualLogger] {
       override def log(events: Long => List[Event]): F[Unit] = context.flatMap(log(_, events))
 
       final override def log(context: Context, events: Long => List[Event]): F[Unit] =
-        logger.log { timestamp =>
-          events(timestamp).map(_.defaults(context))
-        }
+        logger.log { timestamp => events(timestamp).map(_.defaults(context)) }
 
       final override val context: F[Context] = F.ask
 
