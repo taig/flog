@@ -1,4 +1,4 @@
-package io.taig.flog.stackdriver.interal
+package io.taig.flog.stackdriver.util
 
 import java.util
 

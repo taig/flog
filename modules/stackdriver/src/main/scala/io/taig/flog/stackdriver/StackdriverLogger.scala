@@ -13,7 +13,7 @@ import io.circe.JsonObject
 import io.circe.syntax._
 import io.taig.flog.Logger
 import io.taig.flog.data.{Event, Level}
-import io.taig.flog.stackdriver.interal.Circe
+import io.taig.flog.stackdriver.util.Circe
 import io.taig.flog.util.Printer
 
 object StackdriverLogger {
