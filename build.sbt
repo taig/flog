@@ -17,25 +17,10 @@ val TestfVersion = "0.1.5"
 val ZioVersion = "1.0.0-RC21"
 val ZioInteropCatsVersion = "2.1.3.0-RC16"
 
-ThisBuild / testFrameworks += new TestFramework("io.taig.testf.runner.TestF")
+// Don't publish root / aggregation project
+noPublishSettings
 
-lazy val flog = project
-  .in(file("."))
-  .settings(noPublishSettings)
-  .aggregate(
-    core.jvm,
-    core.js,
-    zio.jvm,
-    monix.jvm,
-    monix.js,
-    zio.js,
-    slf4j,
-    sheets,
-    stackdriver,
-    logstash,
-    http4sClient,
-    http4sServer
-  )
+ThisBuild / testFrameworks += new TestFramework("io.taig.testf.runner.TestF")
 
 lazy val core = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
