@@ -1,6 +1,6 @@
 package io.taig.flog.http4s
 
-import cats.effect.Sync
+import cats.effect.{ExitCase, Sync}
 import cats.effect.implicits._
 import cats.implicits._
 import io.circe.syntax._
@@ -13,15 +13,17 @@ object LoggingMiddleware {
   def apply[F[_]: Sync](logger: Logger[F])(app: HttpApp[F]): HttpApp[F] =
     create(Logger.prefix(Scope.Root / "server")(logger), app)
 
-  private def create[F[_]](logger: Logger[F], service: HttpApp[F])(
-      implicit F: Sync[F]
-  ): HttpApp[F] =
+  private def create[F[_]](logger: Logger[F], service: HttpApp[F])(implicit F: Sync[F]): HttpApp[F] =
     HttpApp[F] { request =>
       (for {
         _ <- logger.info("Request", encode(request))
         response <- service.run(request)
         _ <- logger.info("Response", encode(response))
-      } yield response).onCancel(logger.info("Request cancelled", encode(request)))
+      } yield response).guaranteeCase {
+        case ExitCase.Completed        => F.unit
+        case ExitCase.Error(throwable) => logger.error("Request failed", throwable)
+        case ExitCase.Canceled         => logger.info("Request cancelled", encode(request))
+      }
     }
 
   private def encode[F[_]](request: Request[F]) =
