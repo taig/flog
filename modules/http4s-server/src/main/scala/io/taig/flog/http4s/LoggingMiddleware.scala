@@ -10,22 +10,18 @@ import io.taig.flog.data.Scope
 import org.http4s.{HttpApp, Request, Response}
 
 object LoggingMiddleware {
-  val LogAll: Request[Any] => Boolean = (_: Request[Any]) => true
+  def apply[F[_]: Sync](logger: Logger[F])(app: HttpApp[F]): HttpApp[F] =
+    create(Logger.prefix(Scope.Root / "server")(logger), app)
 
-  def apply[F[_]: Sync](logger: Logger[F])(app: HttpApp[F], filter: Request[F] => Boolean = LogAll): HttpApp[F] =
-    create(Logger.prefix(Scope.Root / "server")(logger), app, filter)
-
-  private def create[F[_]](logger: Logger[F], service: HttpApp[F], filter: Request[F] => Boolean)(
+  private def create[F[_]](logger: Logger[F], service: HttpApp[F])(
       implicit F: Sync[F]
   ): HttpApp[F] =
     HttpApp[F] { request =>
-      if (filter(request))
-        (for {
-          _ <- logger.info("Request", encode(request))
-          response <- service.run(request)
-          _ <- logger.info("Response", encode(response))
-        } yield response).onCancel(logger.info("Request cancelled", encode(request)))
-      else service.run(request)
+      (for {
+        _ <- logger.info("Request", encode(request))
+        response <- service.run(request)
+        _ <- logger.info("Response", encode(response))
+      } yield response).onCancel(logger.info("Request cancelled", encode(request)))
     }
 
   private def encode[F[_]](request: Request[F]) =
