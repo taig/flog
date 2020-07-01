@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.12
+
+_2020-07-01_
+
+ * Log failures in request execution
+ * Remove `filter` parameter from `LoggingMiddleware`, use `Logger.filter` instead
+ * Rename `internal` package to `util`
+ * Remove explicit root / aggregation module
+ * Upgrade to google-cloud-logging 1.101.2
+
 ## 0.6.11
 
 _2020-06-29_
