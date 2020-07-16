@@ -14,7 +14,7 @@ val ScalaCollectionCompatVersion = "2.1.6"
 val ScalatestVersion = "3.1.1"
 val Slf4jVersion = "1.7.30"
 val TestfVersion = "0.1.5"
-val ZioVersion = "1.0.0-RC21"
+val ZioVersion = "1.0.0-RC21-2"
 val ZioInteropCatsVersion = "2.1.4.0-RC17"
 
 // Don't publish root / aggregation project
