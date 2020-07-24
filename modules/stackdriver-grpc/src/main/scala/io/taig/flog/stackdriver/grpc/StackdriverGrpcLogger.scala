@@ -1,4 +1,4 @@
-package io.taig.flog.stackdriver
+package io.taig.flog.stackdriver.grpc
 
 import java.util.{Collections, UUID}
 
@@ -8,15 +8,14 @@ import cats.effect.{Clock, Resource, Sync}
 import cats.implicits._
 import com.google.cloud.MonitoredResource
 import com.google.cloud.logging.Payload.JsonPayload
-import com.google.cloud.logging.{Option => _, _}
+import com.google.cloud.logging.{LogEntry, Logging, LoggingOptions, Severity}
 import io.circe.JsonObject
 import io.circe.syntax._
 import io.taig.flog.Logger
 import io.taig.flog.data.{Event, Level}
-import io.taig.flog.stackdriver.util.Circe
-import io.taig.flog.util.Printer
+import io.taig.flog.util.{Circe, Printer}
 
-object StackdriverLogger {
+object StackdriverGrpcLogger {
   def apply[F[_]: Clock](name: String, logging: Logging, resource: MonitoredResource)(implicit F: Sync[F]): Logger[F] =
     Logger { events =>
       events
@@ -35,7 +34,7 @@ object StackdriverLogger {
   ): Resource[F, Logger[F]] =
     Resource
       .fromAutoCloseable[F, Logging](F.delay(options.getService))
-      .map(StackdriverLogger[F](name, _, resource))
+      .map(StackdriverGrpcLogger[F](name, _, resource))
 
   // https://cloud.google.com/logging/docs/api/v2/resource-list
   def default[F[_]: Clock](name: String, resource: MonitoredResource)(implicit F: Sync[F]): Resource[F, Logger[F]] =

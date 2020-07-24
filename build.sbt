@@ -3,19 +3,21 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 val CatsEffectVersion = "2.1.4"
 val CatsMtlVersion = "0.7.1"
 val CirceVersion = "0.13.0"
+val Fs2Version = "2.4.2"
 val GoogleApiClientVersion = "1.25.1"
+val GoogleApiServicesLoggingVersion = "v2-rev20200619-1.30.10"
 val GoogleApiServicesSheetsVersion = "v4-rev581-1.25.0"
+val GoogleAuthLibraryOauth2HttpVersion = "0.21.1"
 val GoogleCloudLoggingVersion = "1.101.2"
 val GoogleOauthClientJettyVersion = "1.25.0"
 val Http4sVersion = "0.21.6"
-val Fs2Version = "2.4.2"
 val MonixVersion = "3.2.2"
 val ScalaCollectionCompatVersion = "2.1.6"
 val ScalatestVersion = "3.1.1"
 val Slf4jVersion = "1.7.30"
 val TestfVersion = "0.1.5"
-val ZioVersion = "1.0.0-RC21-2"
 val ZioInteropCatsVersion = "2.1.4.0-RC17"
+val ZioVersion = "1.0.0-RC21-2"
 
 // Don't publish root / aggregation project
 noPublishSettings
@@ -30,6 +32,7 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
     libraryDependencies ++=
       "co.fs2" %%% "fs2-core" % Fs2Version ::
         "io.circe" %%% "circe-core" % CirceVersion ::
+        "org.scala-lang.modules" %% "scala-collection-compat" % ScalaCollectionCompatVersion ::
         "org.typelevel" %%% "cats-effect" % CatsEffectVersion ::
         "org.typelevel" %%% "cats-mtl-core" % CatsMtlVersion ::
         "io.taig" %%% "testf-auto" % TestfVersion % "test" ::
@@ -85,14 +88,26 @@ lazy val sheets = project
   )
   .dependsOn(core.jvm)
 
-lazy val stackdriver = project
-  .in(file("modules/stackdriver"))
+lazy val stackdriverGrpc = project
+  .in(file("modules/stackdriver-grpc"))
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
       "com.google.cloud" % "google-cloud-logging" % GoogleCloudLoggingVersion ::
-        "org.scala-lang.modules" %% "scala-collection-compat" % ScalaCollectionCompatVersion ::
-        Nil
+        Nil,
+    name := "stackdriver-grpc"
+  )
+  .dependsOn(core.jvm)
+
+lazy val stackdriverHttp = project
+  .in(file("modules/stackdriver-http"))
+  .settings(sonatypePublishSettings)
+  .settings(
+    libraryDependencies ++=
+      "com.google.auth" % "google-auth-library-oauth2-http" % GoogleAuthLibraryOauth2HttpVersion ::
+        "com.google.apis" % "google-api-services-logging" % GoogleApiServicesLoggingVersion ::
+        Nil,
+    name := "stackdriver-http"
   )
   .dependsOn(core.jvm)
 
