@@ -41,6 +41,14 @@ object StackdriverHttpLogger {
           val request = new WriteLogEntriesRequest().setEntries(entries.asJava)
           blocker.delay(logging.write(request).execute()).void
         }
+        .handleErrorWith { throwable =>
+          failureEntry(name, resource, throwable)
+            .flatMap { entry =>
+              val request = new WriteLogEntriesRequest().setEntries(util.Arrays.asList(entry))
+              blocker.delay(logging.write(request).execute()).void
+            }
+        }
+        .handleErrorWith(throwable => F.delay(throwable.printStackTrace(System.err)))
     }
 
   def fromCredentials[F[_]: Sync: ContextShift: Clock](
@@ -97,6 +105,23 @@ object StackdriverHttpLogger {
         .setSeverity(severity(event.level))
         .setResource(resource)
         .setTimestamp(Instant.ofEpochMilli(event.timestamp).toString)
+    }
+
+  private def failureEntry[F[_]: Sync](name: String, resource: MonitoredResource, throwable: Throwable): F[LogEntry] =
+    id[F].map { id =>
+      // format: off
+      val payload = util.Map.of[String, Object](
+        "message", "Failed to submit events",
+        "stacktrace", Printer.throwable(throwable)
+      )
+      // format: on
+
+      new LogEntry()
+        .setJsonPayload(payload)
+        .setLogName(name)
+        .setInsertId(id)
+        .setSeverity(severity(Level.Error))
+        .setResource(resource)
     }
 
   private def payload(event: Event): util.Map[String, Object] = {
