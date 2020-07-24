@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.0
+
+_2020-07-24_
+
+ * Rename `stackdriver` module to `stackdriver-grpc` and introduce `stackdriver-http`
+ * Upgrade to zio 1.0.0-RC21-2
+ * Upgrade to zio-interop-cats 2.1.4.0-RC17
+ * Upgrade to sbt-scalajs 1.1.1
+ * Upgrade to cats-effect 2.1.4
+ * Upgrade to sbt 1.3.13
+
 ## 0.6.12
 
 _2020-07-01_
