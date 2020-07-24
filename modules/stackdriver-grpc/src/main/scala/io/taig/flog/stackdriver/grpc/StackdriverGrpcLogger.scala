@@ -1,5 +1,6 @@
 package io.taig.flog.stackdriver.grpc
 
+import java.util
 import java.util.{Collections, UUID}
 
 import scala.jdk.CollectionConverters._
@@ -56,10 +57,12 @@ object StackdriverGrpcLogger {
 
   private def failureEntry[F[_]: Sync](name: String, resource: MonitoredResource, throwable: Throwable): F[LogEntry] =
     id[F].map { id =>
-      val payload = Map(
-        "message" -> "Failed to submit events",
-        "stacktrace" -> Printer.throwable(throwable)
-      ).asJava
+      // format: off
+      val payload = util.Map.of[String, Object](
+        "message", "Failed to submit events",
+        "stacktrace", Printer.throwable(throwable)
+      )
+      // format: on
 
       LogEntry
         .newBuilder(JsonPayload.of(payload))
