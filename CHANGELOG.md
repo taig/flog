@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.1
+
+_2020-07-24_
+
+ * Add `StackdriverHttpLogger` error handling
+ * Improve `StackdriverGrpcLogger` failureEntry payload construction
+
 ## 0.7.0
 
 _2020-07-24_
