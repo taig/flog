@@ -1,5 +1,7 @@
 package io.taig.flog.stackdriver.http.util
 
+import java.util
+
 import cats.effect.Sync
 import com.google.api.services.logging.v2.model.MonitoredResource
 
@@ -12,14 +14,13 @@ object MonitoredResources {
     new MonitoredResource()
       .setType("cloud_run_revision")
       .setLabels(
-        java.util.Map.of(
-          "service_name",
-          unsafeGetEnv("K_SERVICE"),
-          "revision_name",
-          unsafeGetEnv("K_REVISION"),
-          "configuration_name",
-          unsafeGetEnv("K_CONFIGURATION")
+        // format: off
+        util.Map.of(
+          "service_name", unsafeGetEnv("K_SERVICE"),
+          "revision_name", unsafeGetEnv("K_REVISION"),
+          "configuration_name", unsafeGetEnv("K_CONFIGURATION")
         )
+        // format: on
       )
   }
 }
