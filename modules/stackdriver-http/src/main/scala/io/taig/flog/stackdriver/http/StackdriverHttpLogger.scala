@@ -4,8 +4,7 @@ import java.io.InputStream
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.time.Instant
-import java.util
-import java.util.UUID
+import java.util.{UUID, Arrays => JArrays, Map => JMap}
 
 import scala.jdk.CollectionConverters._
 
@@ -44,7 +43,7 @@ object StackdriverHttpLogger {
         .handleErrorWith { throwable =>
           failureEntry(name, resource, throwable)
             .flatMap { entry =>
-              val request = new WriteLogEntriesRequest().setEntries(util.Arrays.asList(entry))
+              val request = new WriteLogEntriesRequest().setEntries(JArrays.asList(entry))
               blocker.delay(logging.write(request).execute()).void
             }
         }
@@ -85,7 +84,7 @@ object StackdriverHttpLogger {
       .liftF {
         blocker
           .delay {
-            val scopes = util.Arrays.asList(LoggingScopes.CLOUD_PLATFORM_READ_ONLY, LoggingScopes.LOGGING_WRITE)
+            val scopes = java.util.Arrays.asList(LoggingScopes.CLOUD_PLATFORM_READ_ONLY, LoggingScopes.LOGGING_WRITE)
             ServiceAccountCredentials.fromStream(account).createScoped(scopes)
           }
       }
@@ -110,7 +109,7 @@ object StackdriverHttpLogger {
   private def failureEntry[F[_]: Sync](name: String, resource: MonitoredResource, throwable: Throwable): F[LogEntry] =
     id[F].map { id =>
       // format: off
-      val payload = util.Map.of[String, Object](
+      val payload = JMap.of[String, Object](
         "message", "Failed to submit events",
         "stacktrace", Printer.throwable(throwable)
       )
@@ -124,7 +123,7 @@ object StackdriverHttpLogger {
         .setResource(resource)
     }
 
-  private def payload(event: Event): util.Map[String, Object] = {
+  private def payload(event: Event): JMap[String, Object] = {
     val json = JsonObject(
       "message" -> Option(event.message).filter(_.nonEmpty).asJson,
       "payload" -> event.payload.asJson,
