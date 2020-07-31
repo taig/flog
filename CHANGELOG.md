@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.2
+
+_2020-07-31_
+
+ * Add native-image configuration for `stackdriver-http` module
+ * Upgrade to scala 2.12.12
+ * Add `MonitoredResources` helper
+
 ## 0.7.1
 
 _2020-07-24_
