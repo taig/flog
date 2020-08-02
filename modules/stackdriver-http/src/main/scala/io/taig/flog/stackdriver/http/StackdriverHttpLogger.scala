@@ -7,7 +7,6 @@ import java.time.Instant
 import java.util.{UUID, Arrays => JArrays, Map => JMap}
 
 import scala.jdk.CollectionConverters._
-
 import cats.effect.{Blocker, Clock, ContextShift, Resource, Sync}
 import cats.implicits._
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
@@ -20,7 +19,7 @@ import com.google.auth.oauth2.ServiceAccountCredentials
 import io.circe.JsonObject
 import io.circe.syntax._
 import io.taig.flog.Logger
-import io.taig.flog.data.{Event, Level}
+import io.taig.flog.data.{Event, Level, Scope}
 import io.taig.flog.util.{Circe, Printer}
 
 object StackdriverHttpLogger {
@@ -41,7 +40,7 @@ object StackdriverHttpLogger {
           blocker.delay(logging.write(request).execute()).void
         }
         .handleErrorWith { throwable =>
-          failureEntry(name, resource, throwable)
+          failureEntry(project, name, resource, throwable)
             .flatMap { entry =>
               val request = new WriteLogEntriesRequest().setEntries(JArrays.asList(entry))
               blocker.delay(logging.write(request).execute()).void
@@ -96,17 +95,14 @@ object StackdriverHttpLogger {
     id[F].map { id =>
       new LogEntry()
         .setJsonPayload(payload(event))
-        .setLogName(
-          s"projects/$project/logs/" + URLEncoder
-            .encode((name +: event.scope.segments).mkString("."), StandardCharsets.UTF_8)
-        )
+        .setLogName(logName(project, name, event.scope))
         .setInsertId(id)
         .setSeverity(severity(event.level))
         .setResource(resource)
         .setTimestamp(Instant.ofEpochMilli(event.timestamp).toString)
     }
 
-  private def failureEntry[F[_]: Sync](name: String, resource: MonitoredResource, throwable: Throwable): F[LogEntry] =
+  private def failureEntry[F[_]: Sync](project: String, name: String, resource: MonitoredResource, throwable: Throwable): F[LogEntry] =
     id[F].map { id =>
       // format: off
       val payload = JMap.of[String, Object](
@@ -117,11 +113,15 @@ object StackdriverHttpLogger {
 
       new LogEntry()
         .setJsonPayload(payload)
-        .setLogName(name)
+        .setLogName(logName(project, name, Scope.Root))
         .setInsertId(id)
         .setSeverity(severity(Level.Error))
         .setResource(resource)
     }
+
+  def logName(project: String, name: String, scope: Scope): String =
+    s"projects/$project/logs/" + URLEncoder
+      .encode((name +: scope.segments).mkString("."), StandardCharsets.UTF_8)
 
   private def payload(event: Event): JMap[String, Object] = {
     val json = JsonObject(
