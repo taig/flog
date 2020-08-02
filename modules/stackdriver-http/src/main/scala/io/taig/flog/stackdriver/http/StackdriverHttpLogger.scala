@@ -102,7 +102,12 @@ object StackdriverHttpLogger {
         .setTimestamp(Instant.ofEpochMilli(event.timestamp).toString)
     }
 
-  private def failureEntry[F[_]: Sync](project: String, name: String, resource: MonitoredResource, throwable: Throwable): F[LogEntry] =
+  private def failureEntry[F[_]: Sync](
+      project: String,
+      name: String,
+      resource: MonitoredResource,
+      throwable: Throwable
+  ): F[LogEntry] =
     id[F].map { id =>
       // format: off
       val payload = JMap.of[String, Object](
