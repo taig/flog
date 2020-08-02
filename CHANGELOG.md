@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.3
+
+_2020-08-02_
+
+ * Fix logName in failureEntry
+
 ## 0.7.2
 
 _2020-07-31_
