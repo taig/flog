@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.4
+
+_2020-08-08_
+
+ * Upgrade sheets logger dependencies
+ * Upgrade to zio 1.0.0
+ * Add Scope.from(Simple)Name(value: Any) methods
+
 ## 0.7.3
 
 _2020-08-02_
