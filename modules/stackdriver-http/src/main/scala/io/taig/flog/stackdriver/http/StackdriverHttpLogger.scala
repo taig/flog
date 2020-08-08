@@ -83,7 +83,7 @@ object StackdriverHttpLogger {
       .liftF {
         blocker
           .delay {
-            val scopes = java.util.Arrays.asList(LoggingScopes.CLOUD_PLATFORM_READ_ONLY, LoggingScopes.LOGGING_WRITE)
+            val scopes = JArrays.asList(LoggingScopes.CLOUD_PLATFORM_READ_ONLY, LoggingScopes.LOGGING_WRITE)
             ServiceAccountCredentials.fromStream(account).createScoped(scopes)
           }
       }

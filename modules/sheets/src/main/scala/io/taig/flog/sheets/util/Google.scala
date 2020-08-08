@@ -1,54 +1,36 @@
 package io.taig.flog.sheets.util
 
-import java.io.{FileNotFoundException, InputStream}
-import java.util.Collections
-
-import cats.effect.{Resource, Sync}
-import cats.implicits._
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
-import com.google.api.client.http.javanet.NetHttpTransport
-import com.google.api.client.json.jackson2.JacksonFactory
-import com.google.api.services.sheets.v4.model.{AppendValuesResponse, ValueRange}
-import com.google.api.services.sheets.v4.{Sheets, SheetsScopes}
+import java.io.InputStream
+import java.util.{Arrays => JArrays}
 
 import scala.jdk.CollectionConverters._
 
+import cats.effect.{Blocker, ContextShift, Resource, Sync}
+import cats.implicits._
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
+import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.services.sheets.v4.model.{AppendValuesResponse, ValueRange}
+import com.google.api.services.sheets.v4.{Sheets, SheetsScopes}
+import com.google.auth.Credentials
+import com.google.auth.http.HttpCredentialsAdapter
+import com.google.auth.oauth2.ServiceAccountCredentials
+
 object Google {
-  def jackson[F[_]](implicit F: Sync[F]): F[JacksonFactory] =
-    F.delay(JacksonFactory.getDefaultInstance)
-
-  def transport[F[_]](implicit F: Sync[F]): F[NetHttpTransport] =
-    F.delay(GoogleNetHttpTransport.newTrustedTransport())
-
-  def resource[F[_]](name: String)(implicit F: Sync[F]): F[InputStream] =
-    F.delay(Option(getClass.getResourceAsStream(name))).flatMap {
-      case Some(resource) => resource.pure[F]
-      case None =>
-        val message = s"Resource not found: '$name'"
-        new FileNotFoundException(message).raiseError[F, InputStream]
-    }
-
   def handle[F[_]](stream: F[InputStream])(implicit F: Sync[F]): Resource[F, InputStream] =
     Resource.make(stream)(resource => F.delay(resource.close()))
 
-  def credential[F[_]](
-      credentials: F[InputStream],
-      json: JacksonFactory,
-      transport: NetHttpTransport
-  )(implicit F: Sync[F]): F[GoogleCredential] =
-    handle[F](credentials).use { credentials =>
-      val scope = Collections.singletonList(SheetsScopes.SPREADSHEETS)
-      F.delay(GoogleCredential.fromStream(credentials, transport, json))
-        .flatMap(credential => F.delay(credential.createScoped(scope)))
+  def credentials[F[_]: Sync: ContextShift](blocker: Blocker, account: F[InputStream]): F[Credentials] =
+    handle[F](account).use { input =>
+      val scope = JArrays.asList(SheetsScopes.SPREADSHEETS)
+      blocker.delay(ServiceAccountCredentials.fromStream(input).createScoped(scope))
     }
 
-  def sheets[F[_]: Sync](credentials: F[InputStream]): F[Sheets] =
+  def sheets[F[_]: ContextShift](blocker: Blocker, account: F[InputStream])(implicit F: Sync[F]): F[Sheets] =
     for {
-      json <- jackson[F]
-      transport <- transport[F]
-      credential <- credential[F](credentials, json, transport)
-    } yield new Sheets.Builder(transport, json, credential)
+      json <- F.delay(JacksonFactory.getDefaultInstance)
+      transport <- F.delay(GoogleNetHttpTransport.newTrustedTransport())
+      credentials <- credentials[F](blocker, account)
+    } yield new Sheets.Builder(transport, json, new HttpCredentialsAdapter(credentials))
       .setApplicationName("flog")
       .build()
 

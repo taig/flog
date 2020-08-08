@@ -6,10 +6,9 @@ val CirceVersion = "0.13.0"
 val Fs2Version = "2.4.2"
 val GoogleApiClientVersion = "1.25.1"
 val GoogleApiServicesLoggingVersion = "v2-rev20200619-1.30.10"
-val GoogleApiServicesSheetsVersion = "v4-rev581-1.25.0"
+val GoogleApiServicesSheetsVersion = "v4-rev20200707-1.30.10"
 val GoogleAuthLibraryOauth2HttpVersion = "0.21.1"
 val GoogleCloudLoggingVersion = "1.101.2"
-val GoogleOauthClientJettyVersion = "1.25.0"
 val Http4sVersion = "0.21.6"
 val MonixVersion = "3.2.2"
 val ScalaCollectionCompatVersion = "2.1.6"
@@ -80,9 +79,8 @@ lazy val sheets = project
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "com.google.api-client" % "google-api-client" % GoogleApiClientVersion ::
-        "com.google.apis" % "google-api-services-sheets" % GoogleApiServicesSheetsVersion ::
-        "com.google.oauth-client" % "google-oauth-client-jetty" % GoogleOauthClientJettyVersion ::
+      "com.google.apis" % "google-api-services-sheets" % GoogleApiServicesSheetsVersion ::
+        "com.google.auth" % "google-auth-library-oauth2-http" % GoogleAuthLibraryOauth2HttpVersion ::
         "org.scala-lang.modules" %% "scala-collection-compat" % ScalaCollectionCompatVersion ::
         Nil
   )

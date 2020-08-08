@@ -2,7 +2,7 @@ package io.taig.flog.sheets
 
 import java.io.InputStream
 
-import cats.effect.{Clock, Sync}
+import cats.effect.{Blocker, Clock, ContextShift, Sync}
 import cats.implicits._
 import io.circe.Json
 import io.taig.flog.Logger
@@ -11,18 +11,19 @@ import io.taig.flog.sheets.util.Google
 import io.taig.flog.util.{Circe, Printer}
 
 object SheetsLogger {
-  def apply[F[_]: Sync: Clock](
-      credentials: F[InputStream]
-  )(id: String, range: String, schema: List[String]): F[Logger[F]] =
-    Google.sheets[F](credentials).map { sheets =>
+  def apply[F[_]: Sync: ContextShift: Clock](
+      blocker: Blocker,
+      account: F[InputStream],
+      id: String,
+      range: String,
+      schema: List[String]
+  ): F[Logger[F]] =
+    Google.sheets[F](blocker, account).map { sheets =>
       Logger { events =>
         val rows = events.map(row(schema, _))
         Google.append(sheets, id, range)(rows).void
       }
     }
-
-  def fromResource[F[_]: Sync: Clock](resource: String)(id: String, range: String, schema: List[String]): F[Logger[F]] =
-    SheetsLogger(Google.resource[F](resource))(id, range, schema)
 
   def row(schema: List[String], event: Event): List[AnyRef] = {
     val payload = Circe.flatten(Json.fromJsonObject(event.payload)).map {
