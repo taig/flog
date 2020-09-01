@@ -120,7 +120,7 @@ lazy val http4sClient = project
   .settings(
     libraryDependencies ++=
       "io.circe" %%% "circe-parser" % CirceVersion ::
-        "org.http4s" %% "http4s-blaze-client" % Http4sVersion ::
+        "org.http4s" %% "http4s-client" % Http4sVersion ::
         Nil,
     name := "http4s-client"
   )
