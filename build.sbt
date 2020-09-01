@@ -131,7 +131,7 @@ lazy val http4sServer = project
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "org.http4s" %% "http4s-blaze-server" % Http4sVersion ::
+      "org.http4s" %% "http4s-server" % Http4sVersion ::
         Nil,
     name := "http4s-server"
   )
