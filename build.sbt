@@ -16,7 +16,7 @@ val ScalatestVersion = "3.1.1"
 val Slf4jVersion = "1.7.30"
 val TestfVersion = "0.1.5"
 val ZioInteropCatsVersion = "2.1.4.0"
-val ZioVersion = "1.0.0"
+val ZioVersion = "1.0.1"
 
 // Don't publish root / aggregation project
 noPublishSettings
