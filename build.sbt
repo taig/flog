@@ -36,7 +36,8 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
         "org.typelevel" %%% "cats-mtl-core" % CatsMtlVersion ::
         "io.taig" %%% "testf-auto" % TestfVersion % "test" ::
         "io.taig" %%% "testf-runner-sbt" % TestfVersion % "test" ::
-        Nil
+        Nil,
+    name := "flog-core"
   )
 
 lazy val zio = crossProject(JVMPlatform, JSPlatform)
@@ -48,7 +49,7 @@ lazy val zio = crossProject(JVMPlatform, JSPlatform)
       "dev.zio" %%% "zio-interop-cats" % ZioInteropCatsVersion ::
         "dev.zio" %%% "zio" % ZioVersion ::
         Nil,
-    name := "interop-zio"
+    name := "flog-interop-zio"
   )
   .dependsOn(core)
 
@@ -60,7 +61,7 @@ lazy val monix = crossProject(JVMPlatform, JSPlatform)
     libraryDependencies ++=
       "io.monix" %%% "monix" % MonixVersion ::
         Nil,
-    name := "interop-monix"
+    name := "flog-interop-monix"
   )
   .dependsOn(core)
 
@@ -70,7 +71,8 @@ lazy val slf4j = project
   .settings(
     libraryDependencies ++=
       "org.slf4j" % "slf4j-api" % Slf4jVersion ::
-        Nil
+        Nil,
+    name := "flog-slf4j"
   )
   .dependsOn(core.jvm)
 
@@ -82,7 +84,8 @@ lazy val sheets = project
       "com.google.apis" % "google-api-services-sheets" % GoogleApiServicesSheetsVersion ::
         "com.google.auth" % "google-auth-library-oauth2-http" % GoogleAuthLibraryOauth2HttpVersion ::
         "org.scala-lang.modules" %% "scala-collection-compat" % ScalaCollectionCompatVersion ::
-        Nil
+        Nil,
+    name := "flog-sheets"
   )
   .dependsOn(core.jvm)
 
@@ -93,7 +96,7 @@ lazy val stackdriverGrpc = project
     libraryDependencies ++=
       "com.google.cloud" % "google-cloud-logging" % GoogleCloudLoggingVersion ::
         Nil,
-    name := "stackdriver-grpc"
+    name := "flog-stackdriver-grpc"
   )
   .dependsOn(core.jvm)
 
@@ -105,13 +108,16 @@ lazy val stackdriverHttp = project
       "com.google.auth" % "google-auth-library-oauth2-http" % GoogleAuthLibraryOauth2HttpVersion ::
         "com.google.apis" % "google-api-services-logging" % GoogleApiServicesLoggingVersion ::
         Nil,
-    name := "stackdriver-http"
+    name := "flog-stackdriver-http"
   )
   .dependsOn(core.jvm)
 
 lazy val logstash = project
   .in(file("modules/logstash"))
   .settings(sonatypePublishSettings)
+  .settings(
+    name := "flog-logstash"
+  )
   .dependsOn(core.jvm)
 
 lazy val http4sClient = project
@@ -122,7 +128,7 @@ lazy val http4sClient = project
       "io.circe" %%% "circe-parser" % CirceVersion ::
         "org.http4s" %% "http4s-client" % Http4sVersion ::
         Nil,
-    name := "http4s-client"
+    name := "flog-http4s-client"
   )
   .dependsOn(core.jvm)
 
@@ -133,6 +139,6 @@ lazy val http4sServer = project
     libraryDependencies ++=
       "org.http4s" %% "http4s-server" % Http4sVersion ::
         Nil,
-    name := "http4s-server"
+    name := "flog-http4s-server"
   )
   .dependsOn(core.jvm)
