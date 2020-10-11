@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.7.5
+
+_2020-10-11_
+
+ * http4s client should not depend on blaze-client, but just client
+ * http4s server should not depend on blaze-server, but just server
+ * Upgrade to zio 1.0.3
+ * Upgrade to http4s 0.21.7
+ * Upgrade to cats-effect 2.2.0
+ * Upgrade to google-cloud-logging 1.102.0
+ * Upgrade to scala-collection-compat 2.2.0
+ * Upgrade to sbt-scalajs 1.2.0
+ * Upgrade to fs2 2.4.4
+ * Upgrade to zio 1.0.1
+ * Upgrade to sbt 1.4.0
+
 ## 0.7.4
 
 _2020-08-08_
