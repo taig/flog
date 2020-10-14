@@ -1,7 +1,7 @@
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 val CatsEffectVersion = "2.2.0"
-val CatsMtlVersion = "0.7.1"
+val CatsMtlVersion = "1.0.0"
 val CirceVersion = "0.13.0"
 val Fs2Version = "2.4.4"
 val GoogleApiClientVersion = "1.25.1"
@@ -33,7 +33,7 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
         "io.circe" %%% "circe-core" % CirceVersion ::
         "org.scala-lang.modules" %% "scala-collection-compat" % ScalaCollectionCompatVersion ::
         "org.typelevel" %%% "cats-effect" % CatsEffectVersion ::
-        "org.typelevel" %%% "cats-mtl-core" % CatsMtlVersion ::
+        "org.typelevel" %%% "cats-mtl" % CatsMtlVersion ::
         "io.taig" %%% "testf-auto" % TestfVersion % "test" ::
         "io.taig" %%% "testf-runner-sbt" % TestfVersion % "test" ::
         Nil,

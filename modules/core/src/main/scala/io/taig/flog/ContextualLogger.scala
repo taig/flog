@@ -1,7 +1,7 @@
 package io.taig.flog
 
 import cats.implicits._
-import cats.mtl.ApplicativeLocal
+import cats.mtl.Local
 import cats.{~>, Applicative, FlatMap}
 import io.taig.flog.data.{Context, Event}
 import io.taig.flog.internal.Builders
@@ -15,23 +15,23 @@ abstract class ContextualLogger[F[_]] extends Logger[F] { self =>
 
       override val context: G[Context] = fk(self.context)
 
-      override def locally[A](f: Context => Context)(run: G[A]): G[A] =
-        fk(self.locally(f)(gk(run)))
+      override def locally[A](run: G[A])(f: Context => Context): G[A] =
+        fk(self.locally(gk(run))(f))
 
-      override def scope[A](context: Context)(run: G[A]): G[A] = fk(self.scope(context)(gk(run)))
+      override def scope[A](run: G[A])(context: Context): G[A] = fk(self.scope(gk(run))(context))
 
       override def log(events: Long => List[Event]): G[Unit] = fk(self.log(events))
     }
 
   def context: F[Context]
 
-  def locally[A](f: Context => Context)(run: F[A]): F[A]
+  def locally[A](run: F[A])(f: Context => Context): F[A]
 
-  def scope[A](context: Context)(run: F[A]): F[A]
+  def scope[A](run: F[A])(context: Context): F[A]
 }
 
 object ContextualLogger extends Builders[ContextualLogger] {
-  def apply[F[_]: FlatMap](logger: Logger[F])(implicit F: ApplicativeLocal[F, Context]): ContextualLogger[F] =
+  def apply[F[_]: FlatMap](logger: Logger[F])(implicit F: Local[F, Context]): ContextualLogger[F] =
     new ContextualLogger[F] {
       override def log(events: Long => List[Event]): F[Unit] = context.flatMap(log(_, events))
 
@@ -40,9 +40,9 @@ object ContextualLogger extends Builders[ContextualLogger] {
 
       final override val context: F[Context] = F.ask
 
-      final override def locally[A](f: Context => Context)(run: F[A]): F[A] = F.local(f)(run)
+      final override def locally[A](run: F[A])(f: Context => Context): F[A] = F.local(run)(f)
 
-      final override def scope[A](context: Context)(run: F[A]): F[A] = F.scope(context)(run)
+      final override def scope[A](run: F[A])(context: Context): F[A] = F.scope(run)(context)
     }
 
   def build[F[_]](logger: ContextualLogger[F])(f: List[Event] => List[Event]): ContextualLogger[F] =
@@ -53,9 +53,9 @@ object ContextualLogger extends Builders[ContextualLogger] {
 
       override val context: F[Context] = logger.context
 
-      override def locally[A](f: Context => Context)(run: F[A]): F[A] = logger.locally(f)(run)
+      override def locally[A](run: F[A])(f: Context => Context): F[A] = logger.locally(run)(f)
 
-      override def scope[A](context: Context)(run: F[A]): F[A] = logger.scope(context)(run)
+      override def scope[A](run: F[A])(context: Context): F[A] = logger.scope(run)(context)
 
       override def log(events: Long => List[Event]): F[Unit] = logger.log(apply(events))
     }
@@ -66,9 +66,9 @@ object ContextualLogger extends Builders[ContextualLogger] {
 
       override def context: F[Context] = F.pure(Context.Empty)
 
-      override def locally[A](f: Context => Context)(run: F[A]): F[A] = run
+      override def locally[A](run: F[A])(f: Context => Context): F[A] = run
 
-      override def scope[A](context: Context)(run: F[A]): F[A] = run
+      override def scope[A](run: F[A])(context: Context): F[A] = run
 
       override def log(events: Long => List[Event]): F[Unit] = F.unit
     }
@@ -84,9 +84,9 @@ object ContextualLogger extends Builders[ContextualLogger] {
 
     override val context: F[Context] = Context.Empty.pure[F]
 
-    override def locally[A](f: Context => Context)(run: F[A]): F[A] = run
+    override def locally[A](run: F[A])(f: Context => Context): F[A] = run
 
-    override def scope[A](context: Context)(run: F[A]): F[A] = run
+    override def scope[A](run: F[A])(context: Context): F[A] = run
 
     override def log(events: Long => List[Event]): F[Unit] = logger.log(events)
   }
