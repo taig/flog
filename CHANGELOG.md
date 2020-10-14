@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0
+
+_2020-10-14_
+
+ * Upgrade to cats-mtl 1.0.0
+ * Upgrade to sbt-houserules 0.3.0
+
 ## 0.7.5
 
 _2020-10-11_
