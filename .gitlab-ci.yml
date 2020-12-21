@@ -1,47 +1,55 @@
 stages:
   - docker
+  - cache
   - test
   - deploy
 
 variables:
-  CONTAINER_REGISTRY: registry.gitlab.com
-  CONTAINER_IMAGE: $CONTAINER_REGISTRY/taig-github/flog
+  REGISTRY: registry.gitlab.com
+  IMAGE: $REGISTRY/taig-github/flog
   DOCKER_DRIVER: overlay2
+  SBT: sbt -v -sbt-launch-dir ./cache/launchers -Dsbt.global.base=./cache/sbt -Dsbt.boot.directory=./cache/boot -Dsbt.ivy.home=./cache/ivy -Dsbt.coursier.home=./cache/coursier -Dmode=strict
+
+cache: &cache
+  key: global
+  paths:
+    - ./cache/
+    - ./**/target/
+  policy: pull
 
 docker:
   stage: docker
   image: docker
   services:
-    - docker:19.03.5-dind
+    - docker:19-dind
   script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CONTAINER_REGISTRY
-    - docker pull $CONTAINER_IMAGE:latest || true
-    - docker build --cache-from $CONTAINER_IMAGE:latest --tag $CONTAINER_IMAGE:latest --tag $CONTAINER_IMAGE:$CI_COMMIT_SHA .
-    - docker push $CONTAINER_IMAGE
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $REGISTRY
+    - docker pull $IMAGE:latest || true
+    - docker build --cache-from $IMAGE:latest --tag $IMAGE:latest .
+    - docker push $IMAGE:latest
 
-format:
-  stage: test
-  image: $CONTAINER_IMAGE:$CI_COMMIT_SHA
-  script:
-    - sbt scalafmtCheckAll
+dependencies:
+  stage: cache
+  image: $IMAGE:latest
+  script: $SBT +test:compile
+  cache:
+    <<: *cache
+    policy: pull-push
 
-unit:
+formatting:
   stage: test
-  image: $CONTAINER_IMAGE:$CI_COMMIT_SHA
-  script:
-    - sbt +test
+  image: $IMAGE:latest
+  script: $SBT scalafmtCheckAll
 
-warnings:
+unit tests:
   stage: test
-  image: $CONTAINER_IMAGE:$CI_COMMIT_SHA
-  script:
-    - sbt -Dmode=strict +publishLocal
+  image: $IMAGE:latest
+  script: $SBT +test
 
 artifacts:
   stage: deploy
-  image: $CONTAINER_IMAGE:$CI_COMMIT_SHA
+  image: $IMAGE:latest
+  script: $SBT publishAndRelease
   only:
     - master
     - tags
-  script:
-    - sbt publishAndRelease
