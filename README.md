@@ -2,7 +2,7 @@
 
 > Functional logging with metadata
 
-[![GitLab CI](https://gitlab.com/taig-github/flog/badges/master/build.svg?style=flat-square)](https://gitlab.com/taig-github/flog/pipelines)
+[![GitLab CI](https://gitlab.com/taig-github/flog/badges/master/pipeline.svg?style=flat-square)](https://gitlab.com/taig-github/flog/pipelines)
 [![Maven Central](https://img.shields.io/maven-central/v/io.taig/flog-core_2.13.svg?style=flat-square)](https://search.maven.org/search?q=g:io.taig%20AND%20a:flog-*)
 [![License](https://img.shields.io/github/license/taig/flog?style=flat-square)](LICENSE)
 
