@@ -29,8 +29,8 @@ object StackdriverHttpLogger {
       project: String,
       name: String,
       resource: MonitoredResource
-  )(
-      implicit F: Sync[F]
+  )(implicit
+      F: Sync[F]
   ): Logger[F] =
     Logger { events =>
       events

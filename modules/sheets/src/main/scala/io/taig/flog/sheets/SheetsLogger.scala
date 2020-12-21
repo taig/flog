@@ -26,8 +26,8 @@ object SheetsLogger {
     }
 
   def row(schema: List[String], event: Event): List[AnyRef] = {
-    val payload = Circe.flatten(Json.fromJsonObject(event.payload)).map {
-      case (key, value) => key -> value.noSpaces
+    val payload = Circe.flatten(Json.fromJsonObject(event.payload)).map { case (key, value) =>
+      key -> value.noSpaces
     }
     val known: List[String] = schema.map(payload.getOrElse(_, ""))
     val unknown: List[String] = schema.foldLeft(payload)(_ - _).values.toList

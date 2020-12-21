@@ -11,8 +11,8 @@ import io.circe.syntax._
 import io.taig.flog.Logger
 import io.taig.flog.data.Event
 
-final class LogstashLogger[F[_]: ContextShift](channel: DataOutputStream, blocker: Blocker)(
-    implicit F: Sync[F],
+final class LogstashLogger[F[_]: ContextShift](channel: DataOutputStream, blocker: Blocker)(implicit
+    F: Sync[F],
     clock: Clock[F]
 ) extends Logger[F] {
   val timestamp: F[Long] = clock.realTime(TimeUnit.MILLISECONDS)
@@ -29,8 +29,8 @@ final class LogstashLogger[F[_]: ContextShift](channel: DataOutputStream, blocke
 }
 
 object LogstashLogger {
-  def apply[F[_]: ContextShift: Clock](host: String, port: Int, blocker: Blocker)(
-      implicit F: Sync[F]
+  def apply[F[_]: ContextShift: Clock](host: String, port: Int, blocker: Blocker)(implicit
+      F: Sync[F]
   ): Resource[F, Logger[F]] = {
     val acquire = F.delay(new Socket(host, port))
     val release = (socket: Socket) => F.delay(socket.close())

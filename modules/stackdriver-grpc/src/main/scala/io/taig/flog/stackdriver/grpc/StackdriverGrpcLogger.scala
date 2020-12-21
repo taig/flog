@@ -30,8 +30,8 @@ object StackdriverGrpcLogger {
         .handleErrorWith(throwable => F.delay(throwable.printStackTrace(System.err)))
     }
 
-  def fromOptions[F[_]: Clock](name: String, resource: MonitoredResource, options: LoggingOptions)(
-      implicit F: Sync[F]
+  def fromOptions[F[_]: Clock](name: String, resource: MonitoredResource, options: LoggingOptions)(implicit
+      F: Sync[F]
   ): Resource[F, Logger[F]] =
     Resource
       .fromAutoCloseable[F, Logging](F.delay(options.getService))
