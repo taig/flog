@@ -21,6 +21,10 @@ val ZioVersion = "1.0.3"
 // Don't publish root / aggregation project
 noPublishSettings
 
+ThisBuild / crossScalaVersions := Seq("2.12.12", scalaVersion.value)
+
+ThisBuild / scalaVersion := "2.13.4"
+
 ThisBuild / testFrameworks += new TestFramework("io.taig.testf.runner.TestF")
 
 lazy val core = crossProject(JVMPlatform, JSPlatform)
