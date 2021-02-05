@@ -11,7 +11,7 @@ import cats.syntax.all._
 import fs2.concurrent.Queue
 import io.taig.flog.data.{Context, Event, Level, Payload, Scope}
 import io.taig.flog.internal.Builders
-import io.taig.flog.util.Printer
+import io.taig.flog.util.EventPrinter
 
 abstract class Logger[F[_]] {
   def log(events: Long => List[Event]): F[Unit]
@@ -160,7 +160,7 @@ object Logger extends Builders[Logger] {
     F.delay(new BufferedWriter(new OutputStreamWriter(target), buffer)).map { writer =>
       Logger[F] { events =>
         F.delay {
-          events.foreach(event => writer.write(Printer.event(event).show))
+          events.foreach(event => writer.write(EventPrinter(event)))
           writer.flush()
         }
       }
@@ -170,7 +170,7 @@ object Logger extends Builders[Logger] {
     Resource.fromAutoCloseable(F.delay(new BufferedWriter(new OutputStreamWriter(target), buffer))).map { writer =>
       Logger[F] { events =>
         F.delay {
-          events.foreach(event => writer.write(Printer.event(event).show))
+          events.foreach(event => writer.write(EventPrinter(event)))
           writer.flush()
         }
       }
