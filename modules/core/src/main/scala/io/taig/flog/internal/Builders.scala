@@ -1,8 +1,7 @@
 package io.taig.flog.internal
 
 import cats.syntax.all._
-import io.circe.JsonObject
-import io.taig.flog.data.{Context, Event, Level, Scope}
+import io.taig.flog.data._
 
 trait Builders[L[A[_]]] {
   def filter[F[_]](filter: Event => Boolean)(logger: L[F]): L[F]
@@ -13,8 +12,8 @@ trait Builders[L[A[_]]] {
 
   /** Prefix all events of this logger with the given `Scope` */
   final def prefix[F[_]](scope: Scope)(logger: L[F]): L[F] =
-    defaults(Context(scope, JsonObject.empty))(logger)
+    defaults(Context(scope, Payload.Empty))(logger)
 
-  final def presets[F[_]](payload: JsonObject)(logger: L[F]): L[F] =
+  final def presets[F[_]](payload: Payload.Object)(logger: L[F]): L[F] =
     defaults(Context(Scope.Root, payload))(logger)
 }
