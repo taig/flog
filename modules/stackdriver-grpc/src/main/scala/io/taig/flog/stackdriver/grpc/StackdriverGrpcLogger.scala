@@ -6,7 +6,7 @@ import java.util.{Collections, UUID}
 import scala.jdk.CollectionConverters._
 
 import cats.effect.{Clock, Resource, Sync}
-import cats.implicits._
+import cats.syntax.all._
 import com.google.cloud.MonitoredResource
 import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.{LogEntry, Logging, LoggingOptions, Severity}

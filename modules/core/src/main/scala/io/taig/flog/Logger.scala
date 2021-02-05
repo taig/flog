@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 
 import cats._
 import cats.effect.{Clock, Concurrent, Resource, Sync}
-import cats.implicits._
+import cats.syntax.all._
 import fs2.Stream
 import fs2.concurrent.Queue
 import io.circe.JsonObject

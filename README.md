@@ -33,7 +33,7 @@ libraryDependencies ++=
 import java.util.UUID
 
 import cats.effect.ExitCode
-import cats.implicits._
+import cats.syntax.all._
 import io.circe.JsonObject
 import io.circe.syntax._
 import io.taig.flog.Logger

@@ -6,7 +6,7 @@ import java.util.{Arrays => JArrays}
 import scala.jdk.CollectionConverters._
 
 import cats.effect.{Blocker, ContextShift, Resource, Sync}
-import cats.implicits._
+import cats.syntax.all._
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.sheets.v4.model.{AppendValuesResponse, ValueRange}

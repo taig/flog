@@ -3,7 +3,7 @@ package io.taig.flog.http4s
 import java.util.UUID
 
 import cats.effect.Sync
-import cats.implicits._
+import cats.syntax.all._
 import io.taig.flog.ContextualLogger
 import org.http4s.HttpApp
 

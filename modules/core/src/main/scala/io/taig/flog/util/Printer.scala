@@ -4,7 +4,7 @@ import java.io.{PrintWriter, StringWriter}
 import java.text.SimpleDateFormat
 import java.util.TimeZone
 
-import cats.implicits._
+import cats.syntax.all._
 import io.circe.Json
 import io.taig.flog.data.Event
 

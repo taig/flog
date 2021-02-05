@@ -1,6 +1,6 @@
 package io.taig.flog.data
 
-import cats.implicits._
+import cats.syntax.all._
 import io.circe.syntax._
 import io.circe.{Encoder, JsonObject}
 import io.taig.flog.util.Printer

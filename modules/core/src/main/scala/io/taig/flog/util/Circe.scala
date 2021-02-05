@@ -5,7 +5,7 @@ import java.util
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters._
 
-import cats.implicits._
+import cats.syntax.all._
 import io.circe.{Json, JsonObject}
 
 object Circe {

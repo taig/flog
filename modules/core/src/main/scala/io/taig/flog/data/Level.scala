@@ -1,7 +1,6 @@
 package io.taig.flog.data
 
 import cats.{Order, Show}
-import cats.implicits._
 
 sealed abstract class Level extends Product with Serializable
 

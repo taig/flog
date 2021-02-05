@@ -2,7 +2,7 @@ package io.taig.flog.data
 
 import java.util.UUID
 
-import cats.implicits._
+import cats.syntax.all._
 import io.circe.JsonObject
 
 final case class TracedFailure(

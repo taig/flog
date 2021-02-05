@@ -1,6 +1,6 @@
 package io.taig.flog
 
-import cats.implicits._
+import cats.syntax.all._
 import cats.mtl.Local
 import cats.{~>, Applicative, FlatMap}
 import io.taig.flog.data.{Context, Event}

@@ -3,7 +3,7 @@ package io.taig.flog.sheets
 import java.io.InputStream
 
 import cats.effect.{Blocker, Clock, ContextShift, Sync}
-import cats.implicits._
+import cats.syntax.all._
 import io.circe.Json
 import io.taig.flog.Logger
 import io.taig.flog.data.Event

@@ -5,7 +5,7 @@ import java.net.Socket
 import java.util.concurrent.TimeUnit
 
 import cats.effect._
-import cats.implicits._
+import cats.syntax.all._
 import io.circe.Printer
 import io.circe.syntax._
 import io.taig.flog.Logger

@@ -1,7 +1,7 @@
 package io.taig.flog.data
 
 import cats._
-import cats.implicits._
+import cats.syntax.all._
 
 import scala.reflect.{classTag, ClassTag}
 

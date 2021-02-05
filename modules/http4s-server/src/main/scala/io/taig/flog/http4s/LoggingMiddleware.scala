@@ -2,7 +2,7 @@ package io.taig.flog.http4s
 
 import cats.effect.{ExitCase, Sync}
 import cats.effect.implicits._
-import cats.implicits._
+import cats.syntax.all._
 import io.circe.syntax._
 import io.circe.{Json, JsonObject}
 import io.taig.flog.Logger

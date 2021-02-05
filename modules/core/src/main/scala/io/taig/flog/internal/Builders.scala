@@ -1,6 +1,6 @@
 package io.taig.flog.internal
 
-import cats.implicits._
+import cats.syntax.all._
 import io.circe.JsonObject
 import io.taig.flog.data.{Context, Event, Level, Scope}
 
