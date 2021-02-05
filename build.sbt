@@ -1,22 +1,24 @@
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
-val CatsEffectVersion = "2.3.1"
-val CatsMtlVersion = "1.1.1"
-val CirceVersion = "0.13.0"
-val Fs2Version = "2.5.0"
-val GoogleApiClientVersion = "1.25.1"
-val GoogleApiServicesLoggingVersion = "v2-rev20201114-1.31.0"
-val GoogleApiServicesSheetsVersion = "v4-rev20201130-1.31.0"
-val GoogleAuthLibraryOauth2HttpVersion = "0.23.0"
-val GoogleCloudLoggingVersion = "2.1.3"
-val Http4sVersion = "0.21.18"
-val MonixVersion = "3.3.0"
-val ScalaCollectionCompatVersion = "2.4.1"
-val ScalatestVersion = "3.1.1"
-val Slf4jVersion = "1.7.30"
-val TestfVersion = "0.1.5"
-val ZioInteropCatsVersion = "2.2.0.1"
-val ZioVersion = "1.0.4-2"
+val Version = new {
+  val CatsEffect = "2.3.1"
+  val CatsMtl = "1.1.1"
+  val Circe = "0.13.0"
+  val Fs2 = "2.5.0"
+  val GoogleApiClient = "1.25.1"
+  val GoogleApiServicesLogging = "v2-rev20201114-1.31.0"
+  val GoogleApiServicesSheets = "v4-rev20201130-1.31.0"
+  val GoogleAuthLibraryOauth2Http = "0.23.0"
+  val GoogleCloudLogging = "2.1.3"
+  val Http4s = "0.21.18"
+  val Monix = "3.3.0"
+  val ScalaCollectionCompat = "2.4.1"
+  val Scalatest = "3.1.1"
+  val Slf4j = "1.7.30"
+  val Testf = "0.1.5"
+  val ZioInteropCats = "2.2.0.1"
+  val Zio = "1.0.4-2"
+}
 
 // Don't publish root / aggregation project
 noPublishSettings
@@ -33,13 +35,13 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "co.fs2" %%% "fs2-core" % Fs2Version ::
-        "io.circe" %%% "circe-core" % CirceVersion ::
-        "org.scala-lang.modules" %% "scala-collection-compat" % ScalaCollectionCompatVersion ::
-        "org.typelevel" %%% "cats-effect" % CatsEffectVersion ::
-        "org.typelevel" %%% "cats-mtl" % CatsMtlVersion ::
-        "io.taig" %%% "testf-auto" % TestfVersion % "test" ::
-        "io.taig" %%% "testf-runner-sbt" % TestfVersion % "test" ::
+      "co.fs2" %%% "fs2-core" % Version.Fs2 ::
+        "io.circe" %%% "circe-core" % Version.Circe ::
+        "org.scala-lang.modules" %% "scala-collection-compat" % Version.ScalaCollectionCompat ::
+        "org.typelevel" %%% "cats-effect" % Version.CatsEffect ::
+        "org.typelevel" %%% "cats-mtl" % Version.CatsMtl ::
+        "io.taig" %%% "testf-auto" % Version.Testf % "test" ::
+        "io.taig" %%% "testf-runner-sbt" % Version.Testf % "test" ::
         Nil,
     name := "flog-core"
   )
@@ -50,8 +52,8 @@ lazy val zio = crossProject(JVMPlatform, JSPlatform)
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "dev.zio" %%% "zio-interop-cats" % ZioInteropCatsVersion ::
-        "dev.zio" %%% "zio" % ZioVersion ::
+      "dev.zio" %%% "zio-interop-cats" % Version.ZioInteropCats ::
+        "dev.zio" %%% "zio" % Version.Zio ::
         Nil,
     name := "flog-interop-zio"
   )
@@ -63,7 +65,7 @@ lazy val monix = crossProject(JVMPlatform, JSPlatform)
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "io.monix" %%% "monix" % MonixVersion ::
+      "io.monix" %%% "monix" % Version.Monix ::
         Nil,
     name := "flog-interop-monix"
   )
@@ -74,7 +76,7 @@ lazy val slf4j = project
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "org.slf4j" % "slf4j-api" % Slf4jVersion ::
+      "org.slf4j" % "slf4j-api" % Version.Slf4j ::
         Nil,
     name := "flog-slf4j"
   )
@@ -85,9 +87,9 @@ lazy val sheets = project
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "com.google.apis" % "google-api-services-sheets" % GoogleApiServicesSheetsVersion ::
-        "com.google.auth" % "google-auth-library-oauth2-http" % GoogleAuthLibraryOauth2HttpVersion ::
-        "org.scala-lang.modules" %% "scala-collection-compat" % ScalaCollectionCompatVersion ::
+      "com.google.apis" % "google-api-services-sheets" % Version.GoogleApiServicesSheets ::
+        "com.google.auth" % "google-auth-library-oauth2-http" % Version.GoogleAuthLibraryOauth2Http ::
+        "org.scala-lang.modules" %% "scala-collection-compat" % Version.ScalaCollectionCompat ::
         Nil,
     name := "flog-sheets"
   )
@@ -98,7 +100,7 @@ lazy val stackdriverGrpc = project
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "com.google.cloud" % "google-cloud-logging" % GoogleCloudLoggingVersion ::
+      "com.google.cloud" % "google-cloud-logging" % Version.GoogleCloudLogging ::
         Nil,
     name := "flog-stackdriver-grpc"
   )
@@ -109,8 +111,8 @@ lazy val stackdriverHttp = project
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "com.google.auth" % "google-auth-library-oauth2-http" % GoogleAuthLibraryOauth2HttpVersion ::
-        "com.google.apis" % "google-api-services-logging" % GoogleApiServicesLoggingVersion ::
+      "com.google.auth" % "google-auth-library-oauth2-http" % Version.GoogleAuthLibraryOauth2Http ::
+        "com.google.apis" % "google-api-services-logging" % Version.GoogleApiServicesLogging ::
         Nil,
     name := "flog-stackdriver-http"
   )
@@ -129,8 +131,8 @@ lazy val http4sClient = project
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "io.circe" %%% "circe-parser" % CirceVersion ::
-        "org.http4s" %% "http4s-client" % Http4sVersion ::
+      "io.circe" %%% "circe-parser" % Version.Circe ::
+        "org.http4s" %% "http4s-client" % Version.Http4s ::
         Nil,
     name := "flog-http4s-client"
   )
@@ -141,7 +143,7 @@ lazy val http4sServer = project
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "org.http4s" %% "http4s-server" % Http4sVersion ::
+      "org.http4s" %% "http4s-server" % Version.Http4s ::
         Nil,
     name := "flog-http4s-server"
   )
