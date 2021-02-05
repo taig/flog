@@ -4,9 +4,10 @@ import java.io.{BufferedWriter, OutputStream, OutputStreamWriter}
 import java.util.concurrent.TimeUnit
 
 import cats._
+import cats.effect.concurrent.Ref
+import cats.effect.syntax.all._
 import cats.effect.{Clock, Concurrent, Resource, Sync}
 import cats.syntax.all._
-import fs2.Stream
 import fs2.concurrent.Queue
 import io.circe.JsonObject
 import io.taig.flog.data.{Context, Event, Level, Scope}
@@ -129,12 +130,11 @@ object Logger extends Builders[Logger] {
     * Use `Logger.apply[F]` to get a timestamp that will automatically use
     * the current time from `Clock[F]`.
     */
-  def raw[F[_]](timestamp: F[Long], write: List[Event] => F[Unit])(implicit F: Monad[F]): Logger[F] =
-    f =>
-      timestamp.flatMap { timestamp =>
-        val events = f(timestamp)
-        F.whenA(events.nonEmpty)(write(events))
-      }
+  def raw[F[_]](timestamp: F[Long], write: List[Event] => F[Unit])(implicit F: Monad[F]): Logger[F] = f =>
+    timestamp.flatMap { timestamp =>
+      val events = f(timestamp)
+      F.whenA(events.nonEmpty)(write(events))
+    }
 
   /** Create a basic `Logger` that executes the given `write` function when
     * an `Event` is received
@@ -150,44 +150,39 @@ object Logger extends Builders[Logger] {
   def apply[F[_]: Monad](write: List[Event] => F[Unit])(implicit clock: Clock[F]): Logger[F] =
     raw[F](clock.realTime(TimeUnit.MILLISECONDS), write)
 
-  def noTimestamp[F[_]: Applicative](write: Event => F[Unit]): Logger[F] =
-    _.apply(-1).traverse_(write)
+  def noTimestamp[F[_]: Applicative](write: Event => F[Unit]): Logger[F] = _.apply(-1).traverse_(write)
+
+  def list[F[_]: Monad: Clock](target: Ref[F, List[Event]]): Logger[F] = Logger[F](events => target.update(events ++ _))
 
   def unsafeOutput[F[_]: Clock](target: OutputStream, buffer: Int)(implicit F: Sync[F]): F[Logger[F]] =
     F.delay(new BufferedWriter(new OutputStreamWriter(target), buffer)).map { writer =>
       Logger[F] { events =>
         F.delay {
-          events.foreach { event => writer.write(Printer.event(event).show) }
-
+          events.foreach(event => writer.write(Printer.event(event).show))
           writer.flush()
         }
       }
     }
 
-  def output[F[_]: Clock](target: OutputStream, buffer: Int)(implicit F: Sync[F]): Resource[F, Logger[F]] = {
-    val acquire = F.delay(new BufferedWriter(new OutputStreamWriter(target), buffer))
-    val release = (target: BufferedWriter) => F.delay(target.close())
-
-    Resource.make(acquire)(release).map { writer =>
+  def output[F[_]: Clock](target: OutputStream, buffer: Int)(implicit F: Sync[F]): Resource[F, Logger[F]] =
+    Resource.fromAutoCloseable(F.delay(new BufferedWriter(new OutputStreamWriter(target), buffer))).map { writer =>
       Logger[F] { events =>
         F.delay {
-          events.foreach { event => writer.write(Printer.event(event).show) }
-
+          events.foreach(event => writer.write(Printer.event(event).show))
           writer.flush()
         }
       }
     }
-  }
 
   def stdOut[F[_]: Concurrent: Clock](buffer: Int): F[Logger[F]] = unsafeOutput(System.out, buffer)
 
   def stdOut[F[_]: Concurrent: Clock]: F[Logger[F]] = stdOut[F](buffer = 1024)
 
   def queued[F[_]: Concurrent](timestamp: F[Long], logger: Logger[F]): Resource[F, Logger[F]] =
-    Resource.liftF(Queue.unbounded[F, Event]).flatMap { queue =>
-      val enqueue = raw[F](timestamp, _.traverse_(queue.enqueue1))
-      val process = queue.dequeue.chunks.evalMap { events => logger.log(_ => events.toList) }
-      (Stream.emit(enqueue) concurrently process).compile.resource.lastOrError
+    Resource.liftF(Queue.noneTerminated[F, Event]).flatMap { queue =>
+      val enqueue = raw[F](timestamp, _.traverse_(event => queue.enqueue1(event.some)))
+      val process = queue.dequeue.chunks.evalMap(events => logger.log(_ => events.toList))
+      Resource.make(process.compile.drain.start)(fiber => queue.enqueue1(None) *> fiber.join).as(enqueue)
     }
 
   def queued[F[_]: Concurrent](logger: Logger[F])(implicit clock: Clock[F]): Resource[F, Logger[F]] =

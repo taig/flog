@@ -5,7 +5,6 @@ val Version = new {
   val CatsMtl = "1.1.1"
   val Circe = "0.13.0"
   val Fs2 = "2.5.0"
-  val GoogleApiClient = "1.25.1"
   val GoogleApiServicesLogging = "v2-rev20201114-1.31.0"
   val GoogleApiServicesSheets = "v4-rev20201130-1.31.0"
   val GoogleAuthLibraryOauth2Http = "0.23.0"
@@ -13,9 +12,9 @@ val Version = new {
   val Http4s = "0.21.18"
   val Monix = "3.3.0"
   val Munit = "0.7.21"
+  val MunitCatsEffect = "0.13.0"
   val ScalaCollectionCompat = "2.4.1"
   val Slf4j = "1.7.30"
-  val Testf = "0.1.5"
   val ZioInteropCats = "2.2.0.1"
   val Zio = "1.0.4-2"
 }
@@ -41,6 +40,7 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
         "org.typelevel" %%% "cats-effect" % Version.CatsEffect ::
         "org.typelevel" %%% "cats-mtl" % Version.CatsMtl ::
         "org.scalameta" %%% "munit" % Version.Munit % "test" ::
+        "org.typelevel" %%% "munit-cats-effect-2" % Version.MunitCatsEffect % "test" ::
         Nil,
     name := "flog-core"
   )
