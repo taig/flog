@@ -6,9 +6,8 @@ import java.util.concurrent.TimeUnit
 
 import cats.effect._
 import cats.syntax.all._
-import io.circe.Printer
-import io.circe.syntax._
 import io.taig.flog.Logger
+import io.taig.flog.syntax._
 import io.taig.flog.data.Event
 
 final class LogstashLogger[F[_]: ContextShift](channel: DataOutputStream, blocker: Blocker)(implicit
@@ -17,10 +16,8 @@ final class LogstashLogger[F[_]: ContextShift](channel: DataOutputStream, blocke
 ) extends Logger[F] {
   val timestamp: F[Long] = clock.realTime(TimeUnit.MILLISECONDS)
 
-  val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
-
   def write(events: List[Event]): F[Unit] = F.delay {
-    events.foreach(event => channel.writeBytes(printer.print(event.asJson) + '\n'))
+    events.foreach(event => channel.writeBytes(event.asObject.toJson + '\n'))
     channel.flush()
   }
 

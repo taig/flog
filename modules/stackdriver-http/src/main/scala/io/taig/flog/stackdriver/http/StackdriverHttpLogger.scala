@@ -7,6 +7,7 @@ import java.time.Instant
 import java.util.{UUID, Arrays => JArrays, Map => JMap}
 
 import scala.jdk.CollectionConverters._
+
 import cats.effect.{Blocker, Clock, ContextShift, Resource, Sync}
 import cats.syntax.all._
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
@@ -16,11 +17,10 @@ import com.google.api.services.logging.v2.{Logging, LoggingScopes}
 import com.google.auth.Credentials
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.ServiceAccountCredentials
-import io.circe.JsonObject
-import io.circe.syntax._
 import io.taig.flog.Logger
-import io.taig.flog.data.{Event, Level, Scope}
-import io.taig.flog.util.{Circe, Printer}
+import io.taig.flog.syntax._
+import io.taig.flog.data.{Event, Level, Payload, Scope}
+import io.taig.flog.util.StacktracePrinter
 
 object StackdriverHttpLogger {
   def apply[F[_]: ContextShift: Clock](
@@ -112,7 +112,7 @@ object StackdriverHttpLogger {
       // format: off
       val payload = JMap.of[String, Object](
         "message", "Failed to submit events",
-        "stacktrace", Printer.throwable(throwable)
+        "stacktrace", StacktracePrinter(throwable)
       )
       // format: on
 
@@ -128,15 +128,14 @@ object StackdriverHttpLogger {
     s"projects/$project/logs/" + URLEncoder
       .encode((name +: scope.segments).mkString("."), StandardCharsets.UTF_8)
 
-  private def payload(event: Event): JMap[String, Object] = {
-    val json = JsonObject(
-      "message" -> Option(event.message).filter(_.nonEmpty).asJson,
-      "payload" -> event.payload.asJson,
-      "stacktrace" -> event.throwable.map(Printer.throwable).asJson
-    )
-
-    Circe.toJavaMap(json)
-  }
+  private def payload(event: Event): JMap[String, Object] =
+    Payload
+      .of(
+        "message" := Option(event.message).filter(_.nonEmpty),
+        "payload" := event.payload,
+        "stacktrace" := event.throwable.map(StacktracePrinter(_))
+      )
+      .toJavaMap
 
   private val severity: Level => String = {
     case Level.Debug   => "DEBUG"

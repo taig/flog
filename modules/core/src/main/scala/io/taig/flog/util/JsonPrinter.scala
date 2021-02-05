@@ -23,13 +23,16 @@ object JsonPrinter {
       val length = values.size
       builder.append(Open)
       if (length > 0) {
-        values.zipWithIndex.foreach { case ((key, payload), index) =>
-          builder.append(Quote).append(key).append(Quote).append(Colon)
-          JsonPrinter(builder)(payload)
-          if (index < length - 1) builder.append(Comma)
+        values.zipWithIndex.foreach {
+          case ((_, Payload.Null), _) => ()
+          case ((key, payload), index) =>
+            builder.append(Quote).append(key).append(Quote).append(Colon)
+            JsonPrinter(builder)(payload)
+            if (index < length - 1) builder.append(Comma)
         }
       }
       builder.append(Close)
     case Payload.Value(value) => builder.append(Quote).append(value).append(Quote)
+    case Payload.Null         => ()
   }
 }

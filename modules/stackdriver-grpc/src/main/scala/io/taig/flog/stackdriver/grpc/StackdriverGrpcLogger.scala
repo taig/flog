@@ -10,11 +10,10 @@ import cats.syntax.all._
 import com.google.cloud.MonitoredResource
 import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.{LogEntry, Logging, LoggingOptions, Severity}
-import io.circe.JsonObject
-import io.circe.syntax._
 import io.taig.flog.Logger
-import io.taig.flog.data.{Event, Level}
-import io.taig.flog.util.{Circe, Printer}
+import io.taig.flog.data.{Event, Level, Payload}
+import io.taig.flog.syntax._
+import io.taig.flog.util.StacktracePrinter
 
 object StackdriverGrpcLogger {
   def apply[F[_]: Clock](name: String, logging: Logging, resource: MonitoredResource)(implicit F: Sync[F]): Logger[F] =
@@ -60,7 +59,7 @@ object StackdriverGrpcLogger {
       // format: off
       val payload = util.Map.of[String, Object](
         "message", "Failed to submit events",
-        "stacktrace", Printer.throwable(throwable)
+        "stacktrace", StacktracePrinter(throwable)
       )
       // format: on
 
@@ -74,13 +73,15 @@ object StackdriverGrpcLogger {
     }
 
   private def payload(event: Event): JsonPayload = {
-    val json = JsonObject(
-      "message" -> Option(event.message).filter(_.nonEmpty).asJson,
-      "payload" -> event.payload.asJson,
-      "stacktrace" -> event.throwable.map(Printer.throwable).asJson
-    )
+    val payload = Payload
+      .of(
+        "message" := Option(event.message).filter(_.nonEmpty),
+        "payload" := event.payload,
+        "stacktrace" := event.throwable.map(StacktracePrinter(_))
+      )
+      .toJavaMap
 
-    JsonPayload.of(Circe.toJavaMap(json))
+    JsonPayload.of(payload)
   }
 
   private val severity: Level => Severity = {

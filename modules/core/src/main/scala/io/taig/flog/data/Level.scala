@@ -1,6 +1,8 @@
 package io.taig.flog.data
 
+import cats.syntax.all._
 import cats.{Order, Show}
+import io.taig.flog.Encoder
 
 sealed abstract class Level extends Product with Serializable
 
@@ -23,4 +25,6 @@ object Level {
     case Info    => "info"
     case Warning => "warning"
   }
+
+  implicit val encoder: Encoder[Level] = Encoder[String].contramap(_.show)
 }

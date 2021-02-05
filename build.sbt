@@ -139,17 +139,27 @@ lazy val logstash = project
   )
   .dependsOn(core.jvm)
 
+lazy val http4s = project
+  .in(file("modules/http4s"))
+  .settings(sonatypePublishSettings)
+  .settings(
+    libraryDependencies ++=
+      "org.http4s" %% "http4s-core" % Version.Http4s ::
+        Nil,
+    name := "flog-http4s"
+  )
+  .dependsOn(core.jvm)
+
 lazy val http4sClient = project
   .in(file("modules/http4s-client"))
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "io.circe" %%% "circe-parser" % Version.Circe ::
-        "org.http4s" %% "http4s-client" % Version.Http4s ::
+      "org.http4s" %% "http4s-client" % Version.Http4s ::
         Nil,
     name := "flog-http4s-client"
   )
-  .dependsOn(core.jvm)
+  .dependsOn(http4s)
 
 lazy val http4sServer = project
   .in(file("modules/http4s-server"))
@@ -160,4 +170,4 @@ lazy val http4sServer = project
         Nil,
     name := "flog-http4s-server"
   )
-  .dependsOn(core.jvm)
+  .dependsOn(http4s)
