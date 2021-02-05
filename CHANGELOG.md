@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.0
+
+_2021-02-05_
+
+ * Remove circe from core (#11)
+
 ## 0.8.1
 
 _2021-02-05_
