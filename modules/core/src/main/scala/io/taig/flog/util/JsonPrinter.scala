@@ -59,8 +59,9 @@ object JsonPrinter {
             pretty(builder, shift)(payload)
             if (index < length - 1) builder.append(Comma).append(Linebreak).append(shift) else builder.append(Linebreak)
         }
+        builder.append(indent)
       }
-      builder.append(indent).append(Close)
+      builder.append(Close)
     case Payload.Value(value) => builder.append(Quote).append(value).append(Quote)
     case Payload.Null         => ()
   }
