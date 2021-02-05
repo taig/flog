@@ -22,10 +22,8 @@ val Version = new {
 // Don't publish root / aggregation project
 noPublishSettings
 
-ThisBuild / crossScalaVersions := Seq("2.12.12", scalaVersion.value)
-
+ThisBuild / crossScalaVersions := Seq("2.12.13", scalaVersion.value)
 ThisBuild / scalaVersion := "2.13.4"
-
 ThisBuild / testFrameworks += new TestFramework("munit.Framework")
 
 lazy val core = crossProject(JVMPlatform, JSPlatform)
@@ -35,8 +33,7 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
   .settings(
     libraryDependencies ++=
       "co.fs2" %%% "fs2-core" % Version.Fs2 ::
-        "io.circe" %%% "circe-core" % Version.Circe ::
-        "org.scala-lang.modules" %% "scala-collection-compat" % Version.ScalaCollectionCompat ::
+        "org.scala-lang.modules" %%% "scala-collection-compat" % Version.ScalaCollectionCompat ::
         "org.typelevel" %%% "cats-effect" % Version.CatsEffect ::
         "org.typelevel" %%% "cats-mtl" % Version.CatsMtl ::
         "org.scalameta" %%% "munit" % Version.Munit % "test" ::
@@ -47,6 +44,18 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
   .jsSettings(
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule))
   )
+
+lazy val circe = crossProject(JVMPlatform, JSPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("modules/circe"))
+  .settings(sonatypePublishSettings)
+  .settings(
+    libraryDependencies ++=
+      "io.circe" %%% "circe-core" % Version.Circe ::
+        Nil,
+    name := "flog-circe"
+  )
+  .dependsOn(core)
 
 lazy val zio = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
@@ -91,7 +100,6 @@ lazy val sheets = project
     libraryDependencies ++=
       "com.google.apis" % "google-api-services-sheets" % Version.GoogleApiServicesSheets ::
         "com.google.auth" % "google-auth-library-oauth2-http" % Version.GoogleAuthLibraryOauth2Http ::
-        "org.scala-lang.modules" %% "scala-collection-compat" % Version.ScalaCollectionCompat ::
         Nil,
     name := "flog-sheets"
   )
@@ -128,17 +136,27 @@ lazy val logstash = project
   )
   .dependsOn(core.jvm)
 
+lazy val http4s = project
+  .in(file("modules/http4s"))
+  .settings(sonatypePublishSettings)
+  .settings(
+    libraryDependencies ++=
+      "org.http4s" %% "http4s-core" % Version.Http4s ::
+        Nil,
+    name := "flog-http4s"
+  )
+  .dependsOn(core.jvm)
+
 lazy val http4sClient = project
   .in(file("modules/http4s-client"))
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "io.circe" %%% "circe-parser" % Version.Circe ::
-        "org.http4s" %% "http4s-client" % Version.Http4s ::
+      "org.http4s" %% "http4s-client" % Version.Http4s ::
         Nil,
     name := "flog-http4s-client"
   )
-  .dependsOn(core.jvm)
+  .dependsOn(http4s)
 
 lazy val http4sServer = project
   .in(file("modules/http4s-server"))
@@ -149,4 +167,15 @@ lazy val http4sServer = project
         Nil,
     name := "flog-http4s-server"
   )
-  .dependsOn(core.jvm)
+  .dependsOn(http4s)
+
+lazy val sample = project
+  .in(file("modules/sample"))
+  .settings(noPublishSettings)
+  .settings(
+    libraryDependencies ++=
+      "org.http4s" %% "http4s-blaze-server" % Version.Http4s ::
+        Nil,
+    name := "flog-sample"
+  )
+  .dependsOn(http4sServer, zio.jvm, slf4j)

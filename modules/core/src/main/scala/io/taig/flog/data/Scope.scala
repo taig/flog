@@ -1,9 +1,10 @@
 package io.taig.flog.data
 
+import scala.reflect.{classTag, ClassTag}
+
 import cats._
 import cats.syntax.all._
-
-import scala.reflect.{classTag, ClassTag}
+import io.taig.flog.Encoder
 
 final case class Scope(segments: List[String]) extends AnyVal {
   def isEmpty: Boolean = segments.isEmpty
@@ -55,4 +56,6 @@ object Scope {
     case Scope(Nil)      => "/"
     case Scope(segments) => segments.mkString(" / ")
   }
+
+  implicit val encoder: Encoder[Scope] = Encoder[String].contramap(_.show)
 }
