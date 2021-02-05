@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.8.1
+
+_2021-02-05_
+
+ * [#4] Queued logger doesn't flush remaining items before shutdown
+ * Replace import cats.implicits._ with cats.syntax.all._
+ * Migrate tests to munit
+ * Reorganize dependency versions
+ * Update http4s-client, http4s-server to 0.21.18 (#10)
+ * Update zio to 1.0.4-2 (#9)
+ * Update google-api-services-logging to v2-rev20201114-1.31.0 (#5)
+ * Update google-api-services-sheets to v4-rev20201130-1.31.0 (#6)
+ * Upgrade to sbt 1.4.7
+ * Upgrade to google-auth-library-oauth2-http 0.23.0
+ * Upgrade to google-cloud-logging 2.1.3
+ * Upgrade to sbt-scalajs 1.4.0
+ * Upgrade to scala-collection-compat 2.4.1
+ * Upgrade to fs2 2.5.0
+ * Upgrade to monix 3.3.0
+ * Upgrade to cats-mtl 1.1.1
+ * Upgrade to cats-effect 2.3.1
+ * Upgrade to scala 2.13.4
+ * Upgrade to sbt-houserules 0.3.2
+ * Migrate to gitlab CI caching mechanism
+
 ## 0.8.0
 
 _2020-10-14_
