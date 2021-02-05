@@ -12,8 +12,8 @@ val Version = new {
   val GoogleCloudLogging = "2.1.3"
   val Http4s = "0.21.18"
   val Monix = "3.3.0"
+  val Munit = "0.7.21"
   val ScalaCollectionCompat = "2.4.1"
-  val Scalatest = "3.1.1"
   val Slf4j = "1.7.30"
   val Testf = "0.1.5"
   val ZioInteropCats = "2.2.0.1"
@@ -27,7 +27,7 @@ ThisBuild / crossScalaVersions := Seq("2.12.12", scalaVersion.value)
 
 ThisBuild / scalaVersion := "2.13.4"
 
-ThisBuild / testFrameworks += new TestFramework("io.taig.testf.runner.TestF")
+ThisBuild / testFrameworks += new TestFramework("munit.Framework")
 
 lazy val core = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
@@ -40,10 +40,12 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
         "org.scala-lang.modules" %% "scala-collection-compat" % Version.ScalaCollectionCompat ::
         "org.typelevel" %%% "cats-effect" % Version.CatsEffect ::
         "org.typelevel" %%% "cats-mtl" % Version.CatsMtl ::
-        "io.taig" %%% "testf-auto" % Version.Testf % "test" ::
-        "io.taig" %%% "testf-runner-sbt" % Version.Testf % "test" ::
+        "org.scalameta" %%% "munit" % Version.Munit % "test" ::
         Nil,
     name := "flog-core"
+  )
+  .jsSettings(
+    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule))
   )
 
 lazy val zio = crossProject(JVMPlatform, JSPlatform)

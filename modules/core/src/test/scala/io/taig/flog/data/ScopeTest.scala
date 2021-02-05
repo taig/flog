@@ -1,25 +1,24 @@
 package io.taig.flog.data
 
-import io.taig.testf._
-import io.taig.flog.dsl._
+import munit.FunSuite
 
-@AutoTest
-object ScopeTest extends IOAutoTestApp {
-  test("fromName")(
-    test("class") {
-      isEqual(Scope.Root / "io" / "taig" / "flog" / "data" / "Scope")(Scope.fromName[Scope])
-    },
-    test("object") {
-      isEqual(Scope.Root / "io" / "taig" / "flog" / "data" / "Scope")(Scope.fromName[Scope.type])
-    }
-  )
+final class ScopeTest extends FunSuite {
+  test("fromName (class)") {
+    assertEquals(obtained = Scope.fromName[Scope], expected = Scope.Root / "io" / "taig" / "flog" / "data" / "Scope")
+  }
 
-  test("fromSimpleName")(
-    test("class") {
-      isEqual(Scope.Root / "Scope")(Scope.fromSimpleName[Scope])
-    },
-    test("object") {
-      isEqual(Scope.Root / "Scope")(Scope.fromSimpleName[Scope.type])
-    }
-  )
+  test("fromName (object)") {
+    assertEquals(
+      obtained = Scope.fromName[Scope.type],
+      expected = Scope.Root / "io" / "taig" / "flog" / "data" / "Scope"
+    )
+  }
+
+  test("fromSimpleName (class)") {
+    assertEquals(obtained = Scope.fromSimpleName[Scope], expected = Scope.Root / "Scope")
+  }
+
+  test("fromSimpleName (object)") {
+    assertEquals(obtained = Scope.fromSimpleName[Scope.type], expected = Scope.Root / "Scope")
+  }
 }
