@@ -17,7 +17,7 @@ final class LogstashLogger[F[_]: ContextShift](channel: DataOutputStream, blocke
   val timestamp: F[Long] = clock.realTime(TimeUnit.MILLISECONDS)
 
   def write(events: List[Event]): F[Unit] = F.delay {
-    events.foreach(event => channel.writeBytes(event.asObject.toJson + '\n'))
+    events.foreach(event => channel.writeBytes(event.asObject.toJson(pretty = false) + '\n'))
     channel.flush()
   }
 

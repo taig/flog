@@ -23,9 +23,7 @@ val Version = new {
 noPublishSettings
 
 ThisBuild / crossScalaVersions := Seq("2.12.13", scalaVersion.value)
-
 ThisBuild / scalaVersion := "2.13.4"
-
 ThisBuild / testFrameworks += new TestFramework("munit.Framework")
 
 lazy val core = crossProject(JVMPlatform, JSPlatform)
@@ -170,3 +168,14 @@ lazy val http4sServer = project
     name := "flog-http4s-server"
   )
   .dependsOn(http4s)
+
+lazy val sample = project
+  .in(file("modules/sample"))
+  .settings(noPublishSettings)
+  .settings(
+    libraryDependencies ++=
+      "org.http4s" %% "http4s-blaze-server" % Version.Http4s ::
+        Nil,
+    name := "flog-sample"
+  )
+  .dependsOn(http4sServer, zio.jvm, slf4j)

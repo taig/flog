@@ -9,7 +9,7 @@ import cats.syntax.all._
 import io.taig.flog.util.{JsonPrinter, PayloadFlatten}
 
 sealed abstract class Payload extends Product with Serializable {
-  final def toJson: String = JsonPrinter(this)
+  final def toJson(pretty: Boolean): String = if (pretty) JsonPrinter.pretty(this) else JsonPrinter.compact(this)
 }
 
 object Payload {

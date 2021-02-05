@@ -10,6 +10,6 @@ import org.http4s.HttpApp
 object TracingMiddleware {
   def apply[F[_]](logger: ContextualLogger[F])(app: HttpApp[F])(implicit F: Sync[F]): HttpApp[F] =
     HttpApp[F] { request =>
-      F.delay(UUID.randomUUID()).flatMap(uuid => logger.locally(app.run(request))(_.trace(uuid)))
+      F.delay(UUID.randomUUID()).flatMap(uuid => logger.local(app.run(request))(_.trace(uuid)))
     }
 }

@@ -25,7 +25,7 @@ object EventPrinter {
       .append(Space)
       .append(event.message)
 
-    if (!event.payload.isEmpty) builder.append(Linebreak).append(event.payload.toJson)
+    if (!event.payload.isEmpty) builder.append(Linebreak).append(event.payload.toJson(pretty = true))
 
     event.throwable.map(StacktracePrinter(_)).foreach(value => builder.append(Linebreak).append(value))
 

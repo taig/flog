@@ -13,13 +13,9 @@ object zio {
       override def local[B](fa: Task[B])(f: A => A): Task[B] =
         ref.get.flatMap(a => ref.locally(f(a))(fa))
 
-      override def ask[E2 >: A]: Task[E2] = ref.get
-
-      override def scope[B](fa: Task[B])(e: A): Task[B] = ref.locally(e)(fa)
-
       override val applicative: Applicative[Task] = Applicative[Task]
 
-      override def reader[B](f: A => B): Task[B] = ask.map(f)
+      override def ask[E2 >: A]: Task[E2] = ref.get
     }
 
   def contextualZioLogger(logger: Logger[Task]): Task[ContextualLogger[Task]] =
