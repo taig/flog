@@ -36,7 +36,7 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
     libraryDependencies ++=
       "co.fs2" %%% "fs2-core" % Version.Fs2 ::
         "io.circe" %%% "circe-core" % Version.Circe ::
-        "org.scala-lang.modules" %% "scala-collection-compat" % Version.ScalaCollectionCompat ::
+        "org.scala-lang.modules" %%% "scala-collection-compat" % Version.ScalaCollectionCompat ::
         "org.typelevel" %%% "cats-effect" % Version.CatsEffect ::
         "org.typelevel" %%% "cats-mtl" % Version.CatsMtl ::
         "org.scalameta" %%% "munit" % Version.Munit % "test" ::
