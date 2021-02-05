@@ -6,7 +6,7 @@ import java.util.{Map => JMap}
 import scala.jdk.CollectionConverters._
 
 import cats.syntax.all._
-import io.taig.flog.util.JsonPrinter
+import io.taig.flog.util.{JsonPrinter, PayloadFlatten}
 
 sealed abstract class Payload extends Product with Serializable {
   final def toJson: String = JsonPrinter(this)
@@ -32,7 +32,7 @@ object Payload {
       case payload: Object => payload.toJavaMap
     }.asJava
 
-    def flatten: Map[String, String] = ???
+    def flatten: Map[String, String] = PayloadFlatten(this)
 
     def deepMerge(payload: Payload.Object): Payload.Object = {
       val keys = this.keys ++ payload.keys

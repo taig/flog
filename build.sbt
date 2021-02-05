@@ -102,7 +102,6 @@ lazy val sheets = project
     libraryDependencies ++=
       "com.google.apis" % "google-api-services-sheets" % Version.GoogleApiServicesSheets ::
         "com.google.auth" % "google-auth-library-oauth2-http" % Version.GoogleAuthLibraryOauth2Http ::
-        "org.scala-lang.modules" %% "scala-collection-compat" % Version.ScalaCollectionCompat ::
         Nil,
     name := "flog-sheets"
   )
