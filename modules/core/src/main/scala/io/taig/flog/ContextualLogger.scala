@@ -1,8 +1,8 @@
 package io.taig.flog
 
-import cats.{~>, Applicative, Monad}
 import cats.mtl.Local
 import cats.syntax.all._
+import cats.{~>, Applicative, Monad}
 import io.taig.flog.data.{Context, Event}
 
 abstract class ContextualLogger[F[_]] extends Logger[F] { self =>
@@ -15,7 +15,7 @@ abstract class ContextualLogger[F[_]] extends Logger[F] { self =>
   final def imapK[G[_]](fk: F ~> G)(gk: G ~> F): ContextualLogger[G] = new ContextualLogger[G] {
     override def log(events: Long => List[Event]): G[Unit] = fk(self.log(events))
 
-    override val context: G[Context] = fk(self.context)
+    override def context: G[Context] = fk(self.context)
 
     override def local[A](run: G[A])(f: Context => Context): G[A] = fk(self.local(gk(run))(f))
 
