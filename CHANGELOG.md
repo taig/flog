@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.1
+
+_2021-02-06_
+
+ * Add `toJson` conversion methods to `circe` module
+ * Properly escape json
+
 ## 0.9.0
 
 _2021-02-05_
