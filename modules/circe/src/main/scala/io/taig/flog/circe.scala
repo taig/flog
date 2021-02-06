@@ -11,6 +11,8 @@ trait circe extends circe1 {
     toObject(encoder.encodeObject(value))
 
   def toObject(json: JsonObject): Payload.Object = Payload.Object(json.toMap.fmap(toPayload))
+
+  def toJsonObject(payload: Payload.Object): JsonObject = JsonObject.fromMap(payload.values.fmap(toJson))
 }
 
 trait circe1 { this: circe =>
@@ -24,4 +26,10 @@ trait circe1 { this: circe =>
     jsonArray = values => Payload.Object((values.indices.map(_.show) zip values.map(toPayload)).toMap),
     jsonObject = toObject
   )
+
+  def toJson(payload: Payload): Json = payload match {
+    case payload: Payload.Object => Json.fromJsonObject(toJsonObject(payload))
+    case Payload.Value(value)    => Json.fromString(value)
+    case Payload.Null            => Json.Null
+  }
 }
