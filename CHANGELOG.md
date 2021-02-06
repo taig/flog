@@ -4,6 +4,14 @@
 
 _2021-02-06_
 
+ * Change LoggingMiddleware to use Http, not HttpRoutes
+ * Change TracingMiddleware to use Http, not HttpRoutes
+ * Add some convenience methods
+
+## 0.9.1
+
+_2021-02-06_
+
  * Add `toJson` conversion methods to `circe` module
  * Properly escape json
 
