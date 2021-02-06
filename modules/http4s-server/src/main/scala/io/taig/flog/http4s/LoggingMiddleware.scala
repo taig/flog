@@ -7,14 +7,14 @@ import io.taig.flog.Logger
 import io.taig.flog.data.Scope
 import io.taig.flog.http4s.implicits._
 import io.taig.flog.syntax._
-import org.http4s.HttpApp
+import org.http4s.Http
 
 object LoggingMiddleware {
-  def apply[F[_]: Sync](logger: Logger[F])(app: HttpApp[F]): HttpApp[F] =
-    create(logger.prefix(Scope.Root / "server"), app)
+  def apply[F[_]: Sync, G[_]](logger: Logger[F])(http: Http[F, G]): Http[F, G] =
+    create(logger.prefix(Scope.Root / "server"), http)
 
-  private def create[F[_]](logger: Logger[F], service: HttpApp[F])(implicit F: Sync[F]): HttpApp[F] =
-    HttpApp[F] { request =>
+  private def create[F[_], G[_]](logger: Logger[F], service: Http[F, G])(implicit F: Sync[F]): Http[F, G] =
+    Http[F, G] { request =>
       (for {
         _ <- logger.info("Request", request.asObject)
         response <- service.run(request)
