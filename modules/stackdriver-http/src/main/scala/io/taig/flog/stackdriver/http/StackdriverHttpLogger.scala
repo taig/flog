@@ -126,7 +126,7 @@ object StackdriverHttpLogger {
 
   def logName(project: String, name: String, scope: Scope): String =
     s"projects/$project/logs/" + URLEncoder
-      .encode((name +: scope.segments).mkString("."), StandardCharsets.UTF_8)
+      .encode((name +: scope.segments.toList).mkString("."), StandardCharsets.UTF_8)
 
   private def payload(event: Event): JMap[String, Object] =
     Payload

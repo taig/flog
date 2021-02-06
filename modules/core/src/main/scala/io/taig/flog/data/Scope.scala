@@ -3,10 +3,11 @@ package io.taig.flog.data
 import scala.reflect.{classTag, ClassTag}
 
 import cats._
+import cats.data.Chain
 import cats.syntax.all._
 import io.taig.flog.Encoder
 
-final case class Scope(segments: List[String]) extends AnyVal {
+final case class Scope(segments: Chain[String]) extends AnyVal {
   def isEmpty: Boolean = segments.isEmpty
 
   def /(segment: String): Scope = if (segment.isEmpty) this else Scope(segments :+ segment)
@@ -19,23 +20,27 @@ final case class Scope(segments: List[String]) extends AnyVal {
 
   def endsWith(segment: String): Boolean = segments.lastOption.contains(segment)
 
+  def toList: List[String] = segments.toList
+
   override def toString: String = segments match {
-    case Nil      => "/"
-    case segments => segments.mkString(" / ")
+    case Chain.nil => "/"
+    case segments  => segments.mkString_(" / ")
   }
 }
 
 object Scope {
-  val Root: Scope = Scope(List.empty)
+  val Root: Scope = Scope(Chain.empty)
 
-  def apply(root: String): Scope = Scope(List(root))
+  def one(root: String): Scope = Scope(Chain.one(root))
 
-  def of(segments: String*): Scope = Scope(segments.toList)
+  def from(segments: Iterable[String]): Scope = Scope(Chain.fromSeq(segments.toSeq))
+
+  def of(segments: String*): Scope = Scope(Chain.fromSeq(segments))
 
   private def fromName(value: Class[_]): Scope = {
     val name = value.getName
     val normalized = if (name.endsWith("$")) name.init else name
-    Scope(normalized.split('.').toList)
+    Scope.from(normalized.split('.'))
   }
 
   def fromName(value: Any): Scope = fromName(value.getClass)

@@ -13,11 +13,11 @@ object LoggingMiddleware {
   def apply[F[_]: Sync, G[_]](logger: Logger[F])(http: Http[F, G]): Http[F, G] =
     create(logger.prefix(Scope.Root / "server"), http)
 
-  private def create[F[_], G[_]](logger: Logger[F], service: Http[F, G])(implicit F: Sync[F]): Http[F, G] =
+  private def create[F[_], G[_]](logger: Logger[F], http: Http[F, G])(implicit F: Sync[F]): Http[F, G] =
     Http[F, G] { request =>
       (for {
         _ <- logger.info("Request", request.asObject)
-        response <- service.run(request)
+        response <- http.run(request)
         _ <- logger.info("Response", response.asObject)
       } yield response).guaranteeCase {
         case ExitCase.Completed        => F.unit

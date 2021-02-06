@@ -46,7 +46,7 @@ object StackdriverGrpcLogger {
     id[F].map { id =>
       LogEntry
         .newBuilder(payload(event))
-        .setLogName((name +: event.scope.segments).mkString("."))
+        .setLogName((name +: event.scope.segments.toList).mkString("."))
         .setInsertId(id)
         .setSeverity(severity(event.level))
         .setResource(resource)
