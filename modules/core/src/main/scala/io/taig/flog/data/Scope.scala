@@ -9,12 +9,20 @@ import io.taig.flog.Encoder
 final case class Scope(segments: List[String]) extends AnyVal {
   def isEmpty: Boolean = segments.isEmpty
 
-  def /(segment: String): Scope =
-    if (segment.isEmpty) this else Scope(segments :+ segment)
+  def /(segment: String): Scope = if (segment.isEmpty) this else Scope(segments :+ segment)
 
   def ++(scope: Scope): Scope = Scope(segments ++ scope.segments)
 
   def contains(scope: Scope): Boolean = this.show contains scope.show
+
+  def startsWith(segment: String): Boolean = segments.headOption.contains(segment)
+
+  def endsWith(segment: String): Boolean = segments.lastOption.contains(segment)
+
+  override def toString: String = segments match {
+    case Nil      => "/"
+    case segments => segments.mkString(" / ")
+  }
 }
 
 object Scope {
@@ -52,10 +60,7 @@ object Scope {
 
   implicit val eq: Eq[Scope] = Eq.by(_.segments)
 
-  implicit val show: Show[Scope] = {
-    case Scope(Nil)      => "/"
-    case Scope(segments) => segments.mkString(" / ")
-  }
+  implicit val show: Show[Scope] = Show.fromToString
 
   implicit val encoder: Encoder[Scope] = Encoder[String].contramap(_.show)
 }
