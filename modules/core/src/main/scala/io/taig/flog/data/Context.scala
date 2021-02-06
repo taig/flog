@@ -9,7 +9,7 @@ final case class Context(prefix: Scope, presets: Payload.Object) {
 
   def combine(payload: Payload.Object): Context = copy(presets = this.presets deepMerge payload)
 
-  def trace(uuid: UUID): Context = combine(Payload.of("trace" := uuid))
+  def correlation(uuid: UUID): Context = combine(Payload.of("correlation" := uuid))
 }
 
 object Context {

@@ -4,7 +4,7 @@ import scala.concurrent.ExecutionContext
 import cats.effect.{Clock, ConcurrentEffect, Resource, Sync, Timer}
 import cats.syntax.all._
 import io.taig.flog.data.Level
-import io.taig.flog.http4s.{LoggingMiddleware, TracingMiddleware}
+import io.taig.flog.http4s.{CorrelationMiddleware, LoggingMiddleware}
 import io.taig.flog.interop.zio.contextualZioLogger
 import io.taig.flog.slf4j.FlogSlf4jBinder
 import org.http4s.server.Server
@@ -23,7 +23,7 @@ object SampleApp extends CatsApp {
   def server[F[_]: ConcurrentEffect: Timer](logger: ContextualLogger[F]): Resource[F, Server[F]] =
     BlazeServerBuilder[F](ExecutionContext.global)
       .bindHttp(host = "0.0.0.0")
-      .withHttpApp(TracingMiddleware(logger)(LoggingMiddleware(logger)(app[F](logger))))
+      .withHttpApp(CorrelationMiddleware(logger)(LoggingMiddleware(logger)(app[F](logger))))
       .resource
 
   def logger[F[_]: ConcurrentEffect: Clock]: F[Logger[F]] = Logger
