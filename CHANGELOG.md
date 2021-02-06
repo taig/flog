@@ -1,6 +1,13 @@
 # Changelog
 
-## 0.9.1
+## 0.9.3
+
+_2021-02-06_
+
+ * Rename `Trace` to `Correlation`
+ * Use `Chain` instead of `List` for `Scope`
+
+## 0.9.2
 
 _2021-02-06_
 
