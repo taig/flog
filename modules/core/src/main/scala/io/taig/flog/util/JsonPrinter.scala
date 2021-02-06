@@ -1,16 +1,10 @@
 package io.taig.flog.util
 
-import scala.annotation.nowarn
-
+import scala.annotation.{nowarn, switch}
 import io.taig.flog.data.Payload
 
 object JsonPrinter {
-  def compact(payload: Payload): String = {
-    val builder = new StringBuilder()
-    compact(builder)(payload)
-    builder.result()
-  }
-
+  private val Escape = '\\'
   private val Quote = '"'
   private val Colon = ':'
   private val Comma = ','
@@ -18,6 +12,33 @@ object JsonPrinter {
   private val Linebreak = '\n'
   private val Open = '{'
   private val Close = '}'
+
+  private def escape(value: Char): Boolean = (value: @switch) match {
+    case '"' | '\\' | '\b' | '\f' | '\n' | '\r' | '\t' => true
+    case _                                             => false
+  }
+
+  @nowarn("msg=discarded non-Unit value")
+  private def escape(builder: StringBuilder, value: Char): Unit =
+    builder.append(Escape).append(value)
+
+  @nowarn("msg=discarded non-Unit value")
+  private def text(builder: StringBuilder, value: String): Unit = {
+    builder.append(Quote)
+    var i = 0
+    while (i < value.length) {
+      val char = value.charAt(i)
+      if (escape(char)) escape(builder, char) else builder.append(char)
+      i += 1
+    }
+    builder.append(Quote)
+  }
+
+  def compact(payload: Payload): String = {
+    val builder = new StringBuilder()
+    compact(builder)(payload)
+    builder.result()
+  }
 
   @nowarn("msg=discarded non-Unit value")
   private def compact(builder: StringBuilder): Payload => Unit = {
@@ -34,7 +55,7 @@ object JsonPrinter {
         }
       }
       builder.append(Close)
-    case Payload.Value(value) => builder.append(Quote).append(value).append(Quote)
+    case Payload.Value(value) => text(builder, value)
     case Payload.Null         => ()
   }
 
@@ -62,7 +83,7 @@ object JsonPrinter {
         builder.append(indent)
       }
       builder.append(Close)
-    case Payload.Value(value) => builder.append(Quote).append(value).append(Quote)
+    case Payload.Value(value) => text(builder, value)
     case Payload.Null         => ()
   }
 }

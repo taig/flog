@@ -5,22 +5,12 @@ import cats.mtl.Local
 import cats.syntax.all._
 import io.taig.flog.data.{Context, Event}
 
-abstract class ContextualLogger[F[_]] extends LoggerLike[ContextualLogger, F] { self =>
+abstract class ContextualLogger[F[_]] extends Logger[F] { self =>
   def context: F[Context]
 
   def local[A](run: F[A])(f: Context => Context): F[A]
 
   def scope[A](run: F[A])(context: Context): F[A]
-
-  final override def modify(f: List[Event] => List[Event]): ContextualLogger[F] = new ContextualLogger[F] {
-    override def log(events: Long => List[Event]): F[Unit] = self.log(timestamp => f(events(timestamp)))
-
-    override def context: F[Context] = self.context
-
-    override def local[A](run: F[A])(f: Context => Context): F[A] = self.local(run)(f)
-
-    override def scope[A](run: F[A])(context: Context): F[A] = self.scope(run)(context)
-  }
 
   final def imapK[G[_]](fk: F ~> G)(gk: G ~> F): ContextualLogger[G] = new ContextualLogger[G] {
     override def log(events: Long => List[Event]): G[Unit] = fk(self.log(events))
@@ -31,8 +21,6 @@ abstract class ContextualLogger[F[_]] extends LoggerLike[ContextualLogger, F] { 
 
     override def scope[A](run: G[A])(context: Context): G[A] = fk(self.scope(gk(run))(context))
   }
-
-  final def toLogger: Logger[F] = self.log(_)
 }
 
 object ContextualLogger {
@@ -66,5 +54,17 @@ object ContextualLogger {
     override def scope[A](run: F[A])(context: Context): F[A] = run
 
     override def log(events: Long => List[Event]): F[Unit] = F.unit
+  }
+
+  implicit class Ops[F[_]](logger: ContextualLogger[F]) extends LoggerOps[ContextualLogger, F] {
+    override def modify(f: List[Event] => List[Event]): ContextualLogger[F] = new ContextualLogger[F] {
+      override def log(events: Long => List[Event]): F[Unit] = logger.log(events)
+
+      override def context: F[Context] = logger.context
+
+      override def local[A](run: F[A])(f: Context => Context): F[A] = logger.local(run)(f)
+
+      override def scope[A](run: F[A])(context: Context): F[A] = logger.scope(run)(context)
+    }
   }
 }

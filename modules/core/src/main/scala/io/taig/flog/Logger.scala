@@ -12,10 +12,8 @@ import fs2.concurrent.Queue
 import io.taig.flog.data._
 import io.taig.flog.util.EventPrinter
 
-abstract class Logger[F[_]] extends LoggerLike[Logger, F] { self =>
-  final override def modify(f: List[Event] => List[Event]): Logger[F] = new Logger[F] {
-    override def log(events: Long => List[Event]): F[Unit] = self.log(timestamp => f(events(timestamp)))
-  }
+abstract class Logger[F[_]] extends LoggerLike[F] { self =>
+  def log(events: Long => List[Event]): F[Unit]
 
   final def mapK[G[_]](fk: F ~> G): Logger[G] = event => fk(log(event))
 }
@@ -108,4 +106,9 @@ object Logger {
 
   /** This `Logger` does nothing */
   def noop[F[_]](implicit F: Applicative[F]): Logger[F] = _ => F.unit
+
+  implicit class Ops[F[_]](logger: Logger[F]) extends LoggerOps[Logger, F] {
+    override def modify(f: List[Event] => List[Event]): Logger[F] =
+      events => logger.log(timestamp => f(events(timestamp)))
+  }
 }
