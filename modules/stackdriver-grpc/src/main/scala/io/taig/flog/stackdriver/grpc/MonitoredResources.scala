@@ -1,26 +1,27 @@
-package io.taig.flog.stackdriver.http.util
+package io.taig.flog.stackdriver.grpc
 
-import java.util
+import java.util.{Map => JMap}
 
 import cats.effect.Sync
-import com.google.api.services.logging.v2.model.MonitoredResource
+import com.google.cloud.MonitoredResource
 
 object MonitoredResources {
   private def unsafeGetEnv(name: String): String = Option(System.getenv(name)).getOrElse("unknown")
 
-  val global: MonitoredResource = new MonitoredResource().setType("global")
+  val global: MonitoredResource = MonitoredResource.newBuilder("global").build()
 
   def cloudRun[F[_]](implicit F: Sync[F]): F[MonitoredResource] = F.delay {
-    new MonitoredResource()
-      .setType("cloud_run_revision")
+    MonitoredResource
+      .newBuilder("cloud_run_revision")
       .setLabels(
         // format: off
-        util.Map.of(
+        JMap.of(
           "service_name", unsafeGetEnv("K_SERVICE"),
           "revision_name", unsafeGetEnv("K_REVISION"),
           "configuration_name", unsafeGetEnv("K_CONFIGURATION")
         )
         // format: on
       )
+      .build()
   }
 }
