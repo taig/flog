@@ -27,25 +27,25 @@ final class EventTest extends FunSuite {
     )
   }
 
-  test("presets: both empty") {
+  test("merge: both empty") {
     val event = Event(0, Level.Info, Scope.Root, "", Payload.Empty, None)
     assertEquals(obtained = event.merge(Payload.Empty).payload, expected = Payload.Empty)
   }
 
-  test("presets: presets empty") {
+  test("merge: right empty") {
     val event = Event(0, Level.Info, Scope.Root, "", Payload.of("foo" := "bar"), None)
     assertEquals(obtained = event.merge(Payload.Empty).payload, expected = Payload.of("foo" := "bar"))
   }
 
-  test("presets: event empty") {
+  test("merge: left empty") {
     val event = Event(0, Level.Info, Scope.Root, "", Payload.Empty, None)
     assertEquals(obtained = event.merge(Payload.of("foo" := "bar")).payload, expected = Payload.of("foo" := "bar"))
   }
 
-  test("presets: both non-empty") {
+  test("merge: both non-empty") {
     val event = Event(0, Level.Info, Scope.Root, "", Payload.of("foo" := "baz"), None)
-    val presets = Payload.of("foo" := "bar", "quux" := "quuz")
-    val expected = Payload.of("foo" := "baz", "quux" := "quuz")
-    assertEquals(obtained = event.merge(presets).payload, expected = expected)
+    val right = Payload.of("foo" := "bar", "quux" := "quuz")
+    val expected = Payload.of("foo" := "bar", "quux" := "quuz")
+    assertEquals(obtained = event.merge(right).payload, expected = expected)
   }
 }
