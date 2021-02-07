@@ -1,6 +1,6 @@
 package io.taig.flog.stackdriver.http
 
-import java.io.InputStream
+import java.io.ByteArrayInputStream
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.time.Instant
@@ -18,11 +18,13 @@ import com.google.auth.Credentials
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.ServiceAccountCredentials
 import io.taig.flog.Logger
-import io.taig.flog.syntax._
 import io.taig.flog.data.{Event, Level, Payload, Scope}
+import io.taig.flog.syntax._
 import io.taig.flog.util.StacktracePrinter
 
 object StackdriverHttpLogger {
+  private val Scopes = JArrays.asList(LoggingScopes.CLOUD_PLATFORM_READ_ONLY, LoggingScopes.LOGGING_WRITE)
+
   def apply[F[_]: ContextShift: Clock](
       blocker: Blocker,
       logging: Logging#Entries,
@@ -70,21 +72,20 @@ object StackdriverHttpLogger {
         }
       }
 
-  def fromServiceAccount[F[_]: Sync: ContextShift: Clock](
+  def fromServiceAccount[F[_]: ContextShift: Clock](
       blocker: Blocker,
-      account: InputStream,
-      project: String,
+      account: String,
       name: String,
       resource: MonitoredResource
-  ): Resource[F, Logger[F]] =
+  )(implicit F: Sync[F]): Resource[F, Logger[F]] =
     Resource
       .liftF {
-        blocker.delay {
-          val scopes = JArrays.asList(LoggingScopes.CLOUD_PLATFORM_READ_ONLY, LoggingScopes.LOGGING_WRITE)
-          ServiceAccountCredentials.fromStream(account).createScoped(scopes)
+        F.delay {
+          val input = new ByteArrayInputStream(account.getBytes(StandardCharsets.UTF_8))
+          ServiceAccountCredentials.fromStream(input)
         }
       }
-      .flatMap(fromCredentials(blocker, _, project, name, resource))
+      .flatMap(account => fromCredentials(blocker, account.createScoped(Scopes), account.getProjectId, name, resource))
 
   private def id[F[_]](implicit F: Sync[F]): F[String] = F.delay(UUID.randomUUID().show)
 

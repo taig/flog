@@ -1,8 +1,9 @@
 package io.taig.flog.stackdriver.grpc
 
-import java.io.InputStream
+import java.io.ByteArrayInputStream
+import java.nio.charset.StandardCharsets
 import java.util
-import java.util.{Collections, UUID}
+import java.util.{Collections, UUID, Arrays => JArrays}
 
 import scala.jdk.CollectionConverters._
 
@@ -19,6 +20,11 @@ import io.taig.flog.syntax._
 import io.taig.flog.util.StacktracePrinter
 
 object StackdriverGrpcLogger {
+  private val Scopes = JArrays.asList(
+    "https://www.googleapis.com/auth/cloud-platform.read-only",
+    "https://www.googleapis.com/auth/logging.write"
+  )
+
   def apply[F[_]: ContextShift: Clock](blocker: Blocker, logging: Logging, name: String, resource: MonitoredResource)(
       implicit F: Sync[F]
   ): Logger[F] =
@@ -40,7 +46,7 @@ object StackdriverGrpcLogger {
       name: String,
       resource: MonitoredResource
   )(implicit F: Sync[F]): Resource[F, Logger[F]] = {
-    val options = LoggingOptions.getDefaultInstance.toBuilder.setCredentials(credentials).build()
+    val options = LoggingOptions.newBuilder().setCredentials(credentials).build()
     Resource
       .fromAutoCloseableBlocking(blocker)(F.delay(options.getService))
       .map(StackdriverGrpcLogger(blocker, _, name, resource))
@@ -48,12 +54,17 @@ object StackdriverGrpcLogger {
 
   def fromServiceAccount[F[_]: Sync: ContextShift: Clock](
       blocker: Blocker,
-      account: InputStream,
+      account: String,
       name: String,
       resource: MonitoredResource
   ): Resource[F, Logger[F]] =
     Resource
-      .liftF(blocker.delay(ServiceAccountCredentials.fromStream(account)))
+      .liftF {
+        blocker.delay {
+          val input = new ByteArrayInputStream(account.getBytes(StandardCharsets.UTF_8))
+          ServiceAccountCredentials.fromStream(input).createScoped(Scopes)
+        }
+      }
       .flatMap(fromCredentials(blocker, _, name, resource))
 
   private def id[F[_]](implicit F: Sync[F]): F[String] = F.delay(UUID.randomUUID().show)
