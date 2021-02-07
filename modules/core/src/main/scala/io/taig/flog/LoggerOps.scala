@@ -8,19 +8,17 @@ abstract class LoggerOps[F[_[_]], G[_]] {
 
   final def modifyEvent(f: Event => Event): F[G] = modify(_.map(f))
 
-  final def modifyPayload(f: Payload.Object => Payload.Object): F[G] =
-    modifyEvent(event => event.copy(payload = f(event.payload)))
-
-  final def modifyScope(f: Scope => Scope): F[G] = modifyEvent(event => event.copy(scope = f(event.scope)))
-
   final def filter(filter: Event => Boolean): F[G] = modify(_.filter(filter))
 
   final def minimum(level: Level): F[G] = filter(_.level >= level)
 
-  final def withDefaults(context: Context): F[G] = modifyEvent(_.defaults(context))
+  /** Append the given `Scope` to all events of this logger */
+  final def append(scope: Scope): F[G] = modifyEvent(_.append(scope))
 
-  /** Prefix all events of this logger with the given `Scope` */
-  final def prefix(scope: Scope): F[G] = withDefaults(Context(scope, Payload.Empty))
+  /** Prepend the given `Scope` to all events of this logger */
+  final def prepend(scope: Scope): F[G] = modifyEvent(_.prepend(scope))
 
-  final def presets(payload: Payload.Object): F[G] = withDefaults(Context(Scope.Root, payload))
+  final def merge(payload: Payload.Object): F[G] = modifyEvent(_.merge(payload))
+
+  final def withContext(context: Context): F[G] = modifyEvent(_.withContext(context))
 }

@@ -27,7 +27,7 @@ object ContextualLogger {
   def apply[F[_]: Monad](logger: Logger[F])(implicit F: Local[F, Context]): ContextualLogger[F] =
     new ContextualLogger[F] {
       override def log(events: Long => List[Event]): F[Unit] =
-        context.flatMap(context => logger.log(timestamp => events(timestamp).map(_.defaults(context))))
+        context.flatMap(context => logger.log(timestamp => events(timestamp).map(_.withContext(context))))
 
       override def context: F[Context] = F.ask
 

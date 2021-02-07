@@ -11,7 +11,7 @@ import org.http4s.Http
 
 object LoggingMiddleware {
   def apply[F[_]: Sync, G[_]](logger: Logger[F])(http: Http[F, G]): Http[F, G] =
-    create(logger.prefix(Scope.Root / "server"), http)
+    create(logger.prepend(Scope.one("server")), http)
 
   private def create[F[_], G[_]](logger: Logger[F], http: Http[F, G])(implicit F: Sync[F]): Http[F, G] =
     Http[F, G] { request =>

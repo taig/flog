@@ -12,11 +12,33 @@ final case class Event(
     payload: Payload.Object,
     throwable: Option[Throwable]
 ) {
-  def defaults(context: Context): Event = prefix(context.prefix).presets(context.presets)
+  def modifyTimestamp(f: Long => Long): Event = copy(timestamp = f(timestamp))
 
-  def prefix(scope: Scope): Event = copy(scope = scope ++ this.scope)
+  def withTimestamp(timestamp: Long): Event = modifyTimestamp(_ => timestamp)
 
-  def presets(payload: Payload.Object): Event = copy(payload = payload deepMerge this.payload)
+  def modifyLevel(f: Level => Level): Event = copy(level = f(level))
+
+  def withLevel(level: Level): Event = modifyLevel(_ => level)
+
+  def modifyScope(f: Scope => Scope): Event = copy(scope = f(scope))
+
+  def withScope(scope: Scope): Event = modifyScope(_ => scope)
+
+  def append(scope: Scope): Event = modifyScope(_ ++ scope)
+
+  def prepend(scope: Scope): Event = modifyScope(scope ++ _)
+
+  def modifyMessage(f: String => String): Event = copy(message = f(message))
+
+  def withMessage(message: String): Event = modifyMessage(_ => message)
+
+  def modifyPayload(f: Payload.Object => Payload.Object): Event = copy(payload = f(payload))
+
+  def withPayload(payload: Payload.Object): Event = modifyPayload(_ => payload)
+
+  def merge(payload: Payload.Object): Event = modifyPayload(_ deepMerge payload)
+
+  def withContext(context: Context): Event = prepend(context.prefix).modifyPayload(context.presets deepMerge _)
 }
 
 object Event {

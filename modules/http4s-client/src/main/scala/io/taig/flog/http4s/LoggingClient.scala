@@ -9,7 +9,7 @@ import org.http4s.client.Client
 
 object LoggingClient {
   def apply[F[_]: Concurrent](logger: Logger[F])(client: Client[F]): Client[F] =
-    create(logger.prefix(Scope.Root / "client"), client)
+    create(logger.prepend(Scope.one("client")), client)
 
   private def create[F[_]: Concurrent](logger: Logger[F], client: Client[F]): Client[F] = Client[F] { request =>
     for {
