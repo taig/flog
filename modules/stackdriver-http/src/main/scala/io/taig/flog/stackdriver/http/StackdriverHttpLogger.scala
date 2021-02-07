@@ -29,9 +29,7 @@ object StackdriverHttpLogger {
       project: String,
       name: String,
       resource: MonitoredResource
-  )(implicit
-      F: Sync[F]
-  ): Logger[F] =
+  )(implicit F: Sync[F]): Logger[F] =
     Logger { events =>
       events
         .traverse(entry(project, name, _, resource))
@@ -81,11 +79,10 @@ object StackdriverHttpLogger {
   ): Resource[F, Logger[F]] =
     Resource
       .liftF {
-        blocker
-          .delay {
-            val scopes = JArrays.asList(LoggingScopes.CLOUD_PLATFORM_READ_ONLY, LoggingScopes.LOGGING_WRITE)
-            ServiceAccountCredentials.fromStream(account).createScoped(scopes)
-          }
+        blocker.delay {
+          val scopes = JArrays.asList(LoggingScopes.CLOUD_PLATFORM_READ_ONLY, LoggingScopes.LOGGING_WRITE)
+          ServiceAccountCredentials.fromStream(account).createScoped(scopes)
+        }
       }
       .flatMap(fromCredentials(blocker, _, project, name, resource))
 
@@ -124,9 +121,11 @@ object StackdriverHttpLogger {
         .setResource(resource)
     }
 
-  def logName(project: String, name: String, scope: Scope): String =
-    s"projects/$project/logs/" + URLEncoder
-      .encode((name +: scope.segments.toList).mkString("."), StandardCharsets.UTF_8)
+  private def logName(project: String, name: String, scope: Scope): String =
+    s"projects/$project/logs/" + URLEncoder.encode(
+      (name +: scope.segments.toList).mkString("."),
+      StandardCharsets.UTF_8
+    )
 
   private def payload(event: Event): JMap[String, Object] =
     Payload
