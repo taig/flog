@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.4
+
+_2021-02-07_
+
+ * Swap argument order in `ContextualLogger.local` and `.scope`
+ * Streamline data and `LoggerOps` APIs
+
 ## 0.9.3
 
 _2021-02-06_
