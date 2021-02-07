@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.5
+
+_2021-02-07_
+
+ * Align `StackdriverGrpcLogger` API with `StackdriverHttpLogger`
+ * Add `grpc.MonitoredResources` helper
+ * Fix Stackdriver configuration issues
+
 ## 0.9.4
 
 _2021-02-07_
