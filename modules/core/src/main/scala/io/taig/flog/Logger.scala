@@ -1,16 +1,17 @@
 package io.taig.flog
 
-import java.io.{BufferedWriter, OutputStream, OutputStreamWriter}
-import java.util.concurrent.TimeUnit
-
 import cats._
 import cats.effect.concurrent.Ref
 import cats.effect.syntax.all._
 import cats.effect.{Clock, Concurrent, Resource, Sync}
 import cats.syntax.all._
+import fs2.Stream
 import fs2.concurrent.Queue
 import io.taig.flog.data._
 import io.taig.flog.util.EventPrinter
+
+import java.io.{BufferedWriter, OutputStream, OutputStreamWriter}
+import java.util.concurrent.TimeUnit
 
 abstract class Logger[F[_]] extends LoggerLike[F] { self =>
   def log(events: Long => List[Event]): F[Unit]
@@ -34,7 +35,7 @@ object Logger {
   def raw[F[_]](timestamp: F[Long], write: List[Event] => F[Unit])(implicit F: Monad[F]): Logger[F] = f =>
     timestamp.flatMap { timestamp =>
       val events = f(timestamp)
-      F.whenA(events.nonEmpty)(write(events))
+      if (events.isEmpty) F.unit else write(events)
     }
 
   /** Create a basic `Logger` that executes the given `write` function when
@@ -51,7 +52,10 @@ object Logger {
   def apply[F[_]: Monad](write: List[Event] => F[Unit])(implicit clock: Clock[F]): Logger[F] =
     raw[F](clock.realTime(TimeUnit.MILLISECONDS), write)
 
-  def noTimestamp[F[_]: Applicative](write: Event => F[Unit]): Logger[F] = _.apply(-1).traverse_(write)
+  def noTimestamp[F[_]](write: List[Event] => F[Unit])(implicit F: Applicative[F]): Logger[F] = { f =>
+    val events = f(-1)
+    if (events.isEmpty) F.unit else write(events)
+  }
 
   def list[F[_]: Monad: Clock](target: Ref[F, List[Event]]): Logger[F] = Logger[F](events => target.update(events ++ _))
 
@@ -79,13 +83,19 @@ object Logger {
 
   def stdOut[F[_]: Concurrent: Clock]: F[Logger[F]] = stdOut[F](buffer = 1024)
 
+  /** Write all logs into a `Queue` and process them asynchronously
+    *
+    * The `timestamp` is used to set the `Event` time when it is added to the queue, the underlying `Logger`'s
+    * `timestamp` is discarded.
+    */
   def queued[F[_]: Concurrent](timestamp: F[Long], logger: Logger[F]): Resource[F, Logger[F]] =
     Resource.liftF(Queue.noneTerminated[F, Event]).flatMap { queue =>
-      val enqueue = raw[F](timestamp, _.traverse_(event => queue.enqueue1(event.some)))
+      val enqueue = raw[F](timestamp, Stream.emits(_).map(_.some).through(queue.enqueue).compile.drain)
       val process = queue.dequeue.chunks.evalMap(events => logger.log(_ => events.toList))
       Resource.make(process.compile.drain.start)(fiber => queue.enqueue1(None) *> fiber.join).as(enqueue)
     }
 
+  /** Write all logs into a `Queue` and process them asynchronously */
   def queued[F[_]: Concurrent](logger: Logger[F])(implicit clock: Clock[F]): Resource[F, Logger[F]] =
     queued[F](clock.realTime(TimeUnit.MILLISECONDS), logger)
 
