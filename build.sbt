@@ -15,7 +15,7 @@ val Version = new {
   val MunitCatsEffect = "0.13.0"
   val ScalaCollectionCompat = "2.4.1"
   val Slf4j = "1.7.30"
-  val ZioInteropCats = "2.2.0.1"
+  val ZioInteropCats = "2.3.1.0"
   val Zio = "1.0.4-2"
 }
 
