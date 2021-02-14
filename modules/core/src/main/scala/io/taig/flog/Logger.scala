@@ -1,6 +1,7 @@
 package io.taig.flog
 
 import cats._
+import cats.data.Chain
 import cats.effect.concurrent.Ref
 import cats.effect.syntax.all._
 import cats.effect.{Clock, Concurrent, Resource, Sync}
@@ -91,13 +92,39 @@ object Logger {
   def queued[F[_]: Concurrent](timestamp: F[Long], logger: Logger[F]): Resource[F, Logger[F]] =
     Resource.liftF(Queue.noneTerminated[F, Event]).flatMap { queue =>
       val enqueue = raw[F](timestamp, Stream.emits(_).map(_.some).through(queue.enqueue).compile.drain)
-      val process = queue.dequeue.chunks.evalMap(events => logger.log(_ => events.toList))
-      Resource.make(process.compile.drain.start)(fiber => queue.enqueue1(None) *> fiber.join).as(enqueue)
+      val process = queue.dequeue.chunks.evalMap(events => logger.log(_ => events.toList)).compile.drain
+      Resource.make(process.start)(fiber => queue.enqueue1(None) *> fiber.join).as(enqueue)
     }
 
   /** Write all logs into a `Queue` and process them asynchronously */
   def queued[F[_]: Concurrent](logger: Logger[F])(implicit clock: Clock[F]): Resource[F, Logger[F]] =
     queued[F](clock.realTime(TimeUnit.MILLISECONDS), logger)
+
+  /** Write all logs into a `Queue` and process them asynchronously as soon as at least `buffer` logs have
+    * accumulated
+    *
+    * The `timestamp` is used to set the `Event` time when it is added to the queue, the underlying `Logger`'s
+    * `timestamp` is discarded.
+    */
+  def batched[F[_]: Concurrent](timestamp: F[Long], logger: Logger[F], buffer: Int): Resource[F, Logger[F]] =
+    Resource.liftF(Queue.noneTerminated[F, Event]).flatMap { queue =>
+      val enqueue = raw[F](timestamp, Stream.emits(_).map(_.some).through(queue.enqueue).compile.drain)
+      val process = queue.dequeue.chunks
+        .evalScan(Chain.empty[Event]) { (events, chunk) =>
+          val update = events ++ chunk.toChain
+          if (update.length < buffer) update.pure[F] else logger.log(_ => update.toList).as(Chain.empty[Event])
+        }
+        .compile
+        .last
+        .flatMap(_.traverse_(events => logger.log(_ => events.toList)))
+      Resource.make(process.start)(fiber => queue.enqueue1(None) *> fiber.join).as(enqueue)
+    }
+
+  /** Write all logs into a `Queue` and process them asynchronously as soon as at least `buffer` logs have
+    * accumulated
+    */
+  def batched[F[_]: Concurrent](logger: Logger[F], buffer: Int)(implicit clock: Clock[F]): Resource[F, Logger[F]] =
+    batched(clock.realTime(TimeUnit.MILLISECONDS), logger, buffer)
 
   /** Forward logs to all given loggers */
   def broadcast[F[_]: Monad](loggers: List[Logger[F]])(implicit clock: Clock[F]): Logger[F] =
