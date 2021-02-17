@@ -2,7 +2,7 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 val Version = new {
   val CatsEffect = "2.3.2"
-  val CatsMtl = "1.1.1"
+  val CatsMtl = "1.1.2"
   val Circe = "0.13.0"
   val Fs2 = "2.5.0"
   val GoogleApiServicesLogging = "v2-rev20210122-1.31.0"
