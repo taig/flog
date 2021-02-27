@@ -22,7 +22,7 @@ val Version = new {
 // Don't publish root / aggregation project
 noPublishSettings
 
-ThisBuild / crossScalaVersions := Seq("2.12.13", scalaVersion.value)
+ThisBuild / crossScalaVersions := Seq("2.13.5", scalaVersion.value)
 ThisBuild / scalaVersion := "2.13.4"
 ThisBuild / testFrameworks += new TestFramework("munit.Framework")
 
