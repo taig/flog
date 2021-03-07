@@ -2,10 +2,13 @@ package io.taig.flog
 
 import java.util.UUID
 
+import scala.annotation.nowarn
+
 import cats.syntax.all._
 import io.taig.flog.data.Payload
 import simulacrum.typeclass
 
+@nowarn("msg=Unused import")
 @typeclass
 trait Encoder[A] {
   def encode(value: A): Payload
@@ -14,6 +17,7 @@ trait Encoder[A] {
 }
 
 object Encoder {
+  @nowarn("msg=Unused import")
   @typeclass
   trait Object[A] {
     def encode(value: A): Payload.Object
