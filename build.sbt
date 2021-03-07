@@ -26,6 +26,7 @@ noPublishSettings
 ThisBuild / crossScalaVersions := Seq("2.12.13", Version.Scala)
 ThisBuild / scalaVersion := Version.Scala
 ThisBuild / testFrameworks += new TestFramework("munit.Framework")
+ThisBuild / versionScheme := Some("early-semver")
 
 lazy val core = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
