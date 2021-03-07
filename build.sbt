@@ -13,6 +13,7 @@ val Version = new {
   val Monix = "3.3.0"
   val Munit = "0.7.22"
   val MunitCatsEffect = "0.13.1"
+  val Scala  ="2.13.5"
   val ScalaCollectionCompat = "2.4.2"
   val Slf4j = "1.7.30"
   val ZioInteropCats = "2.3.1.0"
@@ -22,8 +23,8 @@ val Version = new {
 // Don't publish root / aggregation project
 noPublishSettings
 
-ThisBuild / crossScalaVersions := Seq("2.12.13", scalaVersion.value)
-ThisBuild / scalaVersion := "2.13.5"
+ThisBuild / crossScalaVersions := Seq("2.12.13", Version.Scala)
+ThisBuild / scalaVersion := Version.Scala
 ThisBuild / testFrameworks += new TestFramework("munit.Framework")
 
 lazy val core = crossProject(JVMPlatform, JSPlatform)
