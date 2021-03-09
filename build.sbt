@@ -17,7 +17,7 @@ val Version = new {
   val ScalaCollectionCompat = "2.4.2"
   val Slf4j = "1.7.30"
   val ZioInteropCats = "2.3.1.0"
-  val Zio = "1.0.4-2"
+  val Zio = "1.0.5"
 }
 
 // Don't publish root / aggregation project
