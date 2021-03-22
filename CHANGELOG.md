@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.6
+
+_2021-03-22_
+
+ * [#12] Add batched logger (#16)
+ * A lot of scala steward
+
 ## 0.9.5
 
 _2021-02-07_
