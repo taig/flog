@@ -79,7 +79,7 @@ object StackdriverHttpLogger {
       resource: MonitoredResource
   )(implicit F: Sync[F]): Resource[F, Logger[F]] =
     Resource
-      .liftF {
+      .eval {
         F.delay {
           val input = new ByteArrayInputStream(account.getBytes(StandardCharsets.UTF_8))
           ServiceAccountCredentials.fromStream(input)

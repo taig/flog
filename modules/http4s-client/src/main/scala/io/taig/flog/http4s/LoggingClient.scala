@@ -13,9 +13,9 @@ object LoggingClient {
 
   private def create[F[_]: Concurrent](logger: Logger[F], client: Client[F]): Client[F] = Client[F] { request =>
     for {
-      _ <- Resource.liftF(logger.info("Request", request.asObject))
+      _ <- Resource.eval(logger.info("Request", request.asObject))
       response <- client.run(request)
-      _ <- Resource.liftF(logger.info("Response", response.asObject))
+      _ <- Resource.eval(logger.info("Response", response.asObject))
     } yield response
   }
 }

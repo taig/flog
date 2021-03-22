@@ -36,8 +36,8 @@ object SampleApp extends CatsApp {
     import zio.interop.catz.implicits._
 
     (for {
-      logger <- Resource.liftF(logger[Task])
-      contextual <- Resource.liftF(contextualZioLogger(logger))
+      logger <- Resource.eval(logger[Task])
+      contextual <- Resource.eval(contextualZioLogger(logger))
       _ <- server[Task](contextual)
     } yield ExitCode.success).use(_ => Task.never).orDie
   }
