@@ -59,7 +59,7 @@ object StackdriverGrpcLogger {
       resource: MonitoredResource
   ): Resource[F, Logger[F]] =
     Resource
-      .liftF {
+      .eval {
         blocker.delay {
           val input = new ByteArrayInputStream(account.getBytes(StandardCharsets.UTF_8))
           ServiceAccountCredentials.fromStream(input).createScoped(Scopes)

@@ -90,7 +90,7 @@ object Logger {
     * `timestamp` is discarded.
     */
   def queued[F[_]: Concurrent](timestamp: F[Long], logger: Logger[F]): Resource[F, Logger[F]] =
-    Resource.liftF(Queue.noneTerminated[F, Event]).flatMap { queue =>
+    Resource.eval(Queue.noneTerminated[F, Event]).flatMap { queue =>
       val enqueue = raw[F](timestamp, Stream.emits(_).map(_.some).through(queue.enqueue).compile.drain)
       val process = queue.dequeue.chunks.evalMap(events => logger.log(_ => events.toList)).compile.drain
       Resource.make(process.start)(fiber => queue.enqueue1(None) *> fiber.join).as(enqueue)
@@ -107,7 +107,7 @@ object Logger {
     * `timestamp` is discarded.
     */
   def batched[F[_]: Concurrent](timestamp: F[Long], logger: Logger[F], buffer: Int): Resource[F, Logger[F]] =
-    Resource.liftF(Queue.noneTerminated[F, Event]).flatMap { queue =>
+    Resource.eval(Queue.noneTerminated[F, Event]).flatMap { queue =>
       val enqueue = raw[F](timestamp, Stream.emits(_).map(_.some).through(queue.enqueue).compile.drain)
       val process = queue.dequeue.chunks
         .evalScan(Chain.empty[Event]) { (events, chunk) =>
