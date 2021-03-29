@@ -2,7 +2,7 @@ package io.taig.flog.sheets
 
 import java.io.InputStream
 
-import cats.effect.{Blocker, Clock, ContextShift, Sync}
+import cats.effect.{Clock, Sync}
 import cats.syntax.all._
 import io.taig.flog.Logger
 import io.taig.flog.data.Event
@@ -10,9 +10,7 @@ import io.taig.flog.sheets.util.Google
 import io.taig.flog.util.{StacktracePrinter, TimestampPrinter}
 
 object SheetsLogger {
-  def apply[F[_]: Sync: ContextShift: Clock](
-      blocker: Blocker,
-      account: F[InputStream],
+  def apply[F[_]: Sync: ContextShift: Clock](account: F[InputStream],
       id: String,
       range: String,
       schema: List[String]

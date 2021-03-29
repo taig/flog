@@ -2,7 +2,6 @@ package io.taig.flog
 
 import cats._
 import cats.data.Chain
-import cats.effect.concurrent.Ref
 import cats.effect.syntax.all._
 import cats.effect.{Clock, Concurrent, Resource, Sync}
 import cats.syntax.all._
@@ -13,6 +12,7 @@ import io.taig.flog.util.EventPrinter
 
 import java.io.{BufferedWriter, OutputStream, OutputStreamWriter}
 import java.util.concurrent.TimeUnit
+import cats.effect.Ref
 
 abstract class Logger[F[_]] extends LoggerLike[F] { self =>
   def log(events: Long => List[Event]): F[Unit]

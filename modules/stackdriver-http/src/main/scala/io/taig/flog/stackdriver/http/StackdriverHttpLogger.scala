@@ -8,7 +8,7 @@ import java.util.{UUID, Arrays => JArrays, Map => JMap}
 
 import scala.jdk.CollectionConverters._
 
-import cats.effect.{Blocker, Clock, ContextShift, Resource, Sync}
+import cats.effect.{Clock, Resource, Sync}
 import cats.syntax.all._
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
@@ -25,9 +25,7 @@ import io.taig.flog.util.StacktracePrinter
 object StackdriverHttpLogger {
   private val Scopes = JArrays.asList(LoggingScopes.CLOUD_PLATFORM_READ_ONLY, LoggingScopes.LOGGING_WRITE)
 
-  def apply[F[_]: ContextShift: Clock](
-      blocker: Blocker,
-      logging: Logging#Entries,
+  def apply[F[_]: ContextShift: Clock](logging: Logging#Entries,
       project: String,
       name: String,
       resource: MonitoredResource
@@ -37,31 +35,29 @@ object StackdriverHttpLogger {
         .traverse(entry(project, name, _, resource))
         .flatMap { entries =>
           val request = new WriteLogEntriesRequest().setEntries(entries.asJava)
-          blocker.delay(logging.write(request).execute()).void
+          Sync[F].blocking(logging.write(request).execute()).void
         }
         .handleErrorWith { throwable =>
           failureEntry(project, name, resource, throwable)
             .flatMap { entry =>
               val request = new WriteLogEntriesRequest().setEntries(JArrays.asList(entry))
-              blocker.delay(logging.write(request).execute()).void
+              Sync[F].blocking(logging.write(request).execute()).void
             }
         }
         .handleErrorWith(throwable => F.delay(throwable.printStackTrace(System.err)))
     }
 
-  def fromCredentials[F[_]: Sync: ContextShift: Clock](
-      blocker: Blocker,
-      credentials: Credentials,
+  def fromCredentials[F[_]: Sync: ContextShift: Clock](credentials: Credentials,
       project: String,
       name: String,
       resource: MonitoredResource
   ): Resource[F, Logger[F]] =
     Resource
-      .make(blocker.delay(GoogleNetHttpTransport.newTrustedTransport()))(transport =>
-        blocker.delay(transport.shutdown())
+      .make(Sync[F].blocking(GoogleNetHttpTransport.newTrustedTransport()))(transport =>
+        Sync[F].blocking(transport.shutdown())
       )
       .evalMap { transport =>
-        blocker.delay {
+        Sync[F].blocking {
           val logging = new Logging.Builder(
             transport,
             JacksonFactory.getDefaultInstance,
@@ -72,9 +68,7 @@ object StackdriverHttpLogger {
         }
       }
 
-  def fromServiceAccount[F[_]: ContextShift: Clock](
-      blocker: Blocker,
-      account: String,
+  def fromServiceAccount[F[_]: ContextShift: Clock](account: String,
       name: String,
       resource: MonitoredResource
   )(implicit F: Sync[F]): Resource[F, Logger[F]] =

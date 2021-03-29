@@ -26,7 +26,7 @@ final class LogstashLogger[F[_]: ContextShift](channel: DataOutputStream, blocke
 }
 
 object LogstashLogger {
-  def apply[F[_]: ContextShift: Clock](host: String, port: Int, blocker: Blocker)(implicit
+  def apply[F[_]: ContextShift: Clock](host: String, port: Int)(implicit
       F: Sync[F]
   ): Resource[F, Logger[F]] = {
     val acquire = F.delay(new Socket(host, port))

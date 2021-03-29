@@ -7,7 +7,7 @@ import java.util.{Collections, UUID, Arrays => JArrays}
 
 import scala.jdk.CollectionConverters._
 
-import cats.effect.{Blocker, Clock, ContextShift, Resource, Sync}
+import cats.effect.{Clock, Resource, Sync}
 import cats.syntax.all._
 import com.google.auth.Credentials
 import com.google.auth.oauth2.ServiceAccountCredentials
@@ -25,24 +25,22 @@ object StackdriverGrpcLogger {
     "https://www.googleapis.com/auth/logging.write"
   )
 
-  def apply[F[_]: ContextShift: Clock](blocker: Blocker, logging: Logging, name: String, resource: MonitoredResource)(
+  def apply[F[_]: ContextShift: Clock](logging: Logging, name: String, resource: MonitoredResource)(
       implicit F: Sync[F]
   ): Logger[F] =
     Logger { events =>
       events
         .traverse(entry(name, _, resource))
-        .flatMap(entries => blocker.delay(logging.write(entries.asJava)))
+        .flatMap(entries => Sync[F].blocking(logging.write(entries.asJava)))
         .handleErrorWith { throwable =>
           failureEntry(name, resource, throwable).flatMap { entry =>
-            blocker.delay(logging.write(Collections.singleton(entry)))
+            Sync[F].blocking(logging.write(Collections.singleton(entry)))
           }
         }
         .handleErrorWith(throwable => F.delay(throwable.printStackTrace(System.err)))
     }
 
-  def fromCredentials[F[_]: ContextShift: Clock](
-      blocker: Blocker,
-      credentials: Credentials,
+  def fromCredentials[F[_]: ContextShift: Clock](credentials: Credentials,
       name: String,
       resource: MonitoredResource
   )(implicit F: Sync[F]): Resource[F, Logger[F]] = {
@@ -52,15 +50,13 @@ object StackdriverGrpcLogger {
       .map(StackdriverGrpcLogger(blocker, _, name, resource))
   }
 
-  def fromServiceAccount[F[_]: Sync: ContextShift: Clock](
-      blocker: Blocker,
-      account: String,
+  def fromServiceAccount[F[_]: Sync: ContextShift: Clock](account: String,
       name: String,
       resource: MonitoredResource
   ): Resource[F, Logger[F]] =
     Resource
       .eval {
-        blocker.delay {
+        Sync[F].blocking {
           val input = new ByteArrayInputStream(account.getBytes(StandardCharsets.UTF_8))
           ServiceAccountCredentials.fromStream(input).createScoped(Scopes)
         }

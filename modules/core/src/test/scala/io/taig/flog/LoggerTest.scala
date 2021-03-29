@@ -1,10 +1,10 @@
 package io.taig.flog
 
 import cats.effect.IO
-import cats.effect.concurrent.Ref
 import cats.syntax.all._
 import io.taig.flog.data.Event
 import munit.CatsEffectSuite
+import cats.effect.Ref
 
 final class LoggerTest extends CatsEffectSuite {
   test("queued flushes before close") {

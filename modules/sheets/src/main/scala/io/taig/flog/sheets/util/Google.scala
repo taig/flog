@@ -5,7 +5,7 @@ import java.util.{Arrays => JArrays}
 
 import scala.jdk.CollectionConverters._
 
-import cats.effect.{Blocker, ContextShift, Resource, Sync}
+import cats.effect.{Resource, Sync}
 import cats.syntax.all._
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
@@ -19,13 +19,13 @@ object Google {
   def handle[F[_]](stream: F[InputStream])(implicit F: Sync[F]): Resource[F, InputStream] =
     Resource.make(stream)(resource => F.delay(resource.close()))
 
-  def credentials[F[_]: Sync: ContextShift](blocker: Blocker, account: F[InputStream]): F[Credentials] =
+  def credentials[F[_]: Sync: ContextShift](account: F[InputStream]): F[Credentials] =
     handle[F](account).use { input =>
       val scope = JArrays.asList(SheetsScopes.SPREADSHEETS)
-      blocker.delay(ServiceAccountCredentials.fromStream(input).createScoped(scope))
+      Sync[F].blocking(ServiceAccountCredentials.fromStream(input).createScoped(scope))
     }
 
-  def sheets[F[_]: ContextShift](blocker: Blocker, account: F[InputStream])(implicit F: Sync[F]): F[Sheets] =
+  def sheets[F[_]: ContextShift](account: F[InputStream])(implicit F: Sync[F]): F[Sheets] =
     for {
       json <- F.delay(JacksonFactory.getDefaultInstance)
       transport <- F.delay(GoogleNetHttpTransport.newTrustedTransport())
