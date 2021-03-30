@@ -1,16 +1,23 @@
 package io.taig.flog
 
 import cats.effect.IO
-import cats.effect.concurrent.Ref
+import cats.effect.Ref
 import cats.syntax.all._
 import io.taig.flog.data.Event
 import munit.CatsEffectSuite
+
+import scala.concurrent.duration.DurationInt
 
 final class LoggerTest extends CatsEffectSuite {
   test("queued flushes before close") {
     Ref[IO]
       .of(List.empty[Event])
-      .flatTap(target => Logger.queued[IO](Logger.list[IO](target)).use(_.info("foobar")))
+      .flatTap(target =>
+        Logger.queued[IO](Logger.list[IO](target)).use { l =>
+          IO.sleep(3.seconds) *>
+            l.info("foobar")
+        }
+      )
       .map(target => assertIO(obtained = target.get.map(_.length), returns = 1))
   }
 

@@ -1,37 +1,32 @@
 package io.taig.flog.slf4j
 
-import java.util.Objects
-
-import cats.effect.{Effect, IO}
-import cats.effect.implicits._
+import cats.effect.std.Dispatcher
 import io.taig.flog.Logger
 import io.taig.flog.data.Level
 import org.slf4j.helpers.{FormattingTuple, MarkerIgnoringBase, MessageFormatter}
 
-final class FlogSlf4jLogger[F[_]: Effect](logger: Logger[F]) extends MarkerIgnoringBase {
+import java.util.Objects
+
+final class FlogSlf4jLogger[F[_]](logger: Logger[F])(dispatcher: Dispatcher[F]) extends MarkerIgnoringBase {
   def log(level: Level, format: String, args: Array[AnyRef]): Unit =
     log(level, MessageFormatter.arrayFormat(format, args))
 
   def log(level: Level, message: String): Unit =
     log(level, message, null: Throwable)
 
-  def log(level: Level, message: String, throwable: Throwable): Unit =
+  def log(level: Level, message: String, throwable: Throwable): Unit = dispatcher.unsafeRunSync {
     logger
       .apply(
         level,
         message = Objects.toString(message, ""),
         throwable = Option(throwable)
       )
-      .runAsync(_ => IO.unit)
-      .unsafeRunSync()
+  }
 
-  def log(level: Level, result: FormattingTuple): Unit = {
+  def log(level: Level, result: FormattingTuple): Unit = dispatcher.unsafeRunSync {
     val message = Objects.toString(result.getMessage, "")
     val throwable = Option(result.getThrowable)
-    logger
-      .apply(level, message = message, throwable = throwable)
-      .runAsync(_ => IO.unit)
-      .unsafeRunSync()
+    logger.apply(level, message = message, throwable = throwable)
   }
 
   override val isTraceEnabled: Boolean = true

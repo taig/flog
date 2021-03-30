@@ -1,5 +1,6 @@
 package io.taig.flog
 
+import cats.effect.{IO, IOLocal}
 import cats.mtl.Local
 import cats.syntax.all._
 import cats.{~>, Applicative, Monad}
@@ -35,6 +36,18 @@ object ContextualLogger {
 
       override def scope[A](context: Context)(run: F[A]): F[A] = F.scope(run)(context)
     }
+
+  def ofIO(logger: Logger[IO]): IO[ContextualLogger[IO]] = IOLocal(Context.Empty).map { ref =>
+    implicit val local: Local[IO, Context] = new Local[IO, Context] {
+      override def local[A](fa: IO[A])(f: Context => Context): IO[A] = ref.update(f) *> fa
+
+      override val applicative: Applicative[IO] = Applicative[IO]
+
+      override def ask[E2 >: Context]: IO[E2] = ref.get
+    }
+
+    ContextualLogger(logger)
+  }
 
   def fake[F[_]: Applicative](logger: Logger[F]): ContextualLogger[F] = new ContextualLogger[F] {
     override def context: F[Context] = Context.Empty.pure[F]

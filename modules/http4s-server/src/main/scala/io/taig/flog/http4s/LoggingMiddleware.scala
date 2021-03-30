@@ -1,7 +1,7 @@
 package io.taig.flog.http4s
 
+import cats.effect.{Outcome, Sync}
 import cats.effect.implicits._
-import cats.effect.{ExitCase, Sync}
 import cats.syntax.all._
 import io.taig.flog.Logger
 import io.taig.flog.data.Scope
@@ -20,9 +20,9 @@ object LoggingMiddleware {
         response <- http.run(request)
         _ <- logger.info("Response", response.asObject)
       } yield response).guaranteeCase {
-        case ExitCase.Completed        => F.unit
-        case ExitCase.Error(throwable) => logger.error("Request failed", throwable)
-        case ExitCase.Canceled         => logger.info("Request cancelled", request.asObject)
+        case Outcome.Succeeded(_)       => F.unit
+        case Outcome.Errored(throwable) => logger.error("Request failed", throwable)
+        case Outcome.Canceled()         => logger.info("Request cancelled", request.asObject)
       }
     }
 }
