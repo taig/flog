@@ -11,8 +11,8 @@ object implicits {
 
   implicit val encoderUri: Encoder[Uri] = Encoder[String].contramap(_.show)
 
-  implicit val encoderHeaders: Encoder[Headers] = Encoder[Map[String, String]]
-    .contramap(_.toList.map(header => (header.name.show, header.value)).toMap)
+  implicit val encoderHeaders: Encoder[Headers] =
+    Encoder[Map[String, String]].contramap(_.headers.map(header => (header.name.show, header.value)).toMap)
 
   implicit def encoderRequest[F[_]]: Encoder.Object[Request[F]] = request =>
     Payload.of(

@@ -1,23 +1,19 @@
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 val Version = new {
-  val CatsEffect = "2.4.0"
-  val CatsMtl = "1.1.2"
+  val CatsEffect = "3.0.1"
+  val CatsMtl = "1.1.3"
   val Circe = "0.13.0"
-  val Fs2 = "2.5.3"
+  val Fs2 = "3.0.0"
   val GoogleApiServicesLogging = "v2-rev20210312-1.31.0"
-  val GoogleApiServicesSheets = "v4-rev20210316-1.31.0"
   val GoogleAuthLibraryOauth2Http = "0.25.2"
   val GoogleCloudLogging = "2.2.0"
-  val Http4s = "0.21.20"
-  val Monix = "3.3.0"
-  val Munit = "0.7.22"
-  val MunitCatsEffect = "0.13.1"
+  val Http4s = "1.0.0-M20"
+  val Munit = "0.7.23"
+  val MunitCatsEffect = "1.0.0"
   val Scala = "2.13.5"
-  val ScalaCollectionCompat = "2.4.2"
+  val ScalaCollectionCompat = "2.4.3"
   val Slf4j = "1.7.30"
-  val ZioInteropCats = "2.3.1.0"
-  val Zio = "1.0.5"
 }
 
 // Don't publish root / aggregation project
@@ -39,7 +35,7 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
         "org.typelevel" %%% "cats-effect" % Version.CatsEffect ::
         "org.typelevel" %%% "cats-mtl" % Version.CatsMtl ::
         "org.scalameta" %%% "munit" % Version.Munit % "test" ::
-        "org.typelevel" %%% "munit-cats-effect-2" % Version.MunitCatsEffect % "test" ::
+        "org.typelevel" %%% "munit-cats-effect-3" % Version.MunitCatsEffect % "test" ::
         Nil,
     name := "flog-core"
   )
@@ -59,31 +55,6 @@ lazy val circe = crossProject(JVMPlatform, JSPlatform)
   )
   .dependsOn(core)
 
-lazy val zio = crossProject(JVMPlatform, JSPlatform)
-  .crossType(CrossType.Pure)
-  .in(file("modules/interop-zio"))
-  .settings(sonatypePublishSettings)
-  .settings(
-    libraryDependencies ++=
-      "dev.zio" %%% "zio-interop-cats" % Version.ZioInteropCats ::
-        "dev.zio" %%% "zio" % Version.Zio ::
-        Nil,
-    name := "flog-interop-zio"
-  )
-  .dependsOn(core)
-
-lazy val monix = crossProject(JVMPlatform, JSPlatform)
-  .crossType(CrossType.Pure)
-  .in(file("modules/interop-monix"))
-  .settings(sonatypePublishSettings)
-  .settings(
-    libraryDependencies ++=
-      "io.monix" %%% "monix" % Version.Monix ::
-        Nil,
-    name := "flog-interop-monix"
-  )
-  .dependsOn(core)
-
 lazy val slf4j = project
   .in(file("modules/slf4j"))
   .settings(sonatypePublishSettings)
@@ -92,18 +63,6 @@ lazy val slf4j = project
       "org.slf4j" % "slf4j-api" % Version.Slf4j ::
         Nil,
     name := "flog-slf4j"
-  )
-  .dependsOn(core.jvm)
-
-lazy val sheets = project
-  .in(file("modules/sheets"))
-  .settings(sonatypePublishSettings)
-  .settings(
-    libraryDependencies ++=
-      "com.google.apis" % "google-api-services-sheets" % Version.GoogleApiServicesSheets ::
-        "com.google.auth" % "google-auth-library-oauth2-http" % Version.GoogleAuthLibraryOauth2Http ::
-        Nil,
-    name := "flog-sheets"
   )
   .dependsOn(core.jvm)
 
@@ -180,4 +139,4 @@ lazy val sample = project
         Nil,
     name := "flog-sample"
   )
-  .dependsOn(http4sServer, zio.jvm, slf4j)
+  .dependsOn(http4sServer, slf4j)

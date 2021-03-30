@@ -1,14 +1,6 @@
 package io.taig.flog.stackdriver.http
 
-import java.io.ByteArrayInputStream
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
-import java.time.Instant
-import java.util.{UUID, Arrays => JArrays, Map => JMap}
-
-import scala.jdk.CollectionConverters._
-
-import cats.effect.{Blocker, Clock, ContextShift, Resource, Sync}
+import cats.effect.{Resource, Sync}
 import cats.syntax.all._
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
@@ -22,11 +14,17 @@ import io.taig.flog.data.{Event, Level, Payload, Scope}
 import io.taig.flog.syntax._
 import io.taig.flog.util.StacktracePrinter
 
+import java.io.ByteArrayInputStream
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+import java.time.Instant
+import java.util.{UUID, Arrays => JArrays, Map => JMap}
+import scala.jdk.CollectionConverters._
+
 object StackdriverHttpLogger {
   private val Scopes = JArrays.asList(LoggingScopes.CLOUD_PLATFORM_READ_ONLY, LoggingScopes.LOGGING_WRITE)
 
-  def apply[F[_]: ContextShift: Clock](
-      blocker: Blocker,
+  def apply[F[_]](
       logging: Logging#Entries,
       project: String,
       name: String,
@@ -37,43 +35,36 @@ object StackdriverHttpLogger {
         .traverse(entry(project, name, _, resource))
         .flatMap { entries =>
           val request = new WriteLogEntriesRequest().setEntries(entries.asJava)
-          blocker.delay(logging.write(request).execute()).void
+          F.delay(logging.write(request).execute()).void
         }
         .handleErrorWith { throwable =>
           failureEntry(project, name, resource, throwable)
             .flatMap { entry =>
               val request = new WriteLogEntriesRequest().setEntries(JArrays.asList(entry))
-              blocker.delay(logging.write(request).execute()).void
+              F.delay(logging.write(request).execute()).void
             }
         }
         .handleErrorWith(throwable => F.delay(throwable.printStackTrace(System.err)))
     }
 
-  def fromCredentials[F[_]: Sync: ContextShift: Clock](
-      blocker: Blocker,
-      credentials: Credentials,
-      project: String,
-      name: String,
-      resource: MonitoredResource
+  def fromCredentials[F[_]](credentials: Credentials, project: String, name: String, resource: MonitoredResource)(
+      implicit F: Sync[F]
   ): Resource[F, Logger[F]] =
     Resource
-      .make(blocker.delay(GoogleNetHttpTransport.newTrustedTransport()))(transport =>
-        blocker.delay(transport.shutdown())
-      )
+      .make(F.delay(GoogleNetHttpTransport.newTrustedTransport()))(transport => F.delay(transport.shutdown()))
       .evalMap { transport =>
-        blocker.delay {
+        F.delay {
           val logging = new Logging.Builder(
             transport,
             JacksonFactory.getDefaultInstance,
             new HttpCredentialsAdapter(credentials)
           ).setApplicationName(project).build()
 
-          StackdriverHttpLogger[F](blocker, logging.entries(), project, name, resource)
+          StackdriverHttpLogger[F](logging.entries(), project, name, resource)
         }
       }
 
-  def fromServiceAccount[F[_]: ContextShift: Clock](
-      blocker: Blocker,
+  def fromServiceAccount[F[_]](
       account: String,
       name: String,
       resource: MonitoredResource
@@ -85,7 +76,7 @@ object StackdriverHttpLogger {
           ServiceAccountCredentials.fromStream(input)
         }
       }
-      .flatMap(account => fromCredentials(blocker, account.createScoped(Scopes), account.getProjectId, name, resource))
+      .flatMap(account => fromCredentials(account.createScoped(Scopes), account.getProjectId, name, resource))
 
   private def id[F[_]](implicit F: Sync[F]): F[String] = F.delay(UUID.randomUUID().show)
 

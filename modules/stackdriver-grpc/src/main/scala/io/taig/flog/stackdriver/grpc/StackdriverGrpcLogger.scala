@@ -1,13 +1,6 @@
 package io.taig.flog.stackdriver.grpc
 
-import java.io.ByteArrayInputStream
-import java.nio.charset.StandardCharsets
-import java.util
-import java.util.{Collections, UUID, Arrays => JArrays}
-
-import scala.jdk.CollectionConverters._
-
-import cats.effect.{Blocker, Clock, ContextShift, Resource, Sync}
+import cats.effect.{Resource, Sync}
 import cats.syntax.all._
 import com.google.auth.Credentials
 import com.google.auth.oauth2.ServiceAccountCredentials
@@ -19,53 +12,53 @@ import io.taig.flog.data.{Event, Level, Payload}
 import io.taig.flog.syntax._
 import io.taig.flog.util.StacktracePrinter
 
+import java.io.ByteArrayInputStream
+import java.nio.charset.StandardCharsets
+import java.util
+import java.util.{Collections, UUID, Arrays => JArrays}
+import scala.jdk.CollectionConverters._
+
 object StackdriverGrpcLogger {
   private val Scopes = JArrays.asList(
     "https://www.googleapis.com/auth/cloud-platform.read-only",
     "https://www.googleapis.com/auth/logging.write"
   )
 
-  def apply[F[_]: ContextShift: Clock](blocker: Blocker, logging: Logging, name: String, resource: MonitoredResource)(
-      implicit F: Sync[F]
-  ): Logger[F] =
+  def apply[F[_]](logging: Logging, name: String, resource: MonitoredResource)(implicit F: Sync[F]): Logger[F] =
     Logger { events =>
       events
         .traverse(entry(name, _, resource))
-        .flatMap(entries => blocker.delay(logging.write(entries.asJava)))
+        .flatMap(entries => F.blocking(logging.write(entries.asJava)))
         .handleErrorWith { throwable =>
           failureEntry(name, resource, throwable).flatMap { entry =>
-            blocker.delay(logging.write(Collections.singleton(entry)))
+            F.blocking(logging.write(Collections.singleton(entry)))
           }
         }
         .handleErrorWith(throwable => F.delay(throwable.printStackTrace(System.err)))
     }
 
-  def fromCredentials[F[_]: ContextShift: Clock](
-      blocker: Blocker,
+  def fromCredentials[F[_]](
       credentials: Credentials,
       name: String,
       resource: MonitoredResource
   )(implicit F: Sync[F]): Resource[F, Logger[F]] = {
     val options = LoggingOptions.newBuilder().setCredentials(credentials).build()
-    Resource
-      .fromAutoCloseableBlocking(blocker)(F.delay(options.getService))
-      .map(StackdriverGrpcLogger(blocker, _, name, resource))
+    Resource.fromAutoCloseable(F.blocking(options.getService)).map(StackdriverGrpcLogger(_, name, resource))
   }
 
-  def fromServiceAccount[F[_]: Sync: ContextShift: Clock](
-      blocker: Blocker,
+  def fromServiceAccount[F[_]](
       account: String,
       name: String,
       resource: MonitoredResource
-  ): Resource[F, Logger[F]] =
+  )(implicit F: Sync[F]): Resource[F, Logger[F]] =
     Resource
       .eval {
-        blocker.delay {
+        F.blocking {
           val input = new ByteArrayInputStream(account.getBytes(StandardCharsets.UTF_8))
           ServiceAccountCredentials.fromStream(input).createScoped(Scopes)
         }
       }
-      .flatMap(fromCredentials(blocker, _, name, resource))
+      .flatMap(fromCredentials(_, name, resource))
 
   private def id[F[_]](implicit F: Sync[F]): F[String] = F.delay(UUID.randomUUID().show)
 
