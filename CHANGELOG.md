@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.10.0
+
+_2021-03-30_
+
+ * Remove `sheets`, `zio` and `monix` modules
+ * Upgrade to cats-effect 3.0.1 (#58)
+ * Update sbt to 1.5.0-RC2 (#47)
+
 ## 0.9.6
 
 _2021-03-22_
