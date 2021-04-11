@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.10.1
+
+_2021-04-11_
+
+ * Upgrade to http4s 1.0.0-M21
+ * Update cats-effect to 3.0.2 (#66)
+ * Update google-cloud-logging to 2.2.1 (#64)
+ * Update sbt to 1.5.0 (#63)
+ * Update google-api-services-logging to v2-rev20210325-1.31.0 (#62)
+ * Update sbt-scalajs, scalajs-compiler, ... to 1.5.1 (#61)
+ * Update fs2-core to 3.0.1 (#59)
+ * Update munit-cats-effect-3 to 1.0.1 (#60)
+
 ## 0.10.0
 
 _2021-03-30_
