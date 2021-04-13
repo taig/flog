@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.10.3
+
+_2021-04-13_
+
+ * Revisit slf4j bridge, mostly copied by zio-logging
+ * Use slugify library to encode stackdriver (http) logName
+
 ## 0.10.2
 
 _2021-04-13_
