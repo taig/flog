@@ -14,7 +14,7 @@ val Version = new {
   val Scala = "2.13.5"
   val ScalaCollectionCompat = "2.4.3"
   val Slf4j = "1.7.30"
-  val Slugify = "2.4"
+  val Slugify = "2.5"
 }
 
 // Don't publish root / aggregation project
