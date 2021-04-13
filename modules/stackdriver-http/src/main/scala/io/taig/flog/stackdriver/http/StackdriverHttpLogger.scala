@@ -35,14 +35,13 @@ object StackdriverHttpLogger {
         .traverse(entry(project, name, _, resource))
         .flatMap { entries =>
           val request = new WriteLogEntriesRequest().setEntries(entries.asJava)
-          F.delay(logging.write(request).execute()).void
-        }
-        .handleErrorWith { throwable =>
-          failureEntry(project, name, resource, throwable)
-            .flatMap { entry =>
-              val request = new WriteLogEntriesRequest().setEntries(JArrays.asList(entry))
-              F.delay(logging.write(request).execute()).void
-            }
+          F.delay(logging.write(request).execute()).void.handleErrorWith { throwable =>
+            failureEntry(project, name, resource, throwable, entries)
+              .flatMap { entry =>
+                val request = new WriteLogEntriesRequest().setEntries(JArrays.asList(entry))
+                F.delay(logging.write(request).execute()).void
+              }
+          }
         }
         .handleErrorWith(throwable => F.delay(throwable.printStackTrace(System.err)))
     }
@@ -95,13 +94,15 @@ object StackdriverHttpLogger {
       project: String,
       name: String,
       resource: MonitoredResource,
-      throwable: Throwable
+      throwable: Throwable,
+      entries: List[LogEntry]
   ): F[LogEntry] =
     id[F].map { id =>
       // format: off
       val payload = JMap.of[String, Object](
         "message", "Failed to submit events",
-        "stacktrace", StacktracePrinter(throwable)
+        "stacktrace", StacktracePrinter(throwable),
+        "entries", entries.map(_.toPrettyString).mkString("\n")
       )
       // format: on
 

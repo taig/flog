@@ -28,10 +28,11 @@ object StackdriverGrpcLogger {
     Logger { events =>
       events
         .traverse(entry(name, _, resource))
-        .flatMap(entries => F.blocking(logging.write(entries.asJava)))
-        .handleErrorWith { throwable =>
-          failureEntry(name, resource, throwable).flatMap { entry =>
-            F.blocking(logging.write(Collections.singleton(entry)))
+        .flatMap { entries =>
+          F.blocking(logging.write(entries.asJava)).handleErrorWith { throwable =>
+            failureEntry(name, resource, throwable, entries).flatMap { entry =>
+              F.blocking(logging.write(Collections.singleton(entry)))
+            }
           }
         }
         .handleErrorWith(throwable => F.delay(throwable.printStackTrace(System.err)))
@@ -74,12 +75,18 @@ object StackdriverGrpcLogger {
         .build()
     }
 
-  private def failureEntry[F[_]: Sync](name: String, resource: MonitoredResource, throwable: Throwable): F[LogEntry] =
+  private def failureEntry[F[_]: Sync](
+      name: String,
+      resource: MonitoredResource,
+      throwable: Throwable,
+      entries: List[LogEntry]
+  ): F[LogEntry] =
     id[F].map { id =>
       // format: off
       val payload = util.Map.of[String, Object](
         "message", "Failed to submit events",
-        "stacktrace", StacktracePrinter(throwable)
+        "stacktrace", StacktracePrinter(throwable),
+        "entries", entries.map(_.toString).mkString("\n")
       )
       // format: on
 
