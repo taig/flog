@@ -14,7 +14,7 @@ final class FlogSlf4jLogger[F[_]](logger: Logger[F])(dispatcher: Dispatcher[F]) 
   def log(level: Level, message: String): Unit =
     log(level, message, null: Throwable)
 
-  def log(level: Level, message: String, throwable: Throwable): Unit = dispatcher.unsafeRunSync {
+  def log(level: Level, message: String, throwable: Throwable): Unit = dispatcher.unsafeRunAndForget {
     logger
       .apply(
         level,
@@ -23,7 +23,7 @@ final class FlogSlf4jLogger[F[_]](logger: Logger[F])(dispatcher: Dispatcher[F]) 
       )
   }
 
-  def log(level: Level, result: FormattingTuple): Unit = dispatcher.unsafeRunSync {
+  def log(level: Level, result: FormattingTuple): Unit = dispatcher.unsafeRunAndForget {
     val message = Objects.toString(result.getMessage, "")
     val throwable = Option(result.getThrowable)
     logger.apply(level, message = message, throwable = throwable)

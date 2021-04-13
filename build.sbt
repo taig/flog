@@ -14,6 +14,7 @@ val Version = new {
   val Scala = "2.13.5"
   val ScalaCollectionCompat = "2.4.3"
   val Slf4j = "1.7.30"
+  val Slugify = "2.4"
 }
 
 // Don't publish root / aggregation project
@@ -82,7 +83,8 @@ lazy val stackdriverHttp = project
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "com.google.auth" % "google-auth-library-oauth2-http" % Version.GoogleAuthLibraryOauth2Http ::
+      "com.github.slugify" % "slugify" % Version.Slugify ::
+        "com.google.auth" % "google-auth-library-oauth2-http" % Version.GoogleAuthLibraryOauth2Http ::
         "com.google.apis" % "google-api-services-logging" % Version.GoogleApiServicesLogging ::
         Nil,
     name := "flog-stackdriver-http"

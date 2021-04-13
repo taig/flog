@@ -13,16 +13,19 @@ import io.taig.flog.Logger
 import io.taig.flog.data.{Event, Level, Payload, Scope}
 import io.taig.flog.syntax._
 import io.taig.flog.util.StacktracePrinter
-
 import java.io.ByteArrayInputStream
-import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.util.{UUID, Arrays => JArrays, Map => JMap}
+
 import scala.jdk.CollectionConverters._
+
+import com.github.slugify.Slugify
 
 object StackdriverHttpLogger {
   private val Scopes = JArrays.asList(LoggingScopes.CLOUD_PLATFORM_READ_ONLY, LoggingScopes.LOGGING_WRITE)
+
+  private val slugify = new Slugify().withLowerCase(false)
 
   def apply[F[_]](
       logging: Logging#Entries,
@@ -115,10 +118,7 @@ object StackdriverHttpLogger {
     }
 
   private def logName(project: String, name: String, scope: Scope): String =
-    s"projects/$project/logs/" + URLEncoder.encode(
-      (name +: scope.segments.toList).mkString("."),
-      StandardCharsets.UTF_8
-    )
+    s"projects/$project/logs/" + (name +: scope.segments.toList).map(slugify.slugify).mkString(".")
 
   private def payload(event: Event): JMap[String, Object] =
     Payload
