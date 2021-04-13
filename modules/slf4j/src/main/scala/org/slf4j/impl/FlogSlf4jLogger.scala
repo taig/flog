@@ -1,32 +1,23 @@
-package io.taig.flog.slf4j
-
-import cats.effect.std.Dispatcher
-import io.taig.flog.Logger
-import io.taig.flog.data.Level
-import org.slf4j.helpers.{FormattingTuple, MarkerIgnoringBase, MessageFormatter}
+package org.slf4j.impl
 
 import java.util.Objects
 
-final class FlogSlf4jLogger[F[_]](logger: Logger[F])(dispatcher: Dispatcher[F]) extends MarkerIgnoringBase {
+import io.taig.flog.data.Level
+import org.slf4j.helpers.{FormattingTuple, MarkerIgnoringBase, MessageFormatter}
+
+class FlogSlf4jLogger(unsafeLog: (Level, String, Option[Throwable]) => Unit) extends MarkerIgnoringBase {
   def log(level: Level, format: String, args: Array[AnyRef]): Unit =
     log(level, MessageFormatter.arrayFormat(format, args))
 
-  def log(level: Level, message: String): Unit =
-    log(level, message, null: Throwable)
+  def log(level: Level, message: String): Unit = log(level, message, null: Throwable)
 
-  def log(level: Level, message: String, throwable: Throwable): Unit = dispatcher.unsafeRunAndForget {
-    logger
-      .apply(
-        level,
-        message = Objects.toString(message, ""),
-        throwable = Option(throwable)
-      )
-  }
+  def log(level: Level, message: String, throwable: Throwable): Unit =
+    unsafeLog(level, Objects.toString(message, ""), Option(throwable))
 
-  def log(level: Level, result: FormattingTuple): Unit = dispatcher.unsafeRunAndForget {
+  def log(level: Level, result: FormattingTuple): Unit = {
     val message = Objects.toString(result.getMessage, "")
     val throwable = Option(result.getThrowable)
-    logger.apply(level, message = message, throwable = throwable)
+    unsafeLog(level, message, throwable)
   }
 
   override val isTraceEnabled: Boolean = true
