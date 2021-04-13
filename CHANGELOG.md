@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.10.2
+
+_2021-04-13_
+
+ * Include erroneous log entries in stackdriver error handling
+ * Update google-auth-library-oauth2-http to 0.25.3 (#67)
+
 ## 0.10.1
 
 _2021-04-11_
