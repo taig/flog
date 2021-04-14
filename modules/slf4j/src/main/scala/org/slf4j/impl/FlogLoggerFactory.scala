@@ -20,7 +20,14 @@ class FlogLoggerFactory[F[_]] extends ILoggerFactory {
     val log: (Level, String, Option[Throwable]) => Unit = { (level, message, throwable) =>
       if (target == null || dispatcher == null)
         System.err.println("Observed slf4j log message, but FlogLoggerFactory has not been initialized yet")
-      else dispatcher.unsafeRunAndForget(target.apply(level, scope, message, throwable = throwable))
+      else {
+        try dispatcher.unsafeRunAndForget(target.apply(level, scope, message, throwable = throwable))
+        catch {
+          case exception: IllegalStateException if exception.getMessage == "dispatcher already shutdown" =>
+            System.err.println("Observed slf4j log message, but the dispatcher was already shut down")
+          case throwable => throw throwable
+        }
+      }
     }
 
     new FlogSlf4jLogger(log)

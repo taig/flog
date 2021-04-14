@@ -1,6 +1,7 @@
 package io.taig.flog
 
 import cats.effect._
+import cats.effect.std.Dispatcher
 import cats.syntax.all._
 import io.taig.flog.data.Level
 import io.taig.flog.http4s.{CorrelationMiddleware, LoggingMiddleware}
@@ -22,11 +23,13 @@ object SampleApp extends IOApp.Simple {
       .withHttpApp(CorrelationMiddleware(logger)(LoggingMiddleware(logger)(app[F](logger))))
       .resource
 
-  def logger[F[_]: Async]: Resource[F, Logger[F]] = Resource
-    .eval(Logger.stdOut[F])
-    .flatMap(Logger.queued[F])
-    .map(_.minimum(Level.Info))
-    .flatTap(FlogSlf4jBinder.initialize[F](_))
+  def logger[F[_]: Async]: Resource[F, Logger[F]] = Dispatcher[F].flatMap { dispatcher =>
+    Resource
+      .eval(Logger.stdOut[F])
+      .flatMap(Logger.queued[F])
+      .map(_.minimum(Level.Info))
+      .evalTap(FlogSlf4jBinder.initialize[F](_, dispatcher))
+  }
 
   override def run: IO[Unit] =
     (for {

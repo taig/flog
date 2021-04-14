@@ -1,7 +1,7 @@
 package io.taig.flog.slf4j
 
+import cats.effect.Sync
 import cats.effect.std.Dispatcher
-import cats.effect.{Async, Resource, Sync}
 import io.taig.flog.Logger
 import org.slf4j.impl.FlogLoggerFactory
 
