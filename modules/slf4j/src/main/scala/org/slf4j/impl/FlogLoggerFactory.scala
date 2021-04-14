@@ -25,12 +25,8 @@ class FlogLoggerFactory[F[_]] extends ILoggerFactory {
       } else {
         try dispatcher.unsafeRunAndForget(target.apply(level, scope, message, throwable = throwable))
         catch {
-          case exception: IllegalStateException if exception.getMessage == "dispatcher already shutdown" =>
-            val details = EventPrinter(
-              Event(System.currentTimeMillis(), level, scope, message, Payload.Empty, throwable)
-            )
-            System.err.print(s"Observed slf4j log message, but the dispatcher was already shut down:\n$details")
-          case throwable: Throwable => throw throwable
+          case exception: IllegalStateException if exception.getMessage == "dispatcher already shutdown" => ()
+          case throwable: Throwable                                                                      => throw throwable
         }
       }
     }
