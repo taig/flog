@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.10.5
+
+_2021-04-14_
+
+ * Apply slugify to gcloud grpc logger name
+
 ## 0.10.4
 
 _2021-04-14_
