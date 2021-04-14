@@ -72,7 +72,8 @@ lazy val stackdriverGrpc = project
   .settings(sonatypePublishSettings)
   .settings(
     libraryDependencies ++=
-      "com.google.cloud" % "google-cloud-logging" % Version.GoogleCloudLogging ::
+      "com.github.slugify" % "slugify" % Version.Slugify ::
+        "com.google.cloud" % "google-cloud-logging" % Version.GoogleCloudLogging ::
         Nil,
     name := "flog-stackdriver-grpc"
   )

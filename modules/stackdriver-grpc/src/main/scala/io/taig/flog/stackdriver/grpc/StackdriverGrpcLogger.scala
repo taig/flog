@@ -11,18 +11,22 @@ import io.taig.flog.Logger
 import io.taig.flog.data.{Event, Level, Payload}
 import io.taig.flog.syntax._
 import io.taig.flog.util.StacktracePrinter
-
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 import java.util
 import java.util.{Collections, UUID, Arrays => JArrays}
+
 import scala.jdk.CollectionConverters._
+
+import com.github.slugify.Slugify
 
 object StackdriverGrpcLogger {
   private val Scopes = JArrays.asList(
     "https://www.googleapis.com/auth/cloud-platform.read-only",
     "https://www.googleapis.com/auth/logging.write"
   )
+
+  private val slugify = new Slugify().withLowerCase(false)
 
   def apply[F[_]](logging: Logging, name: String, resource: MonitoredResource)(implicit F: Sync[F]): Logger[F] =
     Logger { events =>
@@ -67,7 +71,7 @@ object StackdriverGrpcLogger {
     id[F].map { id =>
       LogEntry
         .newBuilder(payload(event))
-        .setLogName((name +: event.scope.segments.toList).mkString("."))
+        .setLogName((name +: event.scope.segments.toList).map(slugify.slugify).mkString("."))
         .setInsertId(id)
         .setSeverity(severity(event.level))
         .setResource(resource)
