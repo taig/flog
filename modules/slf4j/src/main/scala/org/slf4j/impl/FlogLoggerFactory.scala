@@ -25,7 +25,7 @@ class FlogLoggerFactory[F[_]] extends ILoggerFactory {
         catch {
           case exception: IllegalStateException if exception.getMessage == "dispatcher already shutdown" =>
             System.err.println("Observed slf4j log message, but the dispatcher was already shut down")
-          case throwable => throw throwable
+          case throwable: Throwable => throw throwable
         }
       }
     }
