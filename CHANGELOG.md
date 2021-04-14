@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.10.4
+
+_2021-04-14_
+
+ * Catch dispatcher already shutdown exception in slf4j logger
+ * Dump log messages that fail to be handled in slf4j bridge to stderr
+ * Remove FlogSlf4JBinder.initialize method that creates its own dispatcher
+ * Upgrade slugify to 2.5 (#68)
+
 ## 0.10.3
 
 _2021-04-13_
