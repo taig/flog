@@ -8,7 +8,4 @@ import org.slf4j.impl.FlogLoggerFactory
 object FlogSlf4jBinder {
   final def initialize[F[_]: Sync](logger: Logger[F], dispatcher: Dispatcher[F]): F[Unit] =
     FlogLoggerFactory.initialize(logger, dispatcher)
-
-  final def initialize[F[_]: Async](logger: Logger[F]): Resource[F, Unit] =
-    Dispatcher[F].evalMap(initialize[F](logger, _))
 }
