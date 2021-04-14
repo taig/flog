@@ -20,14 +20,16 @@ class FlogLoggerFactory[F[_]] extends ILoggerFactory {
     val scope = Scope.from(name.split('.'))
     val log: (Level, String, Option[Throwable]) => Unit = { (level, message, throwable) =>
       if (target == null || dispatcher == null) {
-        val details = EventPrinter(Event(-1, level, scope, message, Payload.Empty, throwable))
-        System.err.println(s"Observed slf4j log message, but FlogLoggerFactory has not been initialized yet:\n$details")
+        val details = EventPrinter(Event(System.currentTimeMillis(), level, scope, message, Payload.Empty, throwable))
+        System.err.print(s"Observed slf4j log message, but FlogLoggerFactory has not been initialized yet:\n$details")
       } else {
         try dispatcher.unsafeRunAndForget(target.apply(level, scope, message, throwable = throwable))
         catch {
           case exception: IllegalStateException if exception.getMessage == "dispatcher already shutdown" =>
-            val details = EventPrinter(Event(-1, level, scope, message, Payload.Empty, throwable))
-            System.err.println(s"Observed slf4j log message, but the dispatcher was already shut down:\n$details")
+            val details = EventPrinter(
+              Event(System.currentTimeMillis(), level, scope, message, Payload.Empty, throwable)
+            )
+            System.err.print(s"Observed slf4j log message, but the dispatcher was already shut down:\n$details")
           case throwable: Throwable => throw throwable
         }
       }
