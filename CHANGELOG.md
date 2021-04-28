@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.10.6
+
+_2021-04-28_
+
+ * Fix slf4j StaticMDCAdapter initialization
+ * Update cats-effect to 3.1.0 (#73)
+ * Update cats-mtl to 1.2.0 (#72)
+ * Update fs2-core to 3.0.2 (#76)
+ * Update sbt to 1.5.1 (#77)
+ * Update google-cloud-logging to 2.2.2 (#79)
+ * Update google-api-services-logging to v2-rev20210416-1.31.0 (#78)
+ * Update google-auth-library-oauth2-http to 0.25.5 (#75)
+ * Update munit-cats-effect-3 to 1.0.2 (#74)
+ * Update munit to 0.7.25 (#70)
+
 ## 0.10.5
 
 _2021-04-14_
