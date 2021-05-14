@@ -12,7 +12,7 @@ val Version = new {
   val Munit = "0.7.25"
   val MunitCatsEffect = "1.0.2"
   val Scala = "2.13.5"
-  val ScalaCollectionCompat = "2.4.3"
+  val ScalaCollectionCompat = "2.4.4"
   val Slf4j = "1.7.30"
   val Slugify = "2.5"
 }
