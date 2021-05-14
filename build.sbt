@@ -11,7 +11,9 @@ val Version = new {
   val Http4s = "1.0.0-M22"
   val Munit = "0.7.26"
   val MunitCatsEffect = "1.0.3"
-  val Scala = "2.13.6"
+  val Scala212 = "2.12.13"
+  val Scala213 = "2.13.6"
+  val Scala3 = "3.0.0"
   val ScalaCollectionCompat = "2.4.4"
   val Slf4j = "1.7.30"
   val Slugify = "2.5"
@@ -20,8 +22,8 @@ val Version = new {
 // Don't publish root / aggregation project
 noPublishSettings
 
-ThisBuild / crossScalaVersions := Seq("2.12.13", Version.Scala)
-ThisBuild / scalaVersion := Version.Scala
+ThisBuild / crossScalaVersions := Seq(Version.Scala212, Version.Scala213, Version.Scala3)
+ThisBuild / scalaVersion := Version.Scala3
 ThisBuild / testFrameworks += new TestFramework("munit.Framework")
 ThisBuild / versionScheme := Some("early-semver")
 
