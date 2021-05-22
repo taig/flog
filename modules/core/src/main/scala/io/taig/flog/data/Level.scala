@@ -7,10 +7,10 @@ import io.taig.flog.Encoder
 sealed abstract class Level extends Product with Serializable
 
 object Level {
-  final case object Debug extends Level
-  final case object Error extends Level
-  final case object Info extends Level
-  final case object Warning extends Level
+  case object Debug extends Level
+  case object Error extends Level
+  case object Info extends Level
+  case object Warning extends Level
 
   implicit val order: Order[Level] = Order.by {
     case Debug   => 0

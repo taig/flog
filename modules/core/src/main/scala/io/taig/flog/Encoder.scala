@@ -8,8 +8,7 @@ import cats.syntax.all._
 import io.taig.flog.data.Payload
 import simulacrum.typeclass
 
-@nowarn("msg=Unused import")
-@typeclass
+@FunctionalInterface
 trait Encoder[A] {
   def encode(value: A): Payload
 
@@ -17,8 +16,7 @@ trait Encoder[A] {
 }
 
 object Encoder {
-  @nowarn("msg=Unused import")
-  @typeclass
+  @FunctionalInterface
   trait Object[A] {
     def encode(value: A): Payload.Object
 
@@ -26,11 +24,15 @@ object Encoder {
   }
 
   object Object {
+    def apply[A](implicit encoder: Encoder.Object[A]): Encoder.Object[A] = encoder
+
     implicit val obj: Encoder.Object[Payload.Object] = identity
 
     implicit def map[A](implicit encoder: Encoder[A]): Encoder.Object[Map[String, A]] = values =>
       Payload.Object(values.fmap(encoder.encode))
   }
+
+  def apply[A](implicit encoder: Encoder[A]): Encoder[A] = encoder
 
   implicit def obj[A](implicit encoder: Encoder.Object[A]): Encoder[A] = encoder.encode(_)
 
