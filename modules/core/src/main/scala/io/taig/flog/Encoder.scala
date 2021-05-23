@@ -2,13 +2,9 @@ package io.taig.flog
 
 import java.util.UUID
 
-import scala.annotation.nowarn
-
 import cats.syntax.all._
 import io.taig.flog.data.Payload
-import simulacrum.typeclass
 
-@FunctionalInterface
 trait Encoder[A] {
   def encode(value: A): Payload
 
@@ -16,7 +12,6 @@ trait Encoder[A] {
 }
 
 object Encoder {
-  @FunctionalInterface
   trait Object[A] {
     def encode(value: A): Payload.Object
 
@@ -26,7 +21,7 @@ object Encoder {
   object Object {
     def apply[A](implicit encoder: Encoder.Object[A]): Encoder.Object[A] = encoder
 
-    implicit val obj: Encoder.Object[Payload.Object] = identity
+    implicit val obj: Encoder.Object[Payload.Object] = identity(_)
 
     implicit def map[A](implicit encoder: Encoder[A]): Encoder.Object[Map[String, A]] = values =>
       Payload.Object(values.fmap(encoder.encode))
@@ -36,11 +31,11 @@ object Encoder {
 
   implicit def obj[A](implicit encoder: Encoder.Object[A]): Encoder[A] = encoder.encode(_)
 
-  implicit val value: Encoder[Payload.Value] = identity
+  implicit val value: Encoder[Payload.Value] = identity(_)
 
-  implicit val payload: Encoder[Payload] = identity
+  implicit val payload: Encoder[Payload] = identity(_)
 
-  implicit val string: Encoder[String] = Payload.Value.apply
+  implicit val string: Encoder[String] = Payload.Value(_)
 
   implicit def option[A](implicit encoder: Encoder[A]): Encoder[Option[A]] = {
     case Some(value) => encoder.encode(value)
