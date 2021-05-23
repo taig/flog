@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.10.7
+
+_2021-05-23_
+
+ * Migrate master -> main
+ * Update http4s to 1.0.0-M22 (#97)
+ * Update cats-effect to 3.1.1 (#85)
+ * Update fs2 to 3.0.4 (#96)
+ * Update sbt-houserules to 0.3.10 (#94)
+ * Update scala to 2.13.6 (#93)
+ * Update google-cloud-logging to 2.2.3 (#83)
+ * Update google-auth-library-oauth2-http to 0.26.0 (#95)
+ * Update google-api-services-logging to v2-rev20210507-1.31.0 (#91)
+ * Update munit to 0.7.26 (#84)
+ * Update munit-cats-effect-3 to 1.0.3 (#88)
+ * Update cats-mtl to 1.2.1 (#86)
+ * Update scala-collection-compat to 2.4.4 (#87)
+ * Update sbt to 1.5.2 (#82)
+
 ## 0.10.6
 
 _2021-04-28_
