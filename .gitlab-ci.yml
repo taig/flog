@@ -51,5 +51,5 @@ artifacts:
   image: $IMAGE:latest
   script: $SBT publishAndRelease
   only:
-    - master
+    - main
     - tags

@@ -6,8 +6,8 @@ import cats.syntax.all._
 import io.taig.flog.data.Level
 import io.taig.flog.http4s.{CorrelationMiddleware, LoggingMiddleware}
 import io.taig.flog.slf4j.FlogSlf4jBinder
+import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.Server
-import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.{HttpApp, Response, Status}
 
 object SampleApp extends IOApp.Simple {
