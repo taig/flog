@@ -58,7 +58,7 @@ object Payload {
 
   final case class Value(value: String) extends Payload
 
-  final case object Null extends Payload
+  case object Null extends Payload
 
   val Empty: Payload.Object = Object(Map.empty)
 
