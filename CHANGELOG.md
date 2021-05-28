@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.10.8
+
+_2021-05-28_
+
+ * Add support for Scala 3 (#98)
+ * Update http4s-blaze-server, http4s-client, ... to 1.0.0-M23 (#100)
+ * Update circe-core to 0.14.1 (#99)
+
 ## 0.10.7
 
 _2021-05-23_
