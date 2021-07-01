@@ -2,8 +2,9 @@ package io.taig.flog.stackdriver.http
 
 import cats.effect.{Resource, Sync}
 import cats.syntax.all._
+import com.github.slugify.Slugify
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
-import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.logging.v2.model.{LogEntry, MonitoredResource, WriteLogEntriesRequest}
 import com.google.api.services.logging.v2.{Logging, LoggingScopes}
 import com.google.auth.Credentials
@@ -13,14 +14,12 @@ import io.taig.flog.Logger
 import io.taig.flog.data.{Event, Level, Payload, Scope}
 import io.taig.flog.syntax._
 import io.taig.flog.util.StacktracePrinter
+
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.util.{UUID, Arrays => JArrays, Map => JMap}
-
 import scala.jdk.CollectionConverters._
-
-import com.github.slugify.Slugify
 
 object StackdriverHttpLogger {
   private val Scopes = JArrays.asList(LoggingScopes.CLOUD_PLATFORM_READ_ONLY, LoggingScopes.LOGGING_WRITE)
@@ -58,7 +57,7 @@ object StackdriverHttpLogger {
         F.delay {
           val logging = new Logging.Builder(
             transport,
-            JacksonFactory.getDefaultInstance,
+            GsonFactory.getDefaultInstance,
             new HttpCredentialsAdapter(credentials)
           ).setApplicationName(project).build()
 
