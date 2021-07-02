@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.10.9
+
+_2021-07-02_
+
+ * Update scala-library to 2.12.14 (#101)
+ * Upgrade to fs2 3.0.5
+ * Upgrade to google-cloud-logging 2.3.1
+ * Upgrade to munit-cats-effect-3 1.0.5
+ * Update google-api-services-logging to v2-rev20210521-1.31.0 (#102)
+ * Upgrade to slf4j 1.7.31
+ * Upgrade to sbt 1.5.4
+ * Upgrade to sbt-scalajs 1.6.0
+ * Upgrade to sbt-houserules 0.3.11
+
 ## 0.10.8
 
 _2021-05-28_
@@ -292,13 +306,13 @@ _2020-04-11_
 
  * Add `filter` parameter to `TracingMiddleware`
  * Remove ability to log request / response bodies
- 
+
 ## 0.6.5
 
 _2020-04-11_
 
  * Stackdriver requires a name as the logger name may not be empty
- 
+
 ## 0.6.4
 
 _2020-04-11_
@@ -331,7 +345,7 @@ _2020-04-09_
 _2020-04-02_
 
  `0.6.0` could not be released due to a misconfiguration, use ` 0.6.1` instead.
- 
+
   * Upgrade to scala 2.12.11
   * Fix tests compile error on Scala 2.12
   * Upgrade to http4s 0.21.3
