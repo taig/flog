@@ -2,7 +2,6 @@ package io.taig.flog
 
 import cats.effect.IO
 import cats.effect.Ref
-import cats.syntax.all._
 import io.taig.flog.data.Event
 import munit.CatsEffectSuite
 

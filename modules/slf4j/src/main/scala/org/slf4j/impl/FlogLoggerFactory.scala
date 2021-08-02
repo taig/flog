@@ -26,7 +26,7 @@ class FlogLoggerFactory[F[_]] extends ILoggerFactory {
         try dispatcher.unsafeRunAndForget(target.apply(level, scope, message, throwable = throwable))
         catch {
           case exception: IllegalStateException if exception.getMessage == "dispatcher already shutdown" => ()
-          case throwable: Throwable                                                                      => throw throwable
+          case throwable: Throwable => throw throwable
         }
       }
     }
