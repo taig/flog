@@ -1,7 +1,7 @@
 package io.taig.flog.stackdriver.grpc
 
 import cats.effect.{Resource, Sync}
-import cats.syntax.all._
+import cats.syntax.all.*
 import com.google.auth.Credentials
 import com.google.auth.oauth2.ServiceAccountCredentials
 import com.google.cloud.MonitoredResource
@@ -9,16 +9,17 @@ import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.{LogEntry, Logging, LoggingOptions, Severity}
 import io.taig.flog.Logger
 import io.taig.flog.data.{Event, Level, Payload}
-import io.taig.flog.syntax._
+import io.taig.flog.syntax.*
 import io.taig.flog.util.StacktracePrinter
+
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 import java.util
-import java.util.{Collections, UUID, Arrays => JArrays}
-
-import scala.jdk.CollectionConverters._
-
+import java.util.{Collections, UUID, Arrays as JArrays}
+import scala.jdk.CollectionConverters.*
 import com.github.slugify.Slugify
+
+import java.time.Instant
 
 object StackdriverGrpcLogger {
   private val Scopes = JArrays.asList(
@@ -75,7 +76,7 @@ object StackdriverGrpcLogger {
         .setInsertId(id)
         .setSeverity(severity(event.level))
         .setResource(resource)
-        .setTimestamp(event.timestamp)
+        .setTimestamp(Instant.ofEpochMilli(event.timestamp))
         .build()
     }
 
