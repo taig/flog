@@ -1,5 +1,6 @@
 FROM        adoptopenjdk/openjdk11:alpine
 
+RUN         apk update
 RUN         apk add --no-cache bash git nodejs
 
 # Install sbt
