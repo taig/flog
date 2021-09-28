@@ -22,6 +22,7 @@ val Version = new {
 // Don't publish root / aggregation project
 noPublishSettings
 
+ThisBuild / scalafmtRules += """runner.dialect = "scala213""""
 ThisBuild / crossScalaVersions := Seq(Version.Scala212, Version.Scala213, Version.Scala3)
 ThisBuild / scalaVersion := Version.Scala3
 ThisBuild / testFrameworks += new TestFramework("munit.Framework")
