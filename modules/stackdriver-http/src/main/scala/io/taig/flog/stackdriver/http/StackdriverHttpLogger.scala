@@ -18,7 +18,7 @@ import io.taig.flog.util.StacktracePrinter
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 import java.time.Instant
-import java.util.{UUID, Arrays => JArrays, Map => JMap}
+import java.util.{Arrays => JArrays, Map => JMap, UUID}
 import scala.jdk.CollectionConverters._
 
 object StackdriverHttpLogger {

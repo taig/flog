@@ -15,7 +15,7 @@ import io.taig.flog.util.StacktracePrinter
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 import java.util
-import java.util.{Collections, UUID, Arrays as JArrays}
+import java.util.{Arrays => JArrays, Collections, UUID}
 import scala.jdk.CollectionConverters.*
 import com.github.slugify.Slugify
 

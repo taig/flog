@@ -1,6 +1,6 @@
 package io.taig.flog
 
-import io.circe.{Json, JsonObject, Encoder => CirceEncoder}
+import io.circe.{Encoder => CirceEncoder, Json, JsonObject}
 import io.taig.flog.data.Payload
 import cats.syntax.all._
 
