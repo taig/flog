@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.10.10
+
+_2021-09-30_
+
+ * Update cats-effect to 3.2.9 (#143)
+ * Update fs2 to 3.1.3
+ * Update google-api-services-logging to v2-rev20210817-1.32.1 (#130)
+ * Update google-auth-library-oauth2-http to 1.1.0 (#126)
+ * Update google-cloud-logging to 3.2.0 (#146)
+ * Update http4s to 1.0.0-M27 (#144)
+ * Update munit to 0.7.29 (#132)
+ * Update munit-cats-effect to 1.0.6
+ * Update sbt to 1.5.5 (#109)
+ * Update sbt-houserules to 0.3.14 (#142)
+ * Update sbt-scalajs to 1.7.0
+ * Update sbt-scalajs-crossproject to 1.1.0 (#106)
+ * Update scala-collection-compat to 2.5.0 (#107)
+ * Update scala to 2.12.15 (#140)
+ * Update scala3 to 3.0.2 (#134)
+ * Update slf4j-api to 1.7.32 (#112)
+
 ## 0.10.9
 
 _2021-07-02_
