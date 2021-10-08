@@ -18,7 +18,7 @@ object SampleApp extends IOApp.Simple {
     }
 
   def server[F[_]: Async](logger: ContextualLogger[F]): Resource[F, Server] =
-    BlazeServerBuilder[F](runtime.compute)
+    BlazeServerBuilder[F]
       .bindHttp(host = "0.0.0.0")
       .withHttpApp(CorrelationMiddleware(logger)(LoggingMiddleware(logger)(app[F](logger))))
       .resource
