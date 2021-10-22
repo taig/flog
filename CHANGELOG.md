@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.10.11
+
+_2021-10-22_
+
+ * Update google-auth-library-oauth2-http to 1.2.2 (#158)
+ * Update google-cloud-logging to 3.3.0 (#157)
+ * Update fs2-core to 3.1.6 (#155)
+ * Update http4s-blaze-server, http4s-client, ... to 1.0.0-M29 (#154)
+ * Update sbt-scalajs, scalajs-compiler, ... to 1.7.1 (#151)
+ * Update google-api-services-logging to v2-rev20210922-1.32.1 (#148)
+
 ## 0.10.10
 
 _2021-09-30_
