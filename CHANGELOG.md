@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.10.12
+
+_2021-11-24_
+
+ * Update fs2-core to 3.2.2 (#162)
+ * Update google-api-services-logging to v2-rev20211108-1.32.1 (#169)
+ * Update google-auth-library-oauth2-http to 1.3.0 (#168)
+ * Update google-cloud-logging to 3.4.0 (#166)
+ * Update sbt-houserules to 0.3.16 (#170)
+ * Update scala-collection-compat to 2.6.0 (#167)
+ * Update scala-library to 2.13.7 (#163)
+
 ## 0.10.11
 
 _2021-10-22_
