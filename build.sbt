@@ -41,9 +41,6 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
         Nil,
     name := "flog-core"
   )
-  .jsSettings(
-    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule))
-  )
 
 lazy val slf4j = project
   .in(file("modules/slf4j"))
