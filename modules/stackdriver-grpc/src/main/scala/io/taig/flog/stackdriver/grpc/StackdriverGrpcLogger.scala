@@ -2,24 +2,24 @@ package io.taig.flog.stackdriver.grpc
 
 import cats.effect.{Resource, Sync}
 import cats.syntax.all._
+import com.github.slugify.Slugify
 import com.google.auth.Credentials
 import com.google.auth.oauth2.ServiceAccountCredentials
 import com.google.cloud.MonitoredResource
 import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.{LogEntry, Logging, LoggingOptions, Severity}
+import io.circe.JsonObject
+import io.circe.syntax._
 import io.taig.flog.Logger
-import io.taig.flog.data.{Event, Level, Payload}
-import io.taig.flog.syntax._
-import io.taig.flog.util.StacktracePrinter
+import io.taig.flog.data.{Event, Level}
+import io.taig.flog.util.{JsonObjects, StacktracePrinter}
 
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
+import java.time.Instant
 import java.util
 import java.util.{Arrays => JArrays, Collections, UUID}
 import scala.jdk.CollectionConverters._
-import com.github.slugify.Slugify
-
-import java.time.Instant
 
 object StackdriverGrpcLogger {
   private val Scopes = JArrays.asList(
@@ -105,13 +105,13 @@ object StackdriverGrpcLogger {
     }
 
   private def payload(event: Event): JsonPayload = {
-    val payload = Payload
-      .of(
+    val payload = JsonObjects.toJavaMap {
+      JsonObject(
         "message" := Option(event.message).filter(_.nonEmpty),
         "payload" := event.payload,
         "stacktrace" := event.throwable.map(StacktracePrinter(_))
       )
-      .toJavaMap
+    }
 
     JsonPayload.of(payload)
   }

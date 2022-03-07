@@ -1,11 +1,10 @@
 package io.taig.flog.data
 
 import scala.reflect.{classTag, ClassTag}
-
 import cats._
 import cats.data.Chain
 import cats.syntax.all._
-import io.taig.flog.Encoder
+import io.circe.Encoder
 
 final case class Scope(segments: Chain[String]) extends AnyVal {
   def isEmpty: Boolean = segments.isEmpty

@@ -10,10 +10,11 @@ import com.google.api.services.logging.v2.{Logging, LoggingScopes}
 import com.google.auth.Credentials
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.ServiceAccountCredentials
+import io.circe.JsonObject
+import io.circe.syntax._
 import io.taig.flog.Logger
-import io.taig.flog.data.{Event, Level, Payload, Scope}
-import io.taig.flog.syntax._
-import io.taig.flog.util.StacktracePrinter
+import io.taig.flog.data.{Event, Level, Scope}
+import io.taig.flog.util.{JsonObjects, StacktracePrinter}
 
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
@@ -119,14 +120,13 @@ object StackdriverHttpLogger {
   private def logName(project: String, name: String, scope: Scope): String =
     s"projects/$project/logs/" + (name +: scope.segments.toList).map(slugify.slugify).mkString(".")
 
-  private def payload(event: Event): JMap[String, Object] =
-    Payload
-      .of(
-        "message" := Option(event.message).filter(_.nonEmpty),
-        "payload" := event.payload,
-        "stacktrace" := event.throwable.map(StacktracePrinter(_))
-      )
-      .toJavaMap
+  private def payload(event: Event): JMap[String, Object] = JsonObjects.toJavaMap {
+    JsonObject(
+      "message" := Option(event.message).filter(_.nonEmpty),
+      "payload" := event.payload,
+      "stacktrace" := event.throwable.map(StacktracePrinter(_))
+    )
+  }
 
   private val severity: Level => String = {
     case Level.Debug   => "DEBUG"

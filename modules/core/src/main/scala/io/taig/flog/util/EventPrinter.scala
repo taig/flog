@@ -1,6 +1,7 @@
 package io.taig.flog.util
 
 import cats.syntax.all._
+import io.circe.Json
 import io.taig.flog.data.Event
 
 object EventPrinter {
@@ -25,7 +26,7 @@ object EventPrinter {
       .append(Space)
       .append(event.message)
 
-    if (!event.payload.isEmpty) builder.append(Linebreak).append(event.payload.toJson(pretty = true))
+    if (!event.payload.isEmpty) builder.append(Linebreak).append(Json.fromJsonObject(event.payload).spaces2)
 
     event.throwable.map(StacktracePrinter(_)).foreach(value => builder.append(Linebreak).append(value))
 

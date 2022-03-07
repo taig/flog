@@ -3,8 +3,8 @@ package io.taig.flog.logstash
 import cats.effect._
 import cats.syntax.all._
 import io.taig.flog.Logger
+import io.circe.syntax._
 import io.taig.flog.data.Event
-import io.taig.flog.syntax._
 
 import java.io.{BufferedOutputStream, DataOutputStream}
 import java.net.Socket
@@ -13,7 +13,7 @@ final class LogstashLogger[F[_]](channel: DataOutputStream)(implicit F: Sync[F])
   val timestamp: F[Long] = Clock[F].realTime.map(_.toMillis)
 
   def write(events: List[Event]): F[Unit] = F.blocking {
-    events.foreach(event => channel.writeBytes(event.asObject.toJson(pretty = false) + '\n'))
+    events.foreach(event => channel.writeBytes(event.asJson.noSpaces + '\n'))
     channel.flush()
   }
 

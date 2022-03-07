@@ -2,7 +2,7 @@ package io.taig.flog.data
 
 import cats.syntax.all._
 import cats.{Order, Show}
-import io.taig.flog.Encoder
+import io.circe.Encoder
 
 sealed abstract class Level extends Product with Serializable
 

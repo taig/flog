@@ -1,7 +1,7 @@
 package io.taig.flog.data
 
-import io.taig.flog.Encoder
-import io.taig.flog.syntax._
+import io.circe.{Encoder, JsonObject}
+import io.circe.syntax._
 import io.taig.flog.util.StacktracePrinter
 
 final case class Event(
@@ -9,7 +9,7 @@ final case class Event(
     level: Level,
     scope: Scope,
     message: String,
-    payload: Payload.Object,
+    payload: JsonObject,
     throwable: Option[Throwable]
 ) {
   def modifyTimestamp(f: Long => Long): Event = copy(timestamp = f(timestamp))
@@ -32,18 +32,18 @@ final case class Event(
 
   def withMessage(message: String): Event = modifyMessage(_ => message)
 
-  def modifyPayload(f: Payload.Object => Payload.Object): Event = copy(payload = f(payload))
+  def modifyPayload(f: JsonObject => JsonObject): Event = copy(payload = f(payload))
 
-  def withPayload(payload: Payload.Object): Event = modifyPayload(_ => payload)
+  def withPayload(payload: JsonObject): Event = modifyPayload(_ => payload)
 
-  def merge(payload: Payload.Object): Event = modifyPayload(_ deepMerge payload)
+  def merge(payload: JsonObject): Event = modifyPayload(_ deepMerge payload)
 
   def withContext(context: Context): Event = prepend(context.prefix).modifyPayload(context.presets deepMerge _)
 }
 
 object Event {
-  implicit val encoder: Encoder.Object[Event] = event =>
-    Payload.of(
+  implicit val encoder: Encoder.AsObject[Event] = event =>
+    JsonObject(
       "timestamp" := event.timestamp,
       "level" := event.level,
       "scope" := event.scope,

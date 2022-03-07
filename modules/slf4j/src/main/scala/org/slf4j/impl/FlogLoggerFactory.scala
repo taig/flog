@@ -1,15 +1,15 @@
 package org.slf4j.impl
 
-import java.util.concurrent.ConcurrentHashMap
-
-import scala.jdk.CollectionConverters._
-
 import cats.effect.Sync
 import cats.effect.std.Dispatcher
+import io.circe.JsonObject
 import io.taig.flog.Logger
-import io.taig.flog.data.{Event, Level, Payload, Scope}
+import io.taig.flog.data.{Event, Level, Scope}
 import io.taig.flog.util.EventPrinter
 import org.slf4j.{ILoggerFactory, Logger => Slf4jLogger}
+
+import java.util.concurrent.ConcurrentHashMap
+import scala.jdk.CollectionConverters._
 
 class FlogLoggerFactory[F[_]] extends ILoggerFactory {
   private var target: Logger[F] = null
@@ -20,7 +20,9 @@ class FlogLoggerFactory[F[_]] extends ILoggerFactory {
     val scope = Scope.from(name.split('.'))
     val log: (Level, String, Option[Throwable]) => Unit = { (level, message, throwable) =>
       if (target == null || dispatcher == null) {
-        val details = EventPrinter(Event(System.currentTimeMillis(), level, scope, message, Payload.Empty, throwable))
+        val details = EventPrinter(
+          Event(System.currentTimeMillis(), level, scope, message, JsonObject.empty, throwable)
+        )
         System.err.print(s"Observed slf4j log message, but FlogLoggerFactory has not been initialized yet:\n$details")
       } else {
         try dispatcher.unsafeRunAndForget(target.apply(level, scope, message, throwable = throwable))

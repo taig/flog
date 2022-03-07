@@ -19,7 +19,6 @@ val Version = new {
   val Slugify = "2.5"
 }
 
-// Don't publish root / aggregation project
 noPublishSettings
 
 ThisBuild / crossScalaVersions := Seq(Version.Scala212, Version.Scala213, Version.Scala3)
@@ -33,6 +32,7 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
   .settings(
     libraryDependencies ++=
       "co.fs2" %%% "fs2-core" % Version.Fs2 ::
+        "io.circe" %%% "circe-core" % Version.Circe ::
         "org.scala-lang.modules" %%% "scala-collection-compat" % Version.ScalaCollectionCompat ::
         "org.typelevel" %%% "cats-effect" % Version.CatsEffect ::
         "org.typelevel" %%% "cats-mtl" % Version.CatsMtl ::
@@ -44,18 +44,6 @@ lazy val core = crossProject(JVMPlatform, JSPlatform)
   .jsSettings(
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule))
   )
-
-lazy val circe = crossProject(JVMPlatform, JSPlatform)
-  .crossType(CrossType.Pure)
-  .in(file("modules/circe"))
-  .settings(sonatypePublishSettings)
-  .settings(
-    libraryDependencies ++=
-      "io.circe" %%% "circe-core" % Version.Circe ::
-        Nil,
-    name := "flog-circe"
-  )
-  .dependsOn(core)
 
 lazy val slf4j = project
   .in(file("modules/slf4j"))
