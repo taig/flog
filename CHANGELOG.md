@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.11.0
+
+_2022-03-07_
+
+ * Remove custom `Payload` implementation in favor of circe `JsonObject`
+ * Update cats-effect to 3.3.6 (#216)
+ * Update fs2-core to 3.2.5 (#212)
+ * Update google-api-services-logging to v2-rev20220211-1.32.1 (#215)
+ * Update google-auth-library-oauth2-http to 1.5.3 (#214)
+ * Update google-cloud-logging to 3.7.1 (#218)
+ * Update http4s-blaze-server, http4s-client, ... to 1.0.0-M30 (#176)
+ * Update munit-cats-effect-3 to 1.0.7 (#174)
+ * Update sbt to 1.6.2 (#203)
+ * Update sbt-houserules to 0.3.20 (#213)
+ * Update sbt-scalajs, scalajs-compiler, ... to 1.9.0 (#209)
+ * Update scala-library to 2.13.8 (#195)
+ * Update scala3-library, ... to 3.1.1 (#204)
+ * Update scalajs-env-nodejs to 1.3.0 (#202)
+ * Update slf4j-api to 1.7.36 (#207)
+
 ## 0.10.12
 
 _2021-11-24_
