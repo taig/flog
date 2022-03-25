@@ -2,7 +2,7 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 import sbtcrossproject.{CrossProject, Platform}
 
 val Version = new {
-  val CatsEffect = "3.3.8"
+  val CatsEffect = "3.3.9"
   val CatsMtl = "1.2.1"
   val Circe = "0.14.1"
   val Fs2 = "3.2.5"
