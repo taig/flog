@@ -4,7 +4,7 @@ import sbtcrossproject.{CrossProject, Platform}
 val Version = new {
   val CatsEffect = "3.3.11"
   val CatsMtl = "1.2.1"
-  val Circe = "0.14.1"
+  val Circe = "0.14.2"
   val Fs2 = "3.2.7"
   val GoogleApiServicesLogging = "v2-rev20220414-1.32.1"
   val GoogleAuthLibraryOauth2Http = "1.7.0"
