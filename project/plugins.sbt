@@ -1,4 +1,4 @@
-addSbtPlugin("io.taig" % "sbt-houserules" % "0.3.22")
+addSbtPlugin("io.taig" % "sbt-houserules" % "0.3.23")
 
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.2.0")
 
