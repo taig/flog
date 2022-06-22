@@ -25,7 +25,7 @@ import scala.jdk.CollectionConverters._
 object StackdriverHttpLogger {
   private val Scopes = JArrays.asList(LoggingScopes.CLOUD_PLATFORM_READ_ONLY, LoggingScopes.LOGGING_WRITE)
 
-  private val slugify = new Slugify().withLowerCase(false)
+  private val slugify = Slugify.builder().lowerCase(false).build()
 
   def apply[F[_]](
       logging: Logging#Entries,

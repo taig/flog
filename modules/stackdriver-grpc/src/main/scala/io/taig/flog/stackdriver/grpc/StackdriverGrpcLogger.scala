@@ -27,7 +27,7 @@ object StackdriverGrpcLogger {
     "https://www.googleapis.com/auth/logging.write"
   )
 
-  private val slugify = new Slugify().withLowerCase(false)
+  private val slugify = Slugify.builder().lowerCase(false).build()
 
   def apply[F[_]](logging: Logging, name: String, resource: MonitoredResource)(implicit F: Sync[F]): Logger[F] =
     Logger { events =>
