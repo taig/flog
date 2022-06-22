@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.12.0
+
+ * Upgrade to slugify 3.0.1
+ * Update cats-effect to 3.3.12 (#246)
+ * Update circe-core to 0.14.2 (#245)
+ * Upgrade to fs2 3.2.8
+ * Update google-api-services-logging to v2-rev20220414-1.32.1 (#241)
+ * Update google-auth-library-oauth2-http to 1.7.0 (#243)
+ * Update google-cloud-logging to 3.9.0 (#248)
+ * Update sbt-houserules to 0.3.23 (#247)
+ * Update sbt-scalajs, scalajs-compiler, ... to 1.10.0 (#233)
+ * Update sbt-scalajs-crossproject to 1.2.0 (#223)
+ * Update scala-collection-compat to 2.7.0 (#224)
+ * Update scala3-library, ... to 3.1.2 (#237)
+ * Upgrade to google-api-services-logging v2-rev20220527-1.32.1
+
 ## 0.11.0
 
 _2022-03-07_
