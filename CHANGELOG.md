@@ -2,6 +2,8 @@
 
 ## 0.12.0
 
+_2022-07-22_
+
  * Upgrade to slugify 3.0.1
  * Update cats-effect to 3.3.12 (#246)
  * Update circe-core to 0.14.2 (#245)
