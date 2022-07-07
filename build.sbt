@@ -3,7 +3,7 @@ import sbtcrossproject.{CrossProject, Platform}
 
 val Version = new {
   val CatsEffect = "3.3.13"
-  val CatsMtl = "1.2.1"
+  val CatsMtl = "1.3.0"
   val Circe = "0.14.2"
   val Fs2 = "3.2.8"
   val GoogleApiServicesLogging = "v2-rev20220527-1.32.1"
