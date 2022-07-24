@@ -1,5 +1,6 @@
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 import sbtcrossproject.{CrossProject, Platform}
+import scala.util.chaining._
 
 val Version = new {
   val CatsEffect = "3.3.14"
@@ -28,6 +29,13 @@ def module(identifier: String, platforms: Seq[Platform]): CrossProject =
     .settings(
       name := s"flog-$identifier"
     )
+    .pipe { project =>
+      if (platforms.contains(JSPlatform))
+        project.jsSettings(
+          scalacOptions ++= { if (scalaVersion.value == Version.Scala3) "-scalajs" :: Nil else Nil }
+        )
+      else project
+    }
 
 noPublishSettings
 
