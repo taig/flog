@@ -1,8 +1,31 @@
 # Changelog
 
+## 0.12.1
+
+_2022-07-24_
+
+ * Fix scalajs test execution
+ * Update cats-effect to 3.3.14 (#256)
+ * Update fs2-core to 3.2.10 (#252)
+ * Update google-api-services-logging to v2-rev20220714-1.32.1 (#259)
+ * Update google-auth-library-oauth2-http to 1.8.1 (#257)
+ * Update sbt to 1.7.1 (#254)
+ * Update sbt-houserules to 0.3.24 (#255)
+ * Update sbt-scalajs, scalajs-compiler, ... to 1.10.1 (#249)
+ * Update scala-collection-compat to 2.8.0 (#253)
+ * Update scala-library to 2.12.16 (#250)
+ * Update scala3-library, ... to 3.1.3 (#251)
+ * Update slugify to 3.0.2 (#258)
+ * Upgrade to cats-effect 3.3.13
+ * Upgrade to cats-mtl 1.3.0
+ * Upgrade to fs2 3.2.9
+ * Upgrade to google-api-services-logging v2-rev20220624-1.32.1
+ * Upgrade to google-auth-library-oauth-http 1.8.0
+ * Upgrade to google-cloud-logging 3.10.0
+
 ## 0.12.0
 
-_2022-07-22_
+_2022-06-22_
 
  * Upgrade to slugify 3.0.1
  * Update cats-effect to 3.3.12 (#246)
