@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.13.0
+
+_2022-08-12_
+
+ * Upgrade to google-api-services-logging v2-rev20220714-2.0.0
+ * Fix google-cloud-logging version
+ * Use ci mode, as strict no longer exists
+ * Update sbt-houserules to 0.4.1 (#270)
+ * Update google-cloud-logging to 3.10.2 (#269)
+ * Update sbt-houserules to 0.3.26 (#266)
+ * Update fs2-core to 3.2.12 (#267)
+ * Update google-auth-library-oauth2-http to 1.10.0 (#268)
+ * Update google-auth-library-oauth2-http to 1.9.0 (#265)
+ * Update scala-collection-compat to 2.8.1 (#263)
+ * Update fs2-core to 3.2.11 (#262)
+
 ## 0.12.1
 
 _2022-07-24_
