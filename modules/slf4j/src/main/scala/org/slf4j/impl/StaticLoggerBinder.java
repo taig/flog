@@ -1,5 +1,6 @@
 package org.slf4j.impl;
 
+import io.taig.flog.slf4j.Build$;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.spi.LoggerFactoryBinder;
 
@@ -23,7 +24,7 @@ public class StaticLoggerBinder implements LoggerFactoryBinder {
      * The value of this field is modified with each major release.
      */
     // to avoid constant folding by the compiler, this field must *not* be final
-    public static String REQUESTED_API_VERSION = "1.6.99"; // !final
+    public static String REQUESTED_API_VERSION = Build$.MODULE$.slf4jVersion(); // !final
 
     private static final String loggerFactoryClassStr = FlogLoggerFactory.class.getName();
 

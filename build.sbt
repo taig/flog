@@ -57,7 +57,11 @@ lazy val core = module("core", platforms = Seq(JVMPlatform, JSPlatform))
   )
 
 lazy val slf4j = module("slf4j", platforms = Seq(JVMPlatform))
+  .enablePlugins(BuildInfoPlugin)
   .settings(
+    buildInfoObject := "Build",
+    buildInfoKeys := Seq("slf4jVersion" -> Version.Slf4j),
+    buildInfoPackage := s"${organization.value}.flog.slf4j",
     libraryDependencies ++=
       "org.slf4j" % "slf4j-api" % Version.Slf4j ::
         Nil
