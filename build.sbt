@@ -3,7 +3,7 @@ import sbtcrossproject.{CrossProject, Platform}
 import scala.util.chaining._
 
 val Version = new {
-  val CatsEffect = "3.4.0"
+  val CatsEffect = "3.4.1"
   val CatsMtl = "1.3.0"
   val Circe = "0.14.3"
   val Fs2 = "3.3.0"
