@@ -17,7 +17,7 @@ val Version = new {
   val Scala213 = "2.13.10"
   val Scala3 = "3.2.0"
   val ScalaCollectionCompat = "2.8.1"
-  val Slf4j = "2.0.4"
+  val Slf4j = "2.0.6"
   val Slugify = "3.0.2"
 }
 
