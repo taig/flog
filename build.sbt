@@ -25,7 +25,6 @@ def module(identifier: String, platforms: Seq[Platform]): CrossProject =
   CrossProject(identifier, file(s"modules/$identifier"))(platforms: _*)
     .crossType(CrossType.Pure)
     .build()
-    .settings(sonatypePublishSettings)
     .settings(
       name := s"flog-$identifier"
     )
