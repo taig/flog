@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.13.1
+
+_2022-12-27_
+
+* Migrate CI/CD to GitHub Actions
+* Use sbt-buildinfo to resolve slf4j version
+* Update cats-effect to 3.4.3 (#311)
+* Update fs2-core to 3.4.0 (#301)
+* Update google-api-services-logging to v2-rev20220922-2.0.0 (#284)
+* Update google-auth-library-oauth2-http to 1.14.0 (#308)
+* Update google-cloud-logging to 3.13.7 (#310)
+* Update sbt to 1.7.2 (#289)
+* Update sbt-scalajs, scalajs-compiler, ... to 1.12.0 (#303)
+* Update scala-library to 2.13.10 (#288)
+* Update scala3-library, ... to 3.2.0 (#280)
+* Update scalajs-env-nodejs to 1.4.0 (#277)
+* Update slf4j-api to 2.0.0 (#274)
+* Update slf4j-api to 2.0.4 (#298)
+* Upgrade scala-collection-compat to 2.9.0
+* Upgrade to circe 0.14.3
+* Upgrade to fs2 3.3.0
+* Upgrade to google-cloud-logging 3.11.1
+* Upgrade to sbt 1.8.0
+* Upgrade to sbt-houserules 0.6.1
+* Upgrade to sbt-scalajs 1.11.0
+* Upgrade to scala 2.12.17
+
 ## 0.13.0
 
 _2022-08-12_

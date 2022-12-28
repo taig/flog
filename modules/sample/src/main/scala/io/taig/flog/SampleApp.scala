@@ -23,7 +23,7 @@ object SampleApp extends IOApp.Simple {
       .withHttpApp(CorrelationMiddleware(logger)(LoggingMiddleware(logger)(app[F](logger))))
       .resource
 
-  def logger[F[_]: Async]: Resource[F, Logger[F]] = Dispatcher[F].flatMap { dispatcher =>
+  def logger[F[_]: Async]: Resource[F, Logger[F]] = Dispatcher.parallel[F].flatMap { dispatcher =>
     Resource
       .eval(Logger.stdOut[F])
       .flatMap(Logger.queued[F])
