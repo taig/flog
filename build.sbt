@@ -5,7 +5,7 @@ import scala.util.chaining._
 val Version = new {
   val CatsEffect = "3.4.6"
   val CatsMtl = "1.3.0"
-  val Circe = "0.14.3"
+  val Circe = "0.14.4"
   val Fs2 = "3.6.0"
   val GoogleApiServicesLogging = "v2-rev20230120-2.0.0"
   val GoogleAuthLibraryOauth2Http = "1.15.0"
