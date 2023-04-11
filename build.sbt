@@ -3,13 +3,13 @@ import sbtcrossproject.{CrossProject, Platform}
 import scala.util.chaining._
 
 val Version = new {
-  val CatsEffect = "3.4.7"
+  val CatsEffect = "3.4.8"
   val CatsMtl = "1.3.0"
-  val Circe = "0.14.4"
+  val Circe = "0.14.5"
   val Fs2 = "3.6.1"
-  val GoogleApiServicesLogging = "v2-rev20230218-2.0.0"
-  val GoogleAuthLibraryOauth2Http = "1.15.0"
-  val GoogleCloudLogging = "3.14.4"
+  val GoogleApiServicesLogging = "v2-rev20230331-2.0.0"
+  val GoogleAuthLibraryOauth2Http = "1.16.1"
+  val GoogleCloudLogging = "3.14.7"
   val Java = "17"
   val Http4s = "1.0.0-M30"
   val Munit = "0.7.29"
