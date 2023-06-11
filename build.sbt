@@ -19,7 +19,7 @@ val Version = new {
   val Scala3 = "3.3.0"
   val ScalaCollectionCompat = "2.10.0"
   val Slf4j = "1.7.36"
-  val Slugify = "3.0.4"
+  val Slugify = "3.0.5"
 }
 
 def module(identifier: Option[String], jvmOnly: Boolean): CrossProject = {
