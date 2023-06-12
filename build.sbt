@@ -3,23 +3,23 @@ import sbtcrossproject.{CrossProject, Platform}
 import scala.util.chaining._
 
 val Version = new {
-  val CatsEffect = "3.4.9"
-  val CatsMtl = "1.3.0"
+  val CatsEffect = "3.5.0"
+  val CatsMtl = "1.3.1"
   val Circe = "0.14.5"
-  val Fs2 = "3.6.1"
-  val GoogleApiServicesLogging = "v2-rev20230421-2.0.0"
-  val GoogleAuthLibraryOauth2Http = "1.16.1"
-  val GoogleCloudLogging = "3.14.9"
+  val Fs2 = "3.7.0"
+  val GoogleApiServicesLogging = "v2-rev20230531-2.0.0"
+  val GoogleAuthLibraryOauth2Http = "1.17.0"
+  val GoogleCloudLogging = "3.15.3"
   val Java = "17"
   val Http4s = "1.0.0-M30"
   val Munit = "0.7.29"
   val MunitCatsEffect = "1.0.7"
-  val Scala212 = "2.12.17"
+  val Scala212 = "2.12.18"
   val Scala213 = "2.13.10"
-  val Scala3 = "3.2.2"
+  val Scala3 = "3.3.0"
   val ScalaCollectionCompat = "2.10.0"
   val Slf4j = "1.7.36"
-  val Slugify = "3.0.4"
+  val Slugify = "3.0.5"
 }
 
 def module(identifier: Option[String], jvmOnly: Boolean): CrossProject = {
