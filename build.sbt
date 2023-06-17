@@ -6,9 +6,6 @@ val Version = new {
   val CatsMtl = "1.3.1"
   val Circe = "0.14.5"
   val Fs2 = "3.7.0"
-  val GoogleApiServicesLogging = "v2-rev20230531-2.0.0"
-  val GoogleAuthLibraryOauth2Http = "1.18.0"
-  val GoogleCloudLogging = "3.15.3"
   val Java = "17"
   val Http4s = "1.0.0-M30"
   val Munit = "0.7.29"
@@ -16,7 +13,6 @@ val Version = new {
   val Scala3 = "3.3.0"
   val ScalaCollectionCompat = "2.11.0"
   val Slf4j = "1.7.36"
-  val Slugify = "3.0.5"
 }
 
 def module(identifier: Option[String], jvmOnly: Boolean): CrossProject = {
@@ -62,7 +58,7 @@ lazy val root = module(identifier = None, jvmOnly = true)
         Nil
     }
   )
-  .aggregate(core, slf4j, stackdriverGrpc, stackdriverHttp, logstash, http4s, http4sClient, http4sServer, sample)
+  .aggregate(core, slf4j, http4s, http4sClient, http4sServer, sample)
 
 lazy val core = module(Some("core"), jvmOnly = false)
   .settings(
@@ -88,27 +84,6 @@ lazy val slf4j = module(Some("slf4j"), jvmOnly = true)
         Nil
   )
   .dependsOn(core)
-
-lazy val stackdriverGrpc = module(Some("stackdriver-grpc"), jvmOnly = true)
-  .settings(
-    libraryDependencies ++=
-      "com.github.slugify" % "slugify" % Version.Slugify ::
-        "com.google.cloud" % "google-cloud-logging" % Version.GoogleCloudLogging ::
-        Nil
-  )
-  .dependsOn(core)
-
-lazy val stackdriverHttp = module(Some("stackdriver-http"), jvmOnly = true)
-  .settings(
-    libraryDependencies ++=
-      "com.github.slugify" % "slugify" % Version.Slugify ::
-        "com.google.auth" % "google-auth-library-oauth2-http" % Version.GoogleAuthLibraryOauth2Http ::
-        "com.google.apis" % "google-api-services-logging" % Version.GoogleApiServicesLogging ::
-        Nil
-  )
-  .dependsOn(core)
-
-lazy val logstash = module(Some("logstash"), jvmOnly = true).dependsOn(core)
 
 lazy val http4s = module(Some("http4s"), jvmOnly = true)
   .settings(

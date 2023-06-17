@@ -1,7 +1,0 @@
-{
-  "resources": [
-    { "pattern": "^.*google-http-client\\.properties$" },
-    { "pattern": "^.*google\\.jks$" },
-    { "pattern": "^.*google-api-client\\.properties$" }
-  ]
-}
