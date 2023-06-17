@@ -14,9 +14,7 @@ import java.io.{BufferedWriter, OutputStream, OutputStreamWriter}
 
 abstract class Logger[F[_]] extends LoggerLike[F]:
   self =>
-
   def log(events: Long => List[Event]): F[Unit]
-
   final def mapK[G[_]](fk: F ~> G): Logger[G] = event => fk(log(event))
 
 object Logger:
@@ -58,14 +56,13 @@ object Logger:
             events.foreach(event => writer.write(EventPrinter(event)))
             writer.flush()
 
-  def output[F[_]](target: OutputStream, buffer: Int)(using F: Sync[F]): Resource[F, Logger[F]] =
-    Resource
-      .fromAutoCloseable(F.delay(new BufferedWriter(new OutputStreamWriter(target), buffer)))
-      .map: writer =>
-        Logger[F]: events =>
-          F.delay:
-            events.foreach(event => writer.write(EventPrinter(event)))
-            writer.flush()
+  def output[F[_]](target: OutputStream, buffer: Int)(using F: Sync[F]): Resource[F, Logger[F]] = Resource
+    .fromAutoCloseable(F.delay(new BufferedWriter(new OutputStreamWriter(target), buffer)))
+    .map: writer =>
+      Logger[F]: events =>
+        F.delay:
+          events.foreach(event => writer.write(EventPrinter(event)))
+          writer.flush()
 
   def stdOut[F[_]: Sync](buffer: Int): F[Logger[F]] = unsafeOutput(System.out, buffer)
 
@@ -76,18 +73,17 @@ object Logger:
     * The `timestamp` is used to set the `Event` time when it is added to the queue, the underlying `Logger`'s
     * `timestamp` is discarded.
     */
-  def queued[F[_]: Concurrent](timestamp: F[Long], logger: Logger[F]): Resource[F, Logger[F]] =
-    Resource
-      .eval(Queue.unbounded[F, Option[Event]])
-      .flatMap: queue =>
-        val enqueue = raw[F](timestamp, _.map(_.some).traverse_(queue.offer))
-        val process = Stream
-          .fromQueueNoneTerminated(queue)
-          .chunks
-          .evalMap(events => logger.log(_ => events.toList))
-          .compile
-          .drain
-        Resource.make(process.start)(fiber => queue.offer(None) *> fiber.join.void).as(enqueue)
+  def queued[F[_]: Concurrent](timestamp: F[Long], logger: Logger[F]): Resource[F, Logger[F]] = Resource
+    .eval(Queue.unbounded[F, Option[Event]])
+    .flatMap: queue =>
+      val enqueue = raw[F](timestamp, _.map(_.some).traverse_(queue.offer))
+      val process = Stream
+        .fromQueueNoneTerminated(queue)
+        .chunks
+        .evalMap(events => logger.log(_ => events.toList))
+        .compile
+        .drain
+      Resource.make(process.start)(fiber => queue.offer(None) *> fiber.join.void).as(enqueue)
 
   /** Write all logs into a `Queue` and process them asynchronously */
   def queued[F[_]: Concurrent](logger: Logger[F])(using clock: Clock[F]): Resource[F, Logger[F]] =

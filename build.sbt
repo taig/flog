@@ -7,11 +7,10 @@ val Version = new {
   val Circe = "0.14.5"
   val Fs2 = "3.7.0"
   val Java = "17"
-  val Http4s = "1.0.0-M30"
+  val Http4s = "1.0.0-M39"
   val Munit = "0.7.29"
   val MunitCatsEffect = "1.0.7"
   val Scala3 = "3.3.0"
-  val ScalaCollectionCompat = "2.11.0"
   val Slf4j = "1.7.36"
 }
 
@@ -65,7 +64,6 @@ lazy val core = module(Some("core"), jvmOnly = false)
     libraryDependencies ++=
       "co.fs2" %%% "fs2-core" % Version.Fs2 ::
         "io.circe" %%% "circe-core" % Version.Circe ::
-        "org.scala-lang.modules" %%% "scala-collection-compat" % Version.ScalaCollectionCompat ::
         "org.typelevel" %%% "cats-effect" % Version.CatsEffect ::
         "org.typelevel" %%% "cats-mtl" % Version.CatsMtl ::
         "org.scalameta" %%% "munit" % Version.Munit % "test" ::
@@ -113,7 +111,8 @@ lazy val sample = module(Some("sample"), jvmOnly = true)
   .settings(noPublishSettings)
   .settings(
     libraryDependencies ++=
-      "org.http4s" %% "http4s-blaze-server" % Version.Http4s ::
+      "org.http4s" %% "http4s-dsl" % Version.Http4s ::
+        "org.http4s" %% "http4s-ember-server" % Version.Http4s ::
         Nil
   )
   .dependsOn(http4sServer, slf4j)

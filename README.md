@@ -9,122 +9,104 @@
 ```scala
 libraryDependencies ++=
   "io.taig" %% "flog-core" % "x.x.x" ::
-  "io.taig" %% "flog-interop-zio" % "x.x.x" ::
-  "io.taig" %% "flog-interop-monix" % "x.x.x" ::
-  "io.taig" %% "flog-sheets" % "x.x.x" ::
-  "io.taig" %% "flog-stackdriver" % "x.x.x" ::
   "io.taig" %% "flog-slf4j" % "x.x.x" ::
-  Nil
-```
-
-The `core` and `interop` modules are also available for Scala.js.
-
-```scala
-libraryDependencies ++=
-  "io.taig" %%% "flog-core" % "x.x.x" ::
-  "io.taig" %%% "flog-interop-zio" % "x.x.x" ::
-  "io.taig" %%% "flog-interop-monix" % "x.x.x" ::
   Nil
 ```
 
 ## Usage
 
 ```scala
-import java.util.UUID
+import cats.effect.*
+import cats.effect.std.Dispatcher
+import io.taig.flog.data.Level
+import io.taig.flog.http4s.{CorrelationMiddleware, LoggingMiddleware}
+import io.taig.flog.slf4j.FlogSlf4jBinder
+import org.http4s.ember.server.EmberServerBuilder
+import org.http4s.server.Server
+import org.http4s.{HttpApp, HttpRoutes, Response}
+import org.http4s.dsl.io.*
+import com.comcast.ip4s.*
 
-import cats.effect.ExitCode
-import cats.syntax.all._
-import io.circe.JsonObject
-import io.circe.syntax._
-import io.taig.flog.Logger
-import io.taig.flog.data.Scope
-import io.taig.flog.interop.monix._
-import monix.eval._
+object SampleApp extends ResourceApp.Forever:
+  def app(logger: Logger[IO]): HttpApp[IO] = HttpRoutes.of[IO] {
+    case GET -> Root / "crash" => IO.raiseError(new RuntimeException("💣"))
+    case GET -> Root =>
+      logger.info("I'm handling a request here, and a trace information is automagically attached to my payload!") *>
+      Ok()
+    }.orNotFound
 
-import scala.io.Source
+  def server(logger: ContextualLogger[IO]): Resource[IO, Server] = EmberServerBuilder
+    .default[IO]
+    .withHost(host"0.0.0.0")
+    .withPort(port"8080")
+    .withHttpApp(CorrelationMiddleware(logger)(LoggingMiddleware(logger)(app(logger))))
+    .build
 
-object Playground extends TaskApp {
-  def loadWebsite(url: String, logger: Logger[Task]): Task[String] =
-    for {
-      _ <- logger.info(
-        Scope.Root / "request",
-        message = url
-      )
-      body <- Task(Source.fromURL(url))
-        .bracket(source => Task(source.mkString))(source => Task(source.close())
-        )
-      _ <- logger.info(
-        Scope.Root / "response",
-        message = url,
-        payload = JsonObject("body" -> (body.take(100) + "...").asJson)
-      )
-    } yield body
+  val logger: Resource[IO, Logger[IO]] = Dispatcher
+    .parallel[IO]
+    .flatMap: dispatcher =>
+    Resource
+    .eval(Logger.stdOut[IO])
+    .flatMap(Logger.queued[IO])
+    .map(_.minimum(Level.Info))
+    .evalTap(FlogSlf4jBinder.initialize(_, dispatcher))
 
-  def app(logger: Logger[Task]): Task[Unit] =
-    (loadWebsite(url = "https://typelevel.org", logger) *>
-      loadWebsite(url = "foobar", logger)).void
-      .onErrorHandleWith { throwable =>
-        logger.error(message = "Execution failed", throwable = throwable.some)
-      }
+  override def run(arguments: List[String]): Resource[IO, Unit] = for
+    logger <- logger
+    contextual <- Resource.eval(ContextualLogger.ofIO(logger))
+    _ <- server(contextual)
+  yield ()
 
-  override def run(args: List[String]): Task[ExitCode] =
-    (for {
-      // Pick a simple std out logger ...
-      stdOutLogger <- Logger.stdOut[Task]
-      // ... and lift it into contextual mode (which is only possible with
-      // monix.eval.Task and ZIO)
-      contextualLogger <- contextualMonixLogger(stdOutLogger)
-      uuid <- Task(UUID.randomUUID())
-      _ <- contextualLogger.locally(_.trace(uuid))(app(contextualLogger))
-    } yield ExitCode.Success).executeWithOptions(_.enableLocalContextPropagation)
-}
 ```
 
 ``` 
-[2020-02-05 18:57:13.504][info][request] https://typelevel.org
+[2023-06-17 10:08:50.582][info][server] Request
 {
-  "trace" : "95cf9ca5-9e10-4451-9d61-111f8850ca0a"
+  "request" : {
+    "method" : "GET",
+    "uri" : "/",
+    "headers" : {
+      "Host" : "localhost:8080",
+      "User-Agent" : "curl/7.88.1",
+      "Accept" : "*/*"
+    }
+  },
+  "correlation" : "351f211a-c857-4b98-a1dd-b16240fa7fa1"
 }
-[2020-02-05 18:57:13.659][info][response] https://typelevel.org
+[2023-06-17 10:08:50.597][info][/] I'm handling a request here, and a trace information is automagically attached to my payload!
 {
-  "trace" : "95cf9ca5-9e10-4451-9d61-111f8850ca0a",
-  "body" : "<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"X-UA-Compatible\" co..."
+  "correlation" : "351f211a-c857-4b98-a1dd-b16240fa7fa1"
 }
-[2020-02-05 18:57:13.659][info][request] foobar
+[2023-06-17 10:08:50.598][info][server] Response
 {
-  "trace" : "95cf9ca5-9e10-4451-9d61-111f8850ca0a"
+  "response" : {
+    "status" : "200 OK",
+    "headers" : {
+      "Content-Length" : "0"
+    }
+  },
+  "correlation" : "351f211a-c857-4b98-a1dd-b16240fa7fa1"
 }
-[2020-02-05 18:57:13.661][error][/] Execution failed
+[2023-06-17 10:08:54.808][info][server] Request
 {
-  "trace" : "95cf9ca5-9e10-4451-9d61-111f8850ca0a"
+  "request" : {
+    "method" : "GET",
+    "uri" : "/crash",
+    "headers" : {
+      "Host" : "localhost:8080",
+      "User-Agent" : "curl/7.88.1",
+      "Accept" : "*/*"
+    }
+  },
+  "correlation" : "47b1dca1-50be-4c53-a621-ad16d72b1b35"
 }
-java.net.MalformedURLException: no protocol: foobar
-	at java.net.URL.<init>(URL.java:610)
-	at java.net.URL.<init>(URL.java:507)
-	at java.net.URL.<init>(URL.java:456)
-	at scala.io.Source$.fromURL(Source.scala:132)
+[2023-06-17 10:08:54.813][error][server] Request failed
+{
+  "correlation" : "47b1dca1-50be-4c53-a621-ad16d72b1b35"
+}
+java.lang.RuntimeException: 💣
+	at io.taig.flog.SampleApp$$anon$1.applyOrElse(SampleApp.scala:16)
 	[...]
-```
-
-## Logstash
-
-Basic configuration to receive message from the `LogstashLogger`
-
-```
-filter {
-  json {
-	  source => "message"
-	}
-
-	date {
-		match => [ "timestamp", "UNIX_MS" ]
-		target => "@timestamp"
-	}
-
-	mutate {
-    remove_field => [ "timestamp" ]
-  }
-}
 ```
 
 ## Slf4j
