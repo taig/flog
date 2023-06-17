@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.14.0
+
+_2023-06-17_
+
+* Drop support for Scala 2.x
+* Remove stackdriver and logstash modules
+* Improve sample
+* Update cats-effect to 3.5.0 (#366)
+* Update cats-mtl to 1.3.1 (#356)
+* Update circe-core to 0.14.5 (#338)
+* Update fs2-core to 3.7.0 (#358)
+* Update sbt to 1.9.0 (#367)
+* Update sbt-ci-release to 1.5.12 (#357)
+* Update sbt-scalajs, scalajs-compiler, ... to 1.13.1 (#346)
+* Update sbt-scalajs-crossproject to 1.3.1 (#349)
+* Update scala3-library, ... to 3.3.0 (#365)
+* Upgrade to sbt-houserules 0.7.0
+
 ## 0.13.1
 
 _2022-12-27_
