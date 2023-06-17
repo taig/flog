@@ -10,6 +10,7 @@ import org.http4s.server.Server
 import org.http4s.{HttpApp, HttpRoutes, Response}
 import org.http4s.dsl.io.*
 import com.comcast.ip4s.*
+import scala.concurrent.duration.*
 
 object SampleApp extends ResourceApp.Forever:
   def app(logger: Logger[IO]): HttpApp[IO] = HttpRoutes
@@ -25,6 +26,7 @@ object SampleApp extends ResourceApp.Forever:
     .withHost(host"0.0.0.0")
     .withPort(port"8080")
     .withHttpApp(CorrelationMiddleware(logger)(LoggingMiddleware(logger)(app(logger))))
+    .withShutdownTimeout(1.second)
     .build
 
   val logger: Resource[IO, Logger[IO]] = Dispatcher
