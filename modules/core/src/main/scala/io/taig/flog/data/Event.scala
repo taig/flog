@@ -1,7 +1,7 @@
 package io.taig.flog.data
 
 import io.circe.{Encoder, JsonObject}
-import io.circe.syntax._
+import io.circe.syntax.*
 import io.taig.flog.util.StacktracePrinter
 
 final case class Event(
@@ -11,7 +11,7 @@ final case class Event(
     message: String,
     payload: JsonObject,
     throwable: Option[Throwable]
-) {
+):
   def modifyTimestamp(f: Long => Long): Event = copy(timestamp = f(timestamp))
 
   def withTimestamp(timestamp: Long): Event = modifyTimestamp(_ => timestamp)
@@ -36,13 +36,12 @@ final case class Event(
 
   def withPayload(payload: JsonObject): Event = modifyPayload(_ => payload)
 
-  def merge(payload: JsonObject): Event = modifyPayload(_ deepMerge payload)
+  def merge(payload: JsonObject): Event = modifyPayload(_ `deepMerge` payload)
 
-  def withContext(context: Context): Event = prepend(context.prefix).modifyPayload(context.presets deepMerge _)
-}
+  def withContext(context: Context): Event = prepend(context.prefix).modifyPayload(context.presets `deepMerge` _)
 
-object Event {
-  implicit val encoder: Encoder.AsObject[Event] = event =>
+object Event:
+  given Encoder.AsObject[Event] = event =>
     JsonObject(
       "timestamp" := event.timestamp,
       "level" := event.level,
@@ -51,4 +50,3 @@ object Event {
       "payload" := event.payload,
       "stacktrace" := event.throwable.map(StacktracePrinter(_))
     )
-}

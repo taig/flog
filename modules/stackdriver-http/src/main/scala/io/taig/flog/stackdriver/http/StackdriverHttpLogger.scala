@@ -1,7 +1,7 @@
 package io.taig.flog.stackdriver.http
 
 import cats.effect.{Resource, Sync}
-import cats.syntax.all._
+import cats.syntax.all.*
 import com.github.slugify.Slugify
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
@@ -11,7 +11,7 @@ import com.google.auth.Credentials
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.ServiceAccountCredentials
 import io.circe.JsonObject
-import io.circe.syntax._
+import io.circe.syntax.*
 import io.taig.flog.Logger
 import io.taig.flog.data.{Event, Level, Scope}
 import io.taig.flog.util.{JsonObjects, StacktracePrinter}
@@ -19,8 +19,8 @@ import io.taig.flog.util.{JsonObjects, StacktracePrinter}
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 import java.time.Instant
-import java.util.{Arrays => JArrays, Map => JMap, UUID}
-import scala.jdk.CollectionConverters._
+import java.util.{Arrays as JArrays, Map as JMap, UUID}
+import scala.jdk.CollectionConverters.*
 
 object StackdriverHttpLogger {
   private val Scopes = JArrays.asList(LoggingScopes.CLOUD_PLATFORM_READ_ONLY, LoggingScopes.LOGGING_WRITE)
@@ -118,7 +118,7 @@ object StackdriverHttpLogger {
     }
 
   private def logName(project: String, name: String, scope: Scope): String =
-    s"projects/$project/logs/" + (name +: scope.segments.toList).map(slugify.slugify).mkString(".")
+    s"projects/$project/logs/" + (name +: scope.toChain.toList).map(slugify.slugify).mkString(".")
 
   private def payload(event: Event): JMap[String, Object] = JsonObjects.toJavaMap {
     JsonObject(

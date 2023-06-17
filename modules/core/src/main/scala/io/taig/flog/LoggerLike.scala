@@ -3,7 +3,9 @@ package io.taig.flog
 import io.circe.JsonObject
 import io.taig.flog.data.{Event, Level, Scope}
 
-trait LoggerLike[F[_]] { this: Logger[F] =>
+trait LoggerLike[F[_]]:
+  this: Logger[F] =>
+
   final def apply(
       level: Level,
       scope: Scope = Scope.Root,
@@ -103,4 +105,3 @@ trait LoggerLike[F[_]] { this: Logger[F] =>
     warning(Scope.Root, message, payload, Some(throwable))
   final def warning(scope: Scope, message: String, payload: => JsonObject, throwable: Throwable): F[Unit] =
     warning(scope, message, payload, Some(throwable))
-}

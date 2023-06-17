@@ -1,13 +1,13 @@
 package io.taig.flog.util
 
-import cats.syntax.all._
+import cats.syntax.all.*
 import io.circe.{Json, JsonNumber, JsonObject}
 
-import java.util.{Map => JMap}
-import java.lang.{Object => JObject}
-import scala.jdk.CollectionConverters._
+import java.util.Map as JMap
+import java.lang.Object as JObject
+import scala.jdk.CollectionConverters.*
 
-object JsonObjects {
+object JsonObjects:
   private def toJavaNumber(json: JsonNumber): JObject =
     json.toInt
       .map(Int.box)
@@ -24,4 +24,3 @@ object JsonObjects {
   )
 
   def toJavaMap(json: JsonObject): JMap[String, JObject] = json.toMap.fmap(toJavaObject).asJava
-}

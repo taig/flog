@@ -1,6 +1,6 @@
 package io.taig.flog.stackdriver.grpc
 
-import java.util.{Map => JMap}
+import java.util.Map as JMap
 
 import cats.effect.Sync
 import com.google.cloud.MonitoredResource

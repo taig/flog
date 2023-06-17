@@ -1,6 +1,5 @@
-import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
-import sbtcrossproject.{CrossProject, Platform}
-import scala.util.chaining._
+import sbtcrossproject.CrossPlugin.autoImport.CrossType
+import sbtcrossproject.CrossProject
 
 val Version = new {
   val CatsEffect = "3.5.0"
@@ -14,8 +13,6 @@ val Version = new {
   val Http4s = "1.0.0-M30"
   val Munit = "0.7.29"
   val MunitCatsEffect = "1.0.7"
-  val Scala212 = "2.12.18"
-  val Scala213 = "2.13.11"
   val Scala3 = "3.3.0"
   val ScalaCollectionCompat = "2.11.0"
   val Slf4j = "1.7.36"
@@ -29,22 +26,25 @@ def module(identifier: Option[String], jvmOnly: Boolean): CrossProject = {
     .withoutSuffixFor(JVMPlatform)
     .build()
     .settings(
-      name := "flog" + identifier.fold("")("-" + _),
-      scalacOptions ++= (if (scalaVersion.value == Version.Scala3 && crossProjectPlatform.value == JSPlatform)
-                           "-scalajs" :: Nil
-                         else Nil)
+      Compile / scalacOptions ++=
+        "-source:future" ::
+          "-rewrite" ::
+          "-new-syntax" ::
+          "-Wvalue-discard" ::
+          "-Wunused:all" ::
+          Nil,
+      name := "flog" + identifier.fold("")("-" + _)
     )
 }
 
 inThisBuild(
   Def.settings(
-    crossScalaVersions := Seq(Version.Scala212, Version.Scala213, Version.Scala3),
     developers := List(Developer("taig", "Niklas Klein", "mail@taig.io", url("https://taig.io/"))),
     dynverVTagPrefix := false,
     homepage := Some(url("https://github.com/taig/flog/")),
     licenses := List("MIT" -> url("https://raw.githubusercontent.com/taig/flog/main/LICENSE")),
     organization := "io.taig",
-    scalaVersion := Version.Scala213,
+    scalaVersion := Version.Scala3,
     versionScheme := Some("early-semver")
   )
 )

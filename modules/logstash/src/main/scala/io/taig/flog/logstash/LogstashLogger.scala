@@ -1,9 +1,9 @@
 package io.taig.flog.logstash
 
-import cats.effect._
-import cats.syntax.all._
+import cats.effect.*
+import cats.syntax.all.*
 import io.taig.flog.Logger
-import io.circe.syntax._
+import io.circe.syntax.*
 import io.taig.flog.data.Event
 
 import java.io.{BufferedOutputStream, DataOutputStream}

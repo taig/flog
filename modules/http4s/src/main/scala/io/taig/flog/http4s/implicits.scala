@@ -1,7 +1,7 @@
 package io.taig.flog.http4s
 
-import cats.syntax.all._
-import io.circe.syntax._
+import cats.syntax.all.*
+import io.circe.syntax.*
 import io.circe.{Encoder, JsonObject}
 import org.http4s.{Headers, Request, Response}
 

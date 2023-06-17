@@ -1,7 +1,7 @@
 package io.taig.flog.stackdriver.grpc
 
 import cats.effect.{Resource, Sync}
-import cats.syntax.all._
+import cats.syntax.all.*
 import com.github.slugify.Slugify
 import com.google.auth.Credentials
 import com.google.auth.oauth2.ServiceAccountCredentials
@@ -9,7 +9,7 @@ import com.google.cloud.MonitoredResource
 import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.{LogEntry, Logging, LoggingOptions, Severity}
 import io.circe.JsonObject
-import io.circe.syntax._
+import io.circe.syntax.*
 import io.taig.flog.Logger
 import io.taig.flog.data.{Event, Level}
 import io.taig.flog.util.{JsonObjects, StacktracePrinter}
@@ -18,8 +18,8 @@ import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.util
-import java.util.{Arrays => JArrays, Collections, UUID}
-import scala.jdk.CollectionConverters._
+import java.util.{Arrays as JArrays, Collections, UUID}
+import scala.jdk.CollectionConverters.*
 
 object StackdriverGrpcLogger {
   private val Scopes = JArrays.asList(
@@ -72,7 +72,7 @@ object StackdriverGrpcLogger {
     id[F].map { id =>
       LogEntry
         .newBuilder(payload(event))
-        .setLogName((name +: event.scope.segments.toList).map(slugify.slugify).mkString("."))
+        .setLogName((name +: event.scope.toChain.toList).map(slugify.slugify).mkString("."))
         .setInsertId(id)
         .setSeverity(severity(event.level))
         .setResource(resource)

@@ -1,7 +1,7 @@
 package io.taig.flog.data
 
 import io.circe.JsonObject
-import io.circe.syntax._
+import io.circe.syntax.*
 import munit.FunSuite
 
 final class EventTest extends FunSuite {

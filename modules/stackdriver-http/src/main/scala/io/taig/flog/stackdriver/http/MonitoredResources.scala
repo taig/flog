@@ -1,6 +1,6 @@
 package io.taig.flog.stackdriver.http
 
-import java.util.{Map => JMap}
+import java.util.Map as JMap
 
 import cats.effect.Sync
 import com.google.api.services.logging.v2.model.MonitoredResource

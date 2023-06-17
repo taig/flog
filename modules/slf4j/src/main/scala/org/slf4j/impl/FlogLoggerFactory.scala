@@ -6,10 +6,10 @@ import io.circe.JsonObject
 import io.taig.flog.Logger
 import io.taig.flog.data.{Event, Level, Scope}
 import io.taig.flog.util.EventPrinter
-import org.slf4j.{ILoggerFactory, Logger => Slf4jLogger}
+import org.slf4j.{ILoggerFactory, Logger as Slf4jLogger}
 
 import java.util.concurrent.ConcurrentHashMap
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 class FlogLoggerFactory[F[_]] extends ILoggerFactory {
   private var target: Logger[F] = null
@@ -19,7 +19,7 @@ class FlogLoggerFactory[F[_]] extends ILoggerFactory {
   private def createLogger(name: String): Slf4jLogger = {
     val scope = Scope.from(name.split('.'))
     val log: (Level, String, Option[Throwable]) => Unit = { (level, message, throwable) =>
-      if (target == null || dispatcher == null) {
+      if target == null || dispatcher == null then {
         val details = EventPrinter(
           Event(System.currentTimeMillis(), level, scope, message, JsonObject.empty, throwable)
         )

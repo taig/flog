@@ -1,10 +1,10 @@
 package io.taig.flog
 
-import cats.syntax.all._
+import cats.syntax.all.*
 import io.circe.JsonObject
-import io.taig.flog.data._
+import io.taig.flog.data.*
 
-abstract class LoggerOps[F[_[_]], G[_]] {
+abstract class LoggerOps[F[_[_]], G[_]]:
   def modify(f: List[Event] => List[Event]): F[G]
 
   final def modifyEvent(f: Event => Event): F[G] = modify(_.map(f))
@@ -22,4 +22,3 @@ abstract class LoggerOps[F[_[_]], G[_]] {
   final def merge(payload: JsonObject): F[G] = modifyEvent(_.merge(payload))
 
   final def withContext(context: Context): F[G] = modifyEvent(_.withContext(context))
-}

@@ -1,8 +1,8 @@
 package io.taig.flog
 
-import cats.effect._
+import cats.effect.*
 import cats.effect.std.Dispatcher
-import cats.syntax.all._
+import cats.syntax.all.*
 import io.taig.flog.data.Level
 import io.taig.flog.http4s.{CorrelationMiddleware, LoggingMiddleware}
 import io.taig.flog.slf4j.FlogSlf4jBinder
@@ -32,9 +32,9 @@ object SampleApp extends IOApp.Simple {
   }
 
   override def run: IO[Unit] =
-    (for {
+    (for
       logger <- logger[IO]
       contextual <- Resource.eval(ContextualLogger.ofIO(logger))
       _ <- server[IO](contextual)
-    } yield ()).use(_ => IO.never)
+    yield ()).use(_ => IO.never)
 }
