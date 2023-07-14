@@ -21,13 +21,7 @@ def module(identifier: Option[String], jvmOnly: Boolean): CrossProject = {
     .withoutSuffixFor(JVMPlatform)
     .build()
     .settings(
-      Compile / scalacOptions ++=
-        "-source:future" ::
-          "-rewrite" ::
-          "-new-syntax" ::
-          "-Wvalue-discard" ::
-          "-Wunused:all" ::
-          Nil,
+      Compile / scalacOptions ++= "-source:future" :: "-rewrite" :: "-new-syntax" :: "-Wunused:all" :: Nil,
       name := "flog" + identifier.fold("")("-" + _)
     )
 }
