@@ -6,8 +6,9 @@ val Version = new {
   val CatsMtl = "1.3.1"
   val Circe = "0.14.5"
   val Fs2 = "3.7.0"
-  val Java = "17"
   val Http4s = "1.0.0-M39"
+  val Java = "17"
+  val Log4Cats = "2.6.0"
   val Munit = "0.7.29"
   val MunitCatsEffect = "1.0.7"
   val Scala3 = "3.3.0"
@@ -73,6 +74,14 @@ lazy val slf4j = module(Some("slf4j"), jvmOnly = true)
     buildInfoPackage := s"${organization.value}.flog.slf4j",
     libraryDependencies ++=
       "org.slf4j" % "slf4j-api" % Version.Slf4j ::
+        Nil
+  )
+  .dependsOn(core)
+
+lazy val log4cats = module(Some("log4cats"), jvmOnly = false)
+  .settings(
+    libraryDependencies ++=
+      "org.typelevel" %%% "log4cats-core" % Version.Log4Cats ::
         Nil
   )
   .dependsOn(core)

@@ -27,23 +27,15 @@ object Scope:
   def from(segments: Iterable[String]): Scope = Chain.fromSeq(segments.toSeq)
   def of(segments: String*): Scope = Chain.fromSeq(segments)
 
-  private def fromName(value: Class[?]): Scope =
-    val name = value.getName
+  def fromName(name: String): Scope =
     val normalized = if name.endsWith("$") then name.init else name
     Scope.from(normalized.split('.'))
 
-  def fromName(value: Any): Scope = fromName(value.getClass)
+  def fromClassName(value: Any): Scope = fromName(value.getClass.getName)
+  def fromClassName[A: ClassTag]: Scope = fromName(classTag[A].runtimeClass.getName)
 
-  def fromName[A: ClassTag]: Scope = fromName(classTag[A].runtimeClass)
-
-  private def fromSimpleName(value: Class[?]): Scope =
-    val name = value.getSimpleName
-    val normalized = if name.endsWith("$") then name.init else name
-    Scope.of(normalized)
-
-  def fromSimpleName(value: Any): Scope = fromSimpleName(value.getClass)
-
-  def fromSimpleName[A: ClassTag]: Scope = fromSimpleName(classTag[A].runtimeClass)
+  def fromSimpleClassName(value: Any): Scope = fromName(value.getClass.getSimpleName)
+  def fromSimpleClassName[A: ClassTag]: Scope = fromName(classTag[A].runtimeClass.getSimpleName)
 
   given Monoid[Scope] with
     override def empty: Scope = Root

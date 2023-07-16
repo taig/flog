@@ -14,11 +14,8 @@ abstract class ContextualLogger[F[_]] extends Logger[F]:
 
   final def imapK[G[_]](fk: F ~> G)(gk: G ~> F): ContextualLogger[G] = new ContextualLogger[G]:
     override def log(events: Long => List[Event]): G[Unit] = fk(self.log(events))
-
     override def context: G[Context] = fk(self.context)
-
     override def local[A](f: Context => Context)(run: G[A]): G[A] = fk(self.local(f)(gk(run)))
-
     override def scope[A](context: Context)(run: G[A]): G[A] = fk(self.scope(context)(gk(run)))
 
 object ContextualLogger:
