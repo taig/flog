@@ -6,7 +6,7 @@ val Version = new {
   val CatsMtl = "1.3.1"
   val Circe = "0.14.5"
   val Fs2 = "3.7.0"
-  val Http4s = "1.0.0-M39"
+  val Http4s = "1.0.0-M40"
   val Java = "17"
   val Log4Cats = "2.6.0"
   val Munit = "0.7.29"
@@ -118,4 +118,4 @@ lazy val sample = module(Some("sample"), jvmOnly = true)
         "org.http4s" %% "http4s-ember-server" % Version.Http4s ::
         Nil
   )
-  .dependsOn(http4sServer, slf4j)
+  .dependsOn(http4sServer, log4cats)

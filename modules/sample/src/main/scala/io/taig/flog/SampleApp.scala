@@ -1,15 +1,16 @@
 package io.taig.flog
 
 import cats.effect.*
-import cats.effect.std.Dispatcher
 import io.taig.flog.data.Level
 import io.taig.flog.http4s.{CorrelationMiddleware, LoggingMiddleware}
-import io.taig.flog.slf4j.FlogSlf4jBinder
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.Server
 import org.http4s.{HttpApp, HttpRoutes, Response}
 import org.http4s.dsl.io.*
 import com.comcast.ip4s.*
+import io.taig.flog.log4cats.Log4CatsLoggerFactory
+import org.typelevel.log4cats.LoggerFactory
+
 import scala.concurrent.duration.*
 
 object SampleApp extends ResourceApp.Forever:
@@ -21,22 +22,19 @@ object SampleApp extends ResourceApp.Forever:
           Ok()
     .orNotFound
 
-  def server(logger: ContextualLogger[IO]): Resource[IO, Server] = EmberServerBuilder
-    .default[IO]
-    .withHost(host"0.0.0.0")
-    .withPort(port"8080")
-    .withHttpApp(CorrelationMiddleware(logger)(LoggingMiddleware(logger)(app(logger))))
-    .withShutdownTimeout(1.second)
-    .build
+  def server(logger: ContextualLogger[IO]): Resource[IO, Server] =
+    given LoggerFactory[IO] = Log4CatsLoggerFactory(logger)
 
-  val logger: Resource[IO, Logger[IO]] = Dispatcher
-    .parallel[IO]
-    .flatMap: dispatcher =>
-      Resource
-        .eval(Logger.stdOut[IO])
-        .flatMap(Logger.queued[IO])
-        .map(_.minimum(Level.Info))
-        .evalTap(FlogSlf4jBinder.initialize(_, dispatcher))
+    EmberServerBuilder
+      .default[IO]
+      .withHost(host"0.0.0.0")
+      .withPort(port"8080")
+      .withHttpApp(CorrelationMiddleware(logger)(LoggingMiddleware(logger)(app(logger))))
+      .withShutdownTimeout(1.second)
+      .build
+
+  val logger: Resource[IO, Logger[IO]] =
+    Resource.eval(Logger.stdOut[IO]).flatMap(Logger.queued[IO]).map(_.minimum(Level.Info))
 
   override def run(arguments: List[String]): Resource[IO, Unit] = for
     logger <- logger

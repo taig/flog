@@ -7,7 +7,7 @@ import io.circe.syntax.*
 import io.taig.flog.Logger
 import org.typelevel.log4cats.SelfAwareStructuredLogger
 
-final class FlogLogger[F[_]](logger: Logger[F])(using F: Applicative[F]) extends SelfAwareStructuredLogger[F]:
+final class Log4CatsLogger[F[_]](logger: Logger[F])(using F: Applicative[F]) extends SelfAwareStructuredLogger[F]:
   // TODO expose this info from `Logger`
   override def isTraceEnabled: F[Boolean] = F.pure(true)
   override def isDebugEnabled: F[Boolean] = F.pure(true)
@@ -43,5 +43,5 @@ final class FlogLogger[F[_]](logger: Logger[F])(using F: Applicative[F]) extends
   override def warn(msg: => String): F[Unit] = logger.warning(msg)
   override def warn(t: Throwable)(msg: => String): F[Unit] = logger.warning(msg, t)
 
-object FlogLogger:
-  def apply[F[_]: Applicative](logger: Logger[F]): SelfAwareStructuredLogger[F] = new FlogLogger[F](logger)
+object Log4CatsLogger:
+  def apply[F[_]: Applicative](logger: Logger[F]): SelfAwareStructuredLogger[F] = new Log4CatsLogger[F](logger)
