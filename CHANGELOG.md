@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.15.0
+
+_2023-07-16_
+
+* Add support for log4cats
+* Upgrade to http4s 1.0.0-M40
+* Upgrade to sbt-houserules 0.7.1
+* Update sbt to 1.9.2 (#380)
+* Update sbt-scalajs-crossproject to 1.3.2 (#378)
+* Update cats-effect to 3.5.1 (#377)
+* Update sbt to 1.9.1 (#376)
+* Update sbt-scalajs, scalajs-library_2.13, ... to 1.13.2 (#375)
+
 ## 0.14.0
 
 _2023-06-17_
