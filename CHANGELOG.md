@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.16.1
+
+_2023-08-29_
+
+* Ignore slf4j 2 log messages when dispatcher has shut down
+
 ## 0.16.0
 
 _2023-08-28_
