@@ -23,7 +23,10 @@ final class FlogSlf4j2Runtime[F[_]](logger: Logger[F], dispatcher: Dispatcher[F]
       then MessageFormatter.arrayFormat(messagePattern, arguments).getMessage
       else messagePattern
 
-    dispatcher.unsafeRunAndForget(logger.apply(toLevel(level), scope, message, throwable = Option(throwable)))
+    try dispatcher.unsafeRunAndForget(logger.apply(toLevel(level), scope, message, throwable = Option(throwable)))
+    catch
+      case exception: IllegalStateException if exception.getMessage == "dispatcher already shutdown" => ()
+      case throwable: Throwable                                                                      => throw throwable
 
   def toLevel(level: Slf4jLevel): Level = level match
     case Slf4jLevel.ERROR => Level.Error
