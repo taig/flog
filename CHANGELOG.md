@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.16.0
+
+_2023-08-28_
+
+* Add slf4j v2 bridge (thanks to zio-logging) (#386)
+* Update sbt to 1.9.4 (#385)
+* Update fs2-core to 3.8.0 (#384)
+* Update sbt-houserules to 0.7.2 (#383)
+* Update sbt to 1.9.3 (#382)
+
 ## 0.15.0
 
 _2023-07-16_
