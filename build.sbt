@@ -5,7 +5,7 @@ val Version = new {
   val CatsEffect = "3.5.1"
   val CatsMtl = "1.3.1"
   val Circe = "0.14.5"
-  val Fs2 = "3.8.0"
+  val Fs2 = "3.9.1"
   val Http4s = "1.0.0-M40"
   val Java = "17"
   val Log4Cats = "2.6.0"
@@ -13,7 +13,7 @@ val Version = new {
   val MunitCatsEffect = "1.0.7"
   val Scala3 = "3.3.0"
   val Slf4j = "1.7.36"
-  val Slf4j2 = "2.0.7"
+  val Slf4j2 = "2.0.9"
 }
 
 def module(identifier: Option[String], jvmOnly: Boolean, crossType: CrossType = CrossType.Pure): CrossProject = {
