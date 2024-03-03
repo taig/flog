@@ -11,7 +11,7 @@ val Version = new {
   val Log4Cats = "2.6.0"
   val Munit = "0.7.29"
   val MunitCatsEffect = "1.0.7"
-  val Scala3 = "3.3.1"
+  val Scala3 = "3.3.3"
   val Slf4j = "1.7.36"
   val Slf4j2 = "2.0.12"
 }
