@@ -83,7 +83,8 @@ object Logger:
         .evalMap(events => logger.log(_ => events.toList))
         .compile
         .drain
-      Resource.make(process.start)(fiber => queue.offer(None) *> fiber.join.void).as(enqueue)
+
+      process.background *> Resource.make(enqueue.pure[F])(_ => queue.offer(None))
 
   /** Write all logs into a `Queue` and process them asynchronously */
   def queued[F[_]: Concurrent](logger: Logger[F])(using clock: Clock[F]): Resource[F, Logger[F]] =
