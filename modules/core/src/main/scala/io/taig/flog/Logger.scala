@@ -13,7 +13,6 @@ import io.taig.flog.util.EventPrinter
 import java.io.{BufferedWriter, OutputStream, OutputStreamWriter}
 
 abstract class Logger[F[_]] extends LoggerLike[F]:
-  self =>
   def log(events: Long => List[Event]): F[Unit]
   final def mapK[G[_]](fk: F ~> G): Logger[G] = event => fk(log(event))
 
@@ -95,8 +94,9 @@ object Logger:
     * The `timestamp` is used to set the `Event` time when it is added to the queue, the underlying `Logger`'s
     * `timestamp` is discarded.
     */
-  def batched[F[_]: Concurrent](timestamp: F[Long], logger: Logger[F], buffer: Int): Resource[F, Logger[F]] =
-    Resource.eval(Queue.unbounded[F, Option[Event]]).flatMap { queue =>
+  def batched[F[_]: Concurrent](timestamp: F[Long], logger: Logger[F], buffer: Int): Resource[F, Logger[F]] = Resource
+    .eval(Queue.unbounded[F, Option[Event]])
+    .flatMap: queue =>
       val enqueue = raw[F](timestamp, _.map(_.some).traverse_(queue.offer))
       val process = Stream
         .fromQueueNoneTerminated(queue)
@@ -107,8 +107,8 @@ object Logger:
         .compile
         .lastOrError
         .flatMap(events => logger.log(_ => events.toList))
-      Resource.make(process.start)(fiber => queue.offer(None) *> fiber.join.void).as(enqueue)
-    }
+
+      process.background *> Resource.make(enqueue.pure[F])(_ => queue.offer(None))
 
   /** Write all logs into a `Queue` and process them asynchronously as soon as at least `buffer` logs have accumulated
     */
