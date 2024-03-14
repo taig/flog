@@ -1,7 +1,6 @@
 package io.taig.flog
 
 import cats.*
-import cats.data.Chain
 import cats.effect.*
 import cats.effect.std.Queue
 import cats.effect.syntax.all.*
@@ -75,7 +74,7 @@ object Logger:
   def queued[F[_]: Concurrent](timestamp: F[Long], logger: Logger[F]): Resource[F, Logger[F]] = Resource
     .eval(Queue.unbounded[F, Option[Event]])
     .flatMap: queue =>
-      val enqueue = raw[F](timestamp, _.map(_.some).traverse_(queue.offer))
+      val enqueue = raw[F](timestamp, _.traverse_(event => queue.offer(event.some)))
       val process = Stream
         .fromQueueNoneTerminated(queue)
         .chunks
@@ -83,7 +82,7 @@ object Logger:
         .compile
         .drain
 
-      process.background *> Resource.make(enqueue.pure[F])(_ => queue.offer(None))
+      Resource.make(process.start)(fiber => queue.offer(none) *> fiber.join.void).as(enqueue)
 
   /** Write all logs into a `Queue` and process them asynchronously */
   def queued[F[_]: Concurrent](logger: Logger[F])(using clock: Clock[F]): Resource[F, Logger[F]] =
@@ -97,18 +96,15 @@ object Logger:
   def batched[F[_]: Concurrent](timestamp: F[Long], logger: Logger[F], buffer: Int): Resource[F, Logger[F]] = Resource
     .eval(Queue.unbounded[F, Option[Event]])
     .flatMap: queue =>
-      val enqueue = raw[F](timestamp, _.map(_.some).traverse_(queue.offer))
+      val enqueue = raw[F](timestamp, _.traverse_(event => queue.offer(event.some)))
       val process = Stream
         .fromQueueNoneTerminated(queue)
-        .chunks
-        .evalScan(Chain.empty[Event]): (events, chunk) =>
-          val update = events ++ chunk.toChain
-          if update.length < buffer then update.pure[F] else logger.log(_ => update.toList).as(Chain.empty[Event])
+        .chunkN(buffer, allowFewer = true)
+        .evalMap(events => logger.log(_ => events.toList))
         .compile
-        .lastOrError
-        .flatMap(events => logger.log(_ => events.toList))
+        .drain
 
-      process.background *> Resource.make(enqueue.pure[F])(_ => queue.offer(None))
+      Resource.make(process.start)(fiber => queue.offer(none) *> fiber.join.void).as(enqueue)
 
   /** Write all logs into a `Queue` and process them asynchronously as soon as at least `buffer` logs have accumulated
     */
