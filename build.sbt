@@ -10,7 +10,7 @@ val Version = new {
   val Java = "17"
   val Log4Cats = "2.7.0"
   val Munit = "0.7.29"
-  val MunitCatsEffect = "1.0.7"
+  val MunitCatsEffect = "2.0.0"
   val Scala3 = "3.3.3"
   val Slf4j = "1.7.36"
   val Slf4j2 = "2.0.13"
@@ -71,7 +71,7 @@ lazy val core = module(Some("core"), jvmOnly = false)
         "org.typelevel" %%% "cats-effect" % Version.CatsEffect ::
         "org.typelevel" %%% "cats-mtl" % Version.CatsMtl ::
         "org.scalameta" %%% "munit" % Version.Munit % "test" ::
-        "org.typelevel" %%% "munit-cats-effect-3" % Version.MunitCatsEffect % "test" ::
+        "org.typelevel" %%% "munit-cats-effect" % Version.MunitCatsEffect % "test" ::
         Nil
   )
 
