@@ -49,7 +49,7 @@ object ContextualLogger:
 
   implicit class Ops[F[_]](logger: ContextualLogger[F]) extends LoggerOps[ContextualLogger, F]:
     override def modify(f: List[Event] => List[Event]): ContextualLogger[F] = new ContextualLogger[F]:
-      override def log(events: Long => List[Event]): F[Unit] = logger.log(events)
+      override def log(events: Long => List[Event]): F[Unit] = logger.log(timestamp => f(events(timestamp)))
       override def context: F[Context] = logger.context
       override def local[A](f: Context => Context)(run: F[A]): F[A] = logger.local(f)(run)
       override def scope[A](context: Context)(run: F[A]): F[A] = logger.scope(context)(run)
