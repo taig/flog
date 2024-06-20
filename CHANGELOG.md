@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.16.3
+
+_2024-06-20_
+
+- Fix `ContextualLogger` not applying modifications
+- Upgrade to circe 0.14.8
+- Update circe-core to 0.14.7 (#418)
+- Update fs2-core to 3.10.2 (#415)
+- Update log4cats-core to 2.7.0 (#419)
+- Update munit to 1.0.0 (#421)
+- Update munit-cats-effect-3 to 2.0.0 (#422)
+- Update sbt to 1.10.0 (#420)
+- Update sbt-buildinfo to 0.12.0 (#412)
+- Update sbt-scalajs, scalajs-library_2.13, ... to 1.16.0 (#413)
+- Update slf4j-api to 2.0.13 (#417)
+
 ## 0.16.2
 
 _2024-03-14_
