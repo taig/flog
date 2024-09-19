@@ -3,6 +3,7 @@ package io.taig.flog.util
 import cats.syntax.all.*
 import io.circe.Json
 import io.taig.flog.data.Event
+import scala.annotation.nowarn
 
 object EventPrinter:
   private val Linebreak = '\n'
@@ -10,6 +11,7 @@ object EventPrinter:
   private val Open = '['
   private val Close = ']'
 
+  @nowarn("msg=unused value")
   def apply(event: Event): String =
     val builder = new StringBuilder()
 
