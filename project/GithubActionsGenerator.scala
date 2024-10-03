@@ -31,15 +31,15 @@ object GithubActionsGenerator {
         Step.setupJava(javaVersion),
         Json.obj(
           "name" := "Workflows",
-          "run" := "sbt -Dmode=ci blowoutCheck"
+          "run" := "sbt blowoutCheck"
         ),
         Json.obj(
           "name" := "Code formatting",
-          "run" := "sbt -Dmode=ci scalafmtCheckAll"
+          "run" := "sbt scalafmtCheckAll"
         ),
         Json.obj(
           "name" := "Fatal warnings",
-          "run" := "sbt -Dmode=ci +compile"
+          "run" := "sbt +compile"
         )
       )
     )
@@ -56,38 +56,59 @@ object GithubActionsGenerator {
         )
       )
     )
+
+    def deploy(javaVersion: String): Json = Json.obj(
+      "name" := "Deploy",
+      "runs-on" := "ubuntu-latest",
+      "needs" := List("test", "lint"),
+      "steps" := List(
+        Step.Checkout,
+        Step.setupJava(javaVersion),
+        Json.obj(
+          "name" := "Release",
+          "run" := "sbt ci-release",
+          "env" := Json.obj(
+            "PGP_PASSPHRASE" := "${{secrets.PGP_PASSPHRASE}}",
+            "PGP_SECRET" := "${{secrets.PGP_SECRET}}",
+            "SONATYPE_PASSWORD" := "${{secrets.SONATYPE_PASSWORD}}",
+            "SONATYPE_USERNAME" := "${{secrets.SONATYPE_USERNAME}}"
+          )
+        )
+      )
+    )
   }
 
   def main(javaVersion: String): Json = Json.obj(
-    "name" := "CI & CD",
+    "name" := "CI",
     "on" := Json.obj(
       "push" := Json.obj(
-        "branches" := List("main"),
-        "tags" := List("*.*.*")
+        "branches" := List("main")
       )
+    ),
+    "env" := Json.obj(
+      "SBT_TPOLECAT_CI" := "true"
     ),
     "jobs" := Json.obj(
       "lint" := Job.lint(javaVersion),
       "test" := Job.test(javaVersion),
-      "deploy" := Json.obj(
-        "name" := "Deploy",
-        "runs-on" := "ubuntu-latest",
-        "needs" := List("test", "lint"),
-        "steps" := List(
-          Step.Checkout,
-          Step.setupJava(javaVersion),
-          Json.obj(
-            "name" := "Release",
-            "run" := "sbt ci-release",
-            "env" := Json.obj(
-              "PGP_PASSPHRASE" := "${{secrets.PGP_PASSPHRASE}}",
-              "PGP_SECRET" := "${{secrets.PGP_SECRET}}",
-              "SONATYPE_PASSWORD" := "${{secrets.SONATYPE_PASSWORD}}",
-              "SONATYPE_USERNAME" := "${{secrets.SONATYPE_USERNAME}}"
-            )
-          )
-        )
+      "deploy" := Job.deploy(javaVersion)
+    )
+  )
+
+  def tag(javaVersion: String): Json = Json.obj(
+    "name" := "CD",
+    "on" := Json.obj(
+      "push" := Json.obj(
+        "tags" := List("*.*.*")
       )
+    ),
+    "env" := Json.obj(
+      "SBT_TPOLECAT_RELEASE" := "true"
+    ),
+    "jobs" := Json.obj(
+      "lint" := Job.lint(javaVersion),
+      "test" := Job.test(javaVersion),
+      "deploy" := Job.deploy(javaVersion)
     )
   )
 
@@ -97,6 +118,9 @@ object GithubActionsGenerator {
       "pull_request" := Json.obj(
         "branches" := List("main")
       )
+    ),
+    "env" := Json.obj(
+      "SBT_TPOLECAT_CI" := "true"
     ),
     "jobs" := Json.obj(
       "lint" := Job.lint(javaVersion),
