@@ -13,7 +13,7 @@ val Version = new {
   val MunitCatsEffect = "2.0.0"
   val Scala3 = "3.3.5"
   val Slf4j = "1.7.36"
-  val Slf4j2 = "2.0.16"
+  val Slf4j2 = "2.0.17"
 }
 
 def module(identifier: Option[String], jvmOnly: Boolean, crossType: CrossType = CrossType.Pure): CrossProject = {
