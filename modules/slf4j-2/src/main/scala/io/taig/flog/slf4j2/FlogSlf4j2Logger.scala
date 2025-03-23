@@ -14,10 +14,14 @@ final class FlogSlf4j2Logger(name: String) extends Logger:
   override def getName(): String = name
 
   private def log(level: Level, msg: String, throwable: Option[Throwable]): Unit =
-    (FlogSlf4j2Logger.dispatcher, FlogSlf4j2Logger.logger).tupled.foreach: (dispatcher, logger) =>
-      dispatcher.unsafeRunSync(
-        logger.apply(level, scope = Scope.Root, message = msg, payload = JsonObject.empty, throwable)
-      )
+    try {
+      val log = FlogSlf4j2Logger.logger(level, scope = Scope.Root, message = msg, payload = JsonObject.empty, throwable)
+      FlogSlf4j2Logger.dispatcher.unsafeRunSync(log)
+    } catch { cause =>
+      System.err.print(s"Failed to handle slf4j log message: '$msg'")
+      throwable.foreach(_.printStackTrace(System.err))
+      cause.printStackTrace(System.err)
+    }
 
   override def isDebugEnabled(): Boolean = true
   override def isDebugEnabled(marker: Marker): Boolean = true
@@ -107,11 +111,11 @@ final class FlogSlf4j2Logger(name: String) extends Logger:
   override def warn(msg: String): Unit = warn(msg, throwable = none)
 
 object FlogSlf4j2Logger:
-  @SuppressWarnings(Array("scalafix:DisableSyntax.var"))
-  private var dispatcher: Option[Dispatcher[IO]] = none
-  @SuppressWarnings(Array("scalafix:DisableSyntax.var"))
-  private var logger: Option[FlogLogger[IO]] = none
+  @SuppressWarnings(Array("scalafix:DisableSyntax.null"))
+  private var dispatcher: Dispatcher[IO] = null
+  @SuppressWarnings(Array("scalafix:DisableSyntax.null"))
+  private var logger: FlogLogger[IO] = null
 
   def initialize(dispatcher: Dispatcher[IO])(logger: FlogLogger[IO]): IO[Unit] = IO.delay:
-    this.dispatcher = dispatcher.some
-    this.logger = logger.some
+    this.dispatcher = dispatcher
+    this.logger = logger
