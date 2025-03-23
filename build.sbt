@@ -57,15 +57,15 @@ lazy val root = module(identifier = None, jvmOnly = true)
   .aggregate(core, slf4j, slf4j2, http4s, http4sClient, http4sServer, sample)
 
 lazy val core = module(Some("core")).settings(
-    libraryDependencies ++=
-      "co.fs2" %%% "fs2-core" % Version.Fs2 ::
-        "io.circe" %%% "circe-core" % Version.Circe ::
-        "org.typelevel" %%% "cats-effect" % Version.CatsEffect ::
-        "org.typelevel" %%% "cats-mtl" % Version.CatsMtl ::
-        "org.scalameta" %%% "munit" % Version.Munit % "test" ::
-        "org.typelevel" %%% "munit-cats-effect" % Version.MunitCatsEffect % "test" ::
-        Nil
-  )
+  libraryDependencies ++=
+    "co.fs2" %%% "fs2-core" % Version.Fs2 ::
+      "io.circe" %%% "circe-core" % Version.Circe ::
+      "org.typelevel" %%% "cats-effect" % Version.CatsEffect ::
+      "org.typelevel" %%% "cats-mtl" % Version.CatsMtl ::
+      "org.scalameta" %%% "munit" % Version.Munit % "test" ::
+      "org.typelevel" %%% "munit-cats-effect" % Version.MunitCatsEffect % "test" ::
+      Nil
+)
 
 lazy val slf4j = module(Some("slf4j"), jvmOnly = true)
   .enablePlugins(BuildInfoPlugin)
