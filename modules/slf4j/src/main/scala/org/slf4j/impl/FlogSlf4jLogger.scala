@@ -8,9 +8,11 @@ import org.slf4j.helpers.MessageFormatter
 import java.util.Objects
 
 final class FlogSlf4jLogger(unsafeLog: (Level, String, Option[Throwable]) => Unit) extends MarkerIgnoringBase:
+  @SuppressWarnings(Array("scalafix:DisableSyntax.asInstanceOf"))
   def log(level: Level, format: String, args: Array[? <: AnyRef]): Unit =
     log(level, MessageFormatter.arrayFormat(format, args.asInstanceOf[Array[AnyRef]]))
 
+  @SuppressWarnings(Array("scalafix:DisableSyntax.null"))
   def log(level: Level, message: String): Unit = log(level, message, null: Throwable)
 
   def log(level: Level, message: String, throwable: Throwable): Unit =

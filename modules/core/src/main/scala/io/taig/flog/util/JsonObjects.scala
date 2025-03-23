@@ -16,6 +16,7 @@ object JsonObjects:
       .orElse(json.toLong.map(Long.box))
       .getOrElse(Double.box(json.toDouble))
 
+  @SuppressWarnings(Array("scalafix:DisableSyntax.null"))
   private def toJavaObject(json: Json): JObject = json.fold(
     jsonNull = null,
     jsonBoolean = Boolean.box,

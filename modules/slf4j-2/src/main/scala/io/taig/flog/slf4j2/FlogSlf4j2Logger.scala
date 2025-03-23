@@ -1,14 +1,14 @@
 package io.taig.flog.slf4j2
 
-import org.slf4j.Logger
-import org.slf4j.Marker
-import cats.effect.std.Dispatcher
 import cats.effect.IO
+import cats.effect.std.Dispatcher
 import cats.syntax.all.*
+import io.circe.JsonObject
 import io.taig.flog.Logger as FlogLogger
 import io.taig.flog.data.Level
 import io.taig.flog.data.Scope
-import io.circe.JsonObject
+import org.slf4j.Logger
+import org.slf4j.Marker
 
 final class FlogSlf4j2Logger(name: String) extends Logger:
   override def getName(): String = name
@@ -48,7 +48,7 @@ final class FlogSlf4j2Logger(name: String) extends Logger:
     debug(msg = s"$msg $obj1, $obj2", throwable = none)
   override def debug(msg: String, objs: Object*): Unit = debug(msg = s"$msg ${objs.mkString(", ")}", throwable = none)
   override def debug(msg: String, t: Throwable): Unit = debug(msg, throwable = Option(t))
-  override def debug(msg: String): Unit = debug(msg, throwable = null)
+  override def debug(msg: String): Unit = debug(msg, throwable = none)
 
   override def error(marker: Marker, msg: String, obj: Object): Unit = error(msg = s"$msg, $obj", throwable = none)
   override def error(marker: Marker, msg: String, obj1: Object, obj2: Object): Unit =
@@ -107,7 +107,9 @@ final class FlogSlf4j2Logger(name: String) extends Logger:
   override def warn(msg: String): Unit = warn(msg, throwable = none)
 
 object FlogSlf4j2Logger:
+  @SuppressWarnings(Array("scalafix:DisableSyntax.var"))
   private var dispatcher: Option[Dispatcher[IO]] = none
+  @SuppressWarnings(Array("scalafix:DisableSyntax.var"))
   private var logger: Option[FlogLogger[IO]] = none
 
   def initialize(dispatcher: Dispatcher[IO])(logger: FlogLogger[IO]): IO[Unit] = IO.delay:

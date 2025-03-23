@@ -15,10 +15,13 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.jdk.CollectionConverters.*
 
 final class FlogLoggerFactory[F[_]] extends ILoggerFactory:
+  @SuppressWarnings(Array("scalafix:DisableSyntax.var", "scalafix:DisableSyntax.null"))
   private var target: Logger[F] = null
+  @SuppressWarnings(Array("scalafix:DisableSyntax.var", "scalafix:DisableSyntax.null"))
   private var dispatcher: Dispatcher[F] = null
   private val loggers = new ConcurrentHashMap[String, Slf4jLogger]().asScala
 
+  @SuppressWarnings(Array("scalafix:DisableSyntax.null", "scalafix:DisableSyntax.throw"))
   private def createLogger(name: String): Slf4jLogger =
     val scope = Scope.from(name.split('.'))
     val log: (Level, String, Option[Throwable]) => Unit = { (level, message, throwable) =>
@@ -41,6 +44,7 @@ final class FlogLoggerFactory[F[_]] extends ILoggerFactory:
   override def getLogger(name: String): Slf4jLogger = loggers.getOrElseUpdate(name, createLogger(name))
 
 object FlogLoggerFactory:
+  @SuppressWarnings(Array("scalafix:DisableSyntax.asInstanceOf"))
   def initialize[F[_]](logger: Logger[F], dispatcher: Dispatcher[F])(implicit F: Sync[F]): F[Unit] = F.delay:
     val factory = StaticLoggerBinder.getSingleton.getLoggerFactory.asInstanceOf[FlogLoggerFactory[F]]
     factory.target = logger
