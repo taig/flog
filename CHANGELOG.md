@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.17.0
+
+_2025-03-23_
+
+- Simplify slf4j-2 bridge implementation (inspired by lego/woof)
+
 ## 0.16.3
 
 _2024-06-20_
