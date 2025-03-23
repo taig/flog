@@ -1,6 +1,7 @@
 package io.taig.flog.http4s
 
-import cats.effect.{Concurrent, Resource}
+import cats.effect.Concurrent
+import cats.effect.Resource
 import io.circe.syntax.*
 import io.taig.flog.Logger
 import io.taig.flog.data.Scope

@@ -1,14 +1,17 @@
 package io.taig.flog
 
 import cats.effect.*
+import com.comcast.ip4s.*
 import io.taig.flog.data.Level
-import io.taig.flog.http4s.{CorrelationMiddleware, LoggingMiddleware}
+import io.taig.flog.http4s.CorrelationMiddleware
+import io.taig.flog.http4s.LoggingMiddleware
+import io.taig.flog.log4cats.Log4CatsLoggerFactory
+import org.http4s.HttpApp
+import org.http4s.HttpRoutes
+import org.http4s.Response
+import org.http4s.dsl.io.*
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.Server
-import org.http4s.{HttpApp, HttpRoutes, Response}
-import org.http4s.dsl.io.*
-import com.comcast.ip4s.*
-import io.taig.flog.log4cats.Log4CatsLoggerFactory
 import org.typelevel.log4cats.LoggerFactory
 
 import scala.concurrent.duration.*

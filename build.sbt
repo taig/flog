@@ -16,24 +16,16 @@ val Version = new {
   val Slf4j2 = "2.0.17"
 }
 
-def module(identifier: Option[String], jvmOnly: Boolean, crossType: CrossType = CrossType.Pure): CrossProject = {
+def module(identifier: Option[String], jvmOnly: Boolean = false): CrossProject = {
   val platforms = List(JVMPlatform) ++ (if (jvmOnly) Nil else List(JSPlatform))
   CrossProject(identifier.getOrElse("root"), file(identifier.fold(".")("modules/" + _)))(platforms: _*)
-    .crossType(crossType)
+    .crossType(CrossType.Pure)
     .withoutSuffixFor(JVMPlatform)
     .build()
     .settings(
       Compile / scalacOptions ++= "-source:future" :: "-rewrite" :: "-new-syntax" :: "-Wunused:all" :: Nil,
       name := "flog" + identifier.fold("")("-" + _)
     )
-}
-
-def jpmsOverwriteModulePath(modulePaths: Seq[File])(options: Seq[String]): Seq[String] = {
-  val modPathString = modulePaths.map(_.getAbsolutePath).mkString(java.io.File.pathSeparator)
-  val option = "--module-path"
-  val index = options.indexWhere(_ == option)
-  if (index == -1) options ++ List(option, modPathString)
-  else options.patch(index + 1, List(modPathString), 1)
 }
 
 inThisBuild(
@@ -64,8 +56,7 @@ lazy val root = module(identifier = None, jvmOnly = true)
   )
   .aggregate(core, slf4j, slf4j2, http4s, http4sClient, http4sServer, sample)
 
-lazy val core = module(Some("core"), jvmOnly = false)
-  .settings(
+lazy val core = module(Some("core")).settings(
     libraryDependencies ++=
       "co.fs2" %%% "fs2-core" % Version.Fs2 ::
         "io.circe" %%% "circe-core" % Version.Circe ::
@@ -88,20 +79,16 @@ lazy val slf4j = module(Some("slf4j"), jvmOnly = true)
   )
   .dependsOn(core)
 
-lazy val slf4j2 = module(Some("slf4j-2"), jvmOnly = true, CrossType.Full)
+lazy val slf4j2 = module(Some("slf4j-2"), jvmOnly = true)
   .enablePlugins(BuildInfoPlugin)
   .settings(
-    Compile / doc / sources := Seq.empty,
-    compileOrder := CompileOrder.JavaThenScala,
-    javacOptions := jpmsOverwriteModulePath((Compile / dependencyClasspath).value.map(_.data))(javacOptions.value),
-    javaOptions := jpmsOverwriteModulePath((Compile / dependencyClasspath).value.map(_.data))(javaOptions.value),
     libraryDependencies ++=
       "org.slf4j" % "slf4j-api" % Version.Slf4j2 ::
         Nil
   )
   .dependsOn(core)
 
-lazy val log4cats = module(Some("log4cats"), jvmOnly = false)
+lazy val log4cats = module(Some("log4cats"))
   .settings(
     libraryDependencies ++=
       "org.typelevel" %%% "log4cats-core" % Version.Log4Cats ::

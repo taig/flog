@@ -1,10 +1,12 @@
 package io.taig.flog.data
 
-import scala.reflect.{classTag, ClassTag}
 import cats.*
 import cats.data.Chain
 import cats.syntax.all.*
 import io.circe.Encoder
+
+import scala.reflect.ClassTag
+import scala.reflect.classTag
 
 opaque type Scope = Chain[String]
 
@@ -41,7 +43,7 @@ object Scope:
     override def empty: Scope = Root
     override def combine(x: Scope, y: Scope): Scope = x ++ y
 
-  given (using eq: Eq[Chain[String]]): Eq[Scope] = eq
+  given (using order: Order[Chain[String]]): Eq[Scope] = order
   given Show[Scope] = _.toChain match
     case Chain.nil => "/"
     case segments  => segments.mkString_(" / ")

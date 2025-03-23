@@ -4,9 +4,12 @@ import cats.effect.Sync
 import cats.effect.std.Dispatcher
 import io.circe.JsonObject
 import io.taig.flog.Logger
-import io.taig.flog.data.{Event, Level, Scope}
+import io.taig.flog.data.Event
+import io.taig.flog.data.Level
+import io.taig.flog.data.Scope
 import io.taig.flog.util.EventPrinter
-import org.slf4j.{ILoggerFactory, Logger as Slf4jLogger}
+import org.slf4j.ILoggerFactory
+import org.slf4j.Logger as Slf4jLogger
 
 import java.util.concurrent.ConcurrentHashMap
 import scala.jdk.CollectionConverters.*

@@ -1,9 +1,12 @@
 package io.taig.flog.http4s
 
 import cats.syntax.all.*
+import io.circe.Encoder
+import io.circe.JsonObject
 import io.circe.syntax.*
-import io.circe.{Encoder, JsonObject}
-import org.http4s.{Headers, Request, Response}
+import org.http4s.Headers
+import org.http4s.Request
+import org.http4s.Response
 
 object implicits {
   implicit private val encoderHeaders: Encoder[Headers] = Encoder[Map[String, String]]

@@ -1,7 +1,9 @@
 package io.taig.flog
 
 import io.circe.JsonObject
-import io.taig.flog.data.{Event, Level, Scope}
+import io.taig.flog.data.Event
+import io.taig.flog.data.Level
+import io.taig.flog.data.Scope
 
 trait LoggerLike[F[_]]:
   this: Logger[F] =>

@@ -1,10 +1,14 @@
 package io.taig.flog
 
-import cats.effect.{IO, IOLocal}
+import cats.Applicative
+import cats.Monad
+import cats.effect.IO
+import cats.effect.IOLocal
 import cats.mtl.Local
 import cats.syntax.all.*
-import cats.{~>, Applicative, Monad}
-import io.taig.flog.data.{Context, Event}
+import cats.~>
+import io.taig.flog.data.Context
+import io.taig.flog.data.Event
 
 abstract class ContextualLogger[F[_]] extends Logger[F]:
   self =>

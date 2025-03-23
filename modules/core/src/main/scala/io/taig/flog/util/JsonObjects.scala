@@ -1,10 +1,12 @@
 package io.taig.flog.util
 
 import cats.syntax.all.*
-import io.circe.{Json, JsonNumber, JsonObject}
+import io.circe.Json
+import io.circe.JsonNumber
+import io.circe.JsonObject
 
-import java.util.Map as JMap
 import java.lang.Object as JObject
+import java.util.Map as JMap
 import scala.jdk.CollectionConverters.*
 
 object JsonObjects:

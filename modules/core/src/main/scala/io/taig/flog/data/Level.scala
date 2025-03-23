@@ -1,7 +1,8 @@
 package io.taig.flog.data
 
+import cats.Order
+import cats.Show
 import cats.syntax.all.*
-import cats.{Order, Show}
 import io.circe.Encoder
 
 enum Level:

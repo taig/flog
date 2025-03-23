@@ -1,10 +1,11 @@
 package io.taig.flog.http4s
 
-import cats.effect.{Outcome, Sync}
+import cats.effect.Outcome
+import cats.effect.Sync
 import cats.effect.implicits.*
 import cats.syntax.all.*
-import io.taig.flog.Logger
 import io.circe.syntax.*
+import io.taig.flog.Logger
 import io.taig.flog.data.Scope
 import io.taig.flog.http4s.implicits.*
 import org.http4s.Http

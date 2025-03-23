@@ -1,3 +1,4 @@
 .bsp/
-.scalafmt.conf
 target/
+.scalafmt.conf
+.scalafix.conf

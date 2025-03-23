@@ -1,6 +1,7 @@
 package io.taig.flog.data
 
-import io.circe.{Encoder, JsonObject}
+import io.circe.Encoder
+import io.circe.JsonObject
 import io.circe.syntax.*
 import io.taig.flog.util.StacktracePrinter
 

@@ -3,6 +3,7 @@ package io.taig.flog.util
 import cats.syntax.all.*
 import io.circe.Json
 import io.taig.flog.data.Event
+
 import scala.annotation.nowarn
 
 object EventPrinter:

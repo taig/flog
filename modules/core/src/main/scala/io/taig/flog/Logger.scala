@@ -9,7 +9,9 @@ import fs2.Stream
 import io.taig.flog.data.*
 import io.taig.flog.util.EventPrinter
 
-import java.io.{BufferedWriter, OutputStream, OutputStreamWriter}
+import java.io.BufferedWriter
+import java.io.OutputStream
+import java.io.OutputStreamWriter
 
 abstract class Logger[F[_]] extends LoggerLike[F]:
   def log(events: Long => List[Event]): F[Unit]

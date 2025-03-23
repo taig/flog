@@ -1,7 +1,9 @@
 package org.slf4j.impl
 
 import io.taig.flog.data.Level
-import org.slf4j.helpers.{FormattingTuple, MarkerIgnoringBase, MessageFormatter}
+import org.slf4j.helpers.FormattingTuple
+import org.slf4j.helpers.MarkerIgnoringBase
+import org.slf4j.helpers.MessageFormatter
 
 import java.util.Objects
 

@@ -4,7 +4,8 @@ import cats.Applicative
 import cats.syntax.all.*
 import io.taig.flog.Logger
 import io.taig.flog.data.Scope
-import org.typelevel.log4cats.{LoggerFactory, SelfAwareStructuredLogger}
+import org.typelevel.log4cats.LoggerFactory
+import org.typelevel.log4cats.SelfAwareStructuredLogger
 
 final class Log4CatsLoggerFactory[F[_]: Applicative](logger: Logger[F]) extends LoggerFactory[F]:
   override def getLoggerFromName(name: String): SelfAwareStructuredLogger[F] =
