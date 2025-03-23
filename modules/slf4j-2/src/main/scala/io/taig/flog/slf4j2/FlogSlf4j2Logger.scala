@@ -7,9 +7,10 @@ import io.circe.JsonObject
 import io.taig.flog.Logger as FlogLogger
 import io.taig.flog.data.Level
 import io.taig.flog.data.Scope
+import io.taig.flog.util.StacktracePrinter
 import org.slf4j.Logger
 import org.slf4j.Marker
-import io.taig.flog.util.StacktracePrinter
+
 import scala.util.control.NonFatal
 
 final class FlogSlf4j2Logger(name: String) extends Logger:
@@ -117,9 +118,9 @@ final class FlogSlf4j2Logger(name: String) extends Logger:
   override def warn(msg: String): Unit = warn(msg, throwable = none)
 
 object FlogSlf4j2Logger:
-  @SuppressWarnings(Array("scalafix:DisableSyntax.null"))
+  @SuppressWarnings(Array("scalafix:DisableSyntax.null", "scalafix:DisableSyntax.var"))
   private var dispatcher: Dispatcher[IO] = null
-  @SuppressWarnings(Array("scalafix:DisableSyntax.null"))
+  @SuppressWarnings(Array("scalafix:DisableSyntax.null", "scalafix:DisableSyntax.var"))
   private var logger: FlogLogger[IO] = null
 
   def initialize(dispatcher: Dispatcher[IO])(logger: FlogLogger[IO]): IO[Unit] = IO.delay:
