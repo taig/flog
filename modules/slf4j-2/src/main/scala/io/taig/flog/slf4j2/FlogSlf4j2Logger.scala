@@ -9,6 +9,8 @@ import io.taig.flog.data.Level
 import io.taig.flog.data.Scope
 import org.slf4j.Logger
 import org.slf4j.Marker
+import io.taig.flog.util.StacktracePrinter
+import scala.util.control.NonFatal
 
 final class FlogSlf4j2Logger(name: String) extends Logger:
   override def getName(): String = name
@@ -17,10 +19,14 @@ final class FlogSlf4j2Logger(name: String) extends Logger:
     try {
       val log = FlogSlf4j2Logger.logger(level, scope = Scope.Root, message = msg, payload = JsonObject.empty, throwable)
       FlogSlf4j2Logger.dispatcher.unsafeRunSync(log)
-    } catch { cause =>
-      System.err.print(s"Failed to handle slf4j log message: '$msg'")
-      throwable.foreach(_.printStackTrace(System.err))
-      cause.printStackTrace(System.err)
+    } catch {
+      case NonFatal(cause) =>
+        System.err.print(
+          s"Failed to handle slf4j log message: '$msg'\n" +
+            throwable.map(StacktracePrinter.apply).orEmpty
+        )
+        System.err.print(StacktracePrinter(cause))
+      case _ => ()
     }
 
   override def isDebugEnabled(): Boolean = true
