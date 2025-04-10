@@ -56,13 +56,8 @@ object Logger:
             events.foreach(event => writer.write(EventPrinter(event)))
             writer.flush()
 
-  def output[F[_]](target: OutputStream, buffer: Int)(using F: Sync[F]): Resource[F, Logger[F]] = Resource
-    .fromAutoCloseable(F.delay(new BufferedWriter(new OutputStreamWriter(target), buffer)))
-    .map: writer =>
-      Logger[F]: events =>
-        F.delay:
-          events.foreach(event => writer.write(EventPrinter(event)))
-          writer.flush()
+  def output[F[_]](target: OutputStream, buffer: Int)(using F: Sync[F]): Resource[F, Logger[F]] =
+    Resource.fromAutoCloseable(F.delay(target)).evalMap(unsafeOutput(_, buffer))
 
   def stdOut[F[_]: Sync](buffer: Int): F[Logger[F]] = unsafeOutput(System.out, buffer)
 
