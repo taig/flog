@@ -48,18 +48,25 @@ object Logger:
 
   def list[F[_]: Monad: Clock](target: Ref[F, List[Event]]): Logger[F] = Logger[F](events => target.update(events ++ _))
 
-  def unsafeOutput[F[_]](target: OutputStream, buffer: Int)(using F: Sync[F]): F[Logger[F]] =
+  def unsafeOutput[F[_]](target: OutputStream, buffer: Int, printer: Event => String = EventPrinter.apply)(using
+      F: Sync[F]
+  ): F[Logger[F]] =
     F.delay(new BufferedWriter(new OutputStreamWriter(target), buffer))
       .map: writer =>
         Logger[F]: events =>
           F.delay:
-            events.foreach(event => writer.write(EventPrinter(event)))
+            events.foreach(event => writer.write(printer(event)))
             writer.flush()
 
-  def output[F[_]](target: OutputStream, buffer: Int)(using F: Sync[F]): Resource[F, Logger[F]] =
-    Resource.fromAutoCloseable(F.delay(target)).evalMap(unsafeOutput(_, buffer))
+  def output[F[_]](
+      target: OutputStream,
+      buffer: Int,
+      printer: Event => String = EventPrinter.apply
+  )(using F: Sync[F]): Resource[F, Logger[F]] =
+    Resource.fromAutoCloseable(F.delay(target)).evalMap(unsafeOutput(_, buffer, printer))
 
-  def stdOut[F[_]: Sync](buffer: Int): F[Logger[F]] = unsafeOutput(System.out, buffer)
+  def stdOut[F[_]: Sync](buffer: Int, printer: Event => String = EventPrinter.apply): F[Logger[F]] =
+    unsafeOutput(System.out, buffer, printer)
 
   def stdOut[F[_]: Sync]: F[Logger[F]] = stdOut[F](buffer = 1024)
 
