@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.17.2
+
+_2025-04-10_
+
+- Add Logger.output printer argument
+- Simplfy Logger.output implementation
+- Update cats-effect to 3.6.1 (#476)
+- Update munit-cats-effect to 2.1.0 (#475)
+- Update cats-effect to 3.6.0 (#474)
+- Update fs2-core to 3.12.0 (#473)
+- Discard fatal errors in slf4j
+- Handle failed slf4j log messages
+
 ## 0.17.1
 
 _2025-03-23_
