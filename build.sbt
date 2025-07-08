@@ -3,7 +3,6 @@ import sbtcrossproject.CrossProject
 
 val Version = new {
   val CatsEffect = "3.6.2"
-  val CatsMtl = "1.5.0"
   val Circe = "0.14.14"
   val Fs2 = "3.12.0"
   val Http4s = "1.0.0-M44"
@@ -61,7 +60,6 @@ lazy val core = module(Some("core")).settings(
     "co.fs2" %%% "fs2-core" % Version.Fs2 ::
       "io.circe" %%% "circe-core" % Version.Circe ::
       "org.typelevel" %%% "cats-effect" % Version.CatsEffect ::
-      "org.typelevel" %%% "cats-mtl" % Version.CatsMtl ::
       "org.scalameta" %%% "munit" % Version.Munit % "test" ::
       "org.typelevel" %%% "munit-cats-effect" % Version.MunitCatsEffect % "test" ::
       Nil
