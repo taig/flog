@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.17.3
+
+_2025-07-08_
+
+- Upgrade to sbt-ci-release 1.11.1
+- Upgrade to cats-effect 3.6.2
+- Upgrade to log4cats 2.7.1
+- Allow FlogSlf4j2Logger initialization with arbitrary effect type
+- Update sbt, scripted-plugin to 1.11.3 (#489)
+- Update circe-core to 0.14.14 (#488)
+- Update sbt, scripted-plugin to 1.11.0 (#483)
+- Update sbt-ci-release to 1.11.0 (#482)
+- Update sbt-houserules to 0.11.5 (#481)
+- Update scala3-library, ... to 3.3.6 (#480)
+- Update munit to 1.1.1 (#479)
+- Update sbt-scalajs, scalajs-library_2.13, ... to 1.19.0 (#478)
+- Update circe-core to 0.14.13 (#477)
+
 ## 0.17.2
 
 _2025-04-10_
