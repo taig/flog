@@ -1,6 +1,7 @@
 package io.taig.flog.slf4j2
 
 import cats.effect.IO
+import cats.effect.Sync
 import cats.effect.std.Dispatcher
 import cats.syntax.all.*
 import io.circe.JsonObject
@@ -18,8 +19,7 @@ final class FlogSlf4j2Logger(name: String) extends Logger:
 
   private def log(level: Level, msg: String, throwable: Option[Throwable]): Unit =
     try {
-      val log = FlogSlf4j2Logger.logger(level, scope = Scope.Root, message = msg, payload = JsonObject.empty, throwable)
-      FlogSlf4j2Logger.dispatcher.unsafeRunSync(log)
+      FlogSlf4j2Logger.unsafeLog(level, msg, throwable)
     } catch {
       case NonFatal(cause) =>
         System.err.print(
@@ -119,10 +119,14 @@ final class FlogSlf4j2Logger(name: String) extends Logger:
 
 object FlogSlf4j2Logger:
   @SuppressWarnings(Array("scalafix:DisableSyntax.null", "scalafix:DisableSyntax.var"))
-  private var dispatcher: Dispatcher[IO] = null
-  @SuppressWarnings(Array("scalafix:DisableSyntax.null", "scalafix:DisableSyntax.var"))
-  private var logger: FlogLogger[IO] = null
+  private var unsafeLog: (Level, String, Option[Throwable]) => Unit = null
 
-  def initialize(dispatcher: Dispatcher[IO])(logger: FlogLogger[IO]): IO[Unit] = IO.delay:
-    this.dispatcher = dispatcher
-    this.logger = logger
+  def initializeF[F[_]](unsafeRun: F[Unit] => Unit)(logger: FlogLogger[F])(using F: Sync[F]): F[Unit] = F.delay:
+    this.unsafeLog = (level: Level, msg: String, throwable: Option[Throwable]) =>
+      unsafeRun(logger.apply(level, Scope.Root, msg, JsonObject.empty, throwable))
+
+  def initializeIO(dispatcher: Dispatcher[IO])(logger: FlogLogger[IO]): IO[Unit] =
+    initializeF(unsafeRun = dispatcher.unsafeRunSync)(logger)
+
+  @deprecated("Use initializeIO instead", "0.17.3")
+  def initialize(dispatcher: Dispatcher[IO])(logger: FlogLogger[IO]): IO[Unit] = initializeIO(dispatcher)(logger)
