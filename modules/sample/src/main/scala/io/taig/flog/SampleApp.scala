@@ -20,7 +20,7 @@ object SampleApp extends ResourceApp.Forever:
   def app(logger: Logger[IO]): HttpApp[IO] = HttpRoutes
     .of[IO]:
       case GET -> Root / "crash" => IO.raiseError(new RuntimeException("💣"))
-      case GET -> Root =>
+      case GET -> Root           =>
         logger.info("I'm handling a request here, and a trace information is automagically attached to my payload!") *>
           Ok()
     .orNotFound
