@@ -20,7 +20,6 @@ object Scope:
     def endsWith(segment: String): Boolean = self.lastOption.contains(segment)
     def toChain: Chain[String] = self
     def toList: List[String] = self.toList
-    def toString: String = self.show
 
   val Root: Scope = Scope(Chain.empty)
 
