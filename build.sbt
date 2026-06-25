@@ -3,7 +3,7 @@ import sbtcrossproject.CrossProject
 
 val Version = new {
   val CatsEffect = "3.7.0"
-  val Circe = "0.14.15"
+  val Circe = "0.14.16"
   val Fs2 = "3.13.0"
   val Http4s = "1.0.0-M46"
   val Java = "17"
