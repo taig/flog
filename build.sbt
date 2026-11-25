@@ -69,6 +69,8 @@ lazy val slf4j2 = module(Some("slf4j-2"), jvmOnly = true)
   .settings(
     libraryDependencies ++=
       "org.slf4j" % "slf4j-api" % Version.Slf4j2 ::
+        "org.scalameta" %% "munit" % Version.Munit % "test" ::
+        "org.typelevel" %% "munit-cats-effect" % Version.MunitCatsEffect % "test" ::
         Nil
   )
   .dependsOn(core)
