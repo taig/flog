@@ -1,5 +1,45 @@
 # Changelog
 
+## 0.18.0
+
+_2026-11-25_
+
+- **Fix slf4j-2 marker levels and tie the bridge to a Resource (#586)**  
+  `FlogSlf4j2Logger.initializeF`/`initializeIO` now return a `Resource`
+  that installs the bridge on acquire and uninstalls it on release, but
+  only if it is still the active one, so a later initializer is not
+  clobbered. Logging before initialization, after release, or through a
+  bridge released mid-message is discarded silently instead of printing a
+  stack trace per message. `initialize*` accept a minimum `level`
+  (default `Debug`) that answers `isXEnabled` and skips dispatching
+  messages below it, and `error/warn/info/trace(marker, msg)` now log at
+  their own level instead of debug. Breaking: call sites move from
+  `evalTap` to `flatMap`.
+- **Maintain modification order**  
+  Repeated `modify` calls on `Logger` and `ContextualLogger` (and thus
+  `append`/`prepend`) now apply in declaration order. Previously the most
+  recently added modification ran first, so logging under scope `root`
+  with `logger.append(foo).append(bar)` produced `root / bar / foo`
+  instead of `root / foo / bar`.
+- Add `Context.modifyScope`, `withScope`, `modifyPresets`, `withPresets` and `prepend`
+- Derive `Scope`'s `Monoid` and `Order` from `Chain` and disambiguate its `Show` instance
+- Remove unused `Scope.toString` extension method
+- Update cats-effect to 3.7.1 (#558)
+- Update fs2-core to 3.16.0 (#579)
+- Update circe-core to 0.14.17 (#570)
+- Update log4cats-core to 2.8.0 (#523)
+- Update http4s-client, http4s-core, ... to 1.0.0-M50 (#582)
+- Update slf4j-api to 2.0.20 (#567)
+- Update scala3-library, ... to 3.3.9 (#574)
+- Upgrade to sbt 2.1.1 (#585)
+- Update sbt-scalajs, scalajs-library_2.13, ... to 1.23.0 (#581)
+- Update sbt-scalajs-crossproject to 1.4.0 (#554)
+- Update sbt-ci-release to 1.12.1 (#555)
+- Update sbt-buildinfo to 0.14.0 (#580)
+- Update munit to 1.3.6 (#561)
+- Update munit-cats-effect to 2.2.1 (#568)
+- Remove explicit dependency to IOLocal
+
 ## 0.17.3
 
 _2025-07-08_
