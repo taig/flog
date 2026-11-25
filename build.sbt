@@ -1,23 +1,9 @@
 import sbtcrossproject.CrossPlugin.autoImport.CrossType
 import sbtcrossproject.CrossProject
 
-val Version = new {
-  val CatsEffect = "3.7.1"
-  val Circe = "0.14.17"
-  val Fs2 = "3.16.0"
-  val Http4s = "1.0.0-M50"
-  val Java = "17"
-  val Log4Cats = "2.8.0"
-  val Munit = "1.3.6"
-  val MunitCatsEffect = "2.2.1"
-  val Scala3 = "3.3.9"
-  val Slf4j = "1.7.36"
-  val Slf4j2 = "2.0.20"
-}
-
 def module(identifier: Option[String], jvmOnly: Boolean = false): CrossProject = {
   val platforms = List(JVMPlatform) ++ (if (jvmOnly) Nil else List(JSPlatform))
-  CrossProject(identifier.getOrElse("root"), file(identifier.fold(".")("modules/" + _)))(platforms: _*)
+  CrossProject(identifier.getOrElse("root"), file(identifier.fold(".")("modules/" + _)))(platforms *)
     .crossType(CrossType.Pure)
     .withoutSuffixFor(JVMPlatform)
     .build()
@@ -30,10 +16,10 @@ def module(identifier: Option[String], jvmOnly: Boolean = false): CrossProject =
 
 inThisBuild(
   Def.settings(
-    developers := List(Developer("taig", "Niklas Klein", "mail@taig.io", url("https://taig.io/"))),
+    developers := List(Developer("taig", "Niklas Klein", "mail@taig.io", uri("https://taig.io/"))),
     dynverVTagPrefix := false,
-    homepage := Some(url("https://github.com/taig/flog/")),
-    licenses := List("MIT" -> url("https://raw.githubusercontent.com/taig/flog/main/LICENSE")),
+    homepage := Some(uri("https://github.com/taig/flog/")),
+    licenses := List("MIT" -> uri("https://raw.githubusercontent.com/taig/flog/main/LICENSE")),
     organization := "io.taig",
     scalaVersion := Version.Scala3,
     versionScheme := Some("early-semver")
@@ -58,11 +44,11 @@ lazy val root = module(identifier = None, jvmOnly = true)
 
 lazy val core = module(Some("core")).settings(
   libraryDependencies ++=
-    "co.fs2" %%% "fs2-core" % Version.Fs2 ::
-      "io.circe" %%% "circe-core" % Version.Circe ::
-      "org.typelevel" %%% "cats-effect" % Version.CatsEffect ::
-      "org.scalameta" %%% "munit" % Version.Munit % "test" ::
-      "org.typelevel" %%% "munit-cats-effect" % Version.MunitCatsEffect % "test" ::
+    "co.fs2" %% "fs2-core" % Version.Fs2 ::
+      "io.circe" %% "circe-core" % Version.Circe ::
+      "org.typelevel" %% "cats-effect" % Version.CatsEffect ::
+      "org.scalameta" %% "munit" % Version.Munit % "test" ::
+      "org.typelevel" %% "munit-cats-effect" % Version.MunitCatsEffect % "test" ::
       Nil
 )
 
@@ -90,7 +76,7 @@ lazy val slf4j2 = module(Some("slf4j-2"), jvmOnly = true)
 lazy val log4cats = module(Some("log4cats"))
   .settings(
     libraryDependencies ++=
-      "org.typelevel" %%% "log4cats-core" % Version.Log4Cats ::
+      "org.typelevel" %% "log4cats-core" % Version.Log4Cats ::
         Nil
   )
   .dependsOn(core)
